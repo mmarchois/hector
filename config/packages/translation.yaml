@@ -1,0 +1,5 @@
+framework:
+    # Français : langue des messages de validation renvoyés à l'application mobile
+    default_locale: fr
+    translator:
+        default_path: '%kernel.project_dir%/translations'

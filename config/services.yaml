@@ -1,0 +1,69 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+parameters:
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Infrastructure/Persistence/Doctrine/Fixtures'
+            - '../src/Infrastructure/Persistence/Doctrine/Mapping'
+            - '../src/Infrastructure/Persistence/Doctrine/Migrations'
+            - '../src/Kernel.php'
+
+    # ------------
+    # Controllers
+    # ------------
+    App\Infrastructure\Controller\:
+        resource: '../src/Infrastructure/Controller/'
+        # Les DTO et les exceptions HTTP ne sont pas des contrôleurs (instanciés à la main)
+        exclude:
+            - '../src/Infrastructure/Controller/**/Dto/'
+            - '../src/Infrastructure/Controller/Api/ViolationHttpException.php'
+        tags: ['controller.service_arguments']
+
+    # -------------------
+    # Command & Query bus
+    # -------------------
+    App\Infrastructure\Adapter\QueryBus:
+        $queryBus: '@messenger.bus.queries'
+
+    App\Infrastructure\Adapter\CommandBus:
+        $commandBus: '@messenger.bus.commands'
+
+    command_handlers:
+        namespace: App\Application\
+        resource: '%kernel.project_dir%/src/Application/**/Command/**/*Handler.php'
+        public: true
+        tags:
+            - { name: 'messenger.message_handler', bus: 'messenger.bus.commands' }
+
+    query_handlers:
+        namespace: App\Application\
+        resource: '%kernel.project_dir%/src/Application/**/Query/**/*Handler.php'
+        public: true
+        tags:
+            - { name: 'messenger.message_handler', bus: 'messenger.bus.queries' }
+
+when@dev:
+    services:
+        # Fixtures chargées en dev (exclues par défaut : la classe Fixture n'existe pas en prod)
+        App\Infrastructure\Persistence\Doctrine\Fixtures\:
+            resource: '../src/Infrastructure/Persistence/Doctrine/Fixtures/'
+            autowire: true
+            tags: ['doctrine.fixture.orm']
+
+when@test:
+    services:
+        App\Infrastructure\Persistence\Doctrine\Fixtures\:
+            resource: '../src/Infrastructure/Persistence/Doctrine/Fixtures/'
+            autowire: true
+            tags: ['doctrine.fixture.orm']

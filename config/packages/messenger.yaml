@@ -1,0 +1,13 @@
+framework:
+    messenger:
+        default_bus: messenger.bus.commands
+        buses:
+            # Bus 100 % synchrones. Les commandes sont validées (config/validator/)
+            # puis exécutées dans une transaction Doctrine ; les requêtes sont en lecture seule.
+            messenger.bus.commands:
+                middleware:
+                    - validation
+                    - doctrine_transaction
+            messenger.bus.queries:
+                middleware:
+                    - validation

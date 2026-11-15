@@ -1,0 +1,67 @@
+{
+  "@@locale": "fr",
+
+  "appTitle": "Hector AI",
+  "appTagline": "L'assistant des électriciens sur les chantiers",
+
+  "networkError": "Connexion au serveur impossible. Vérifiez votre réseau et réessayez.",
+  "unexpectedError": "Une erreur est survenue. Réessayez dans un instant.",
+  "cancel": "Annuler",
+
+  "loginTitle": "Connexion",
+  "loginEmailLabel": "Email",
+  "loginPasswordLabel": "Mot de passe",
+  "loginSubmit": "Se connecter",
+  "loginNoAccount": "Pas encore de compte ?",
+  "loginRegisterLink": "Créer un compte",
+  "loginEmailRequired": "Saisissez votre email.",
+  "loginEmailInvalid": "Cet email n'est pas valide.",
+  "loginPasswordRequired": "Saisissez votre mot de passe.",
+  "loginInvalidCredentials": "Email ou mot de passe incorrect.",
+
+  "registerTitle": "Créer un compte",
+  "registerSubtitle": "Quelques informations et Hector vous accompagne sur vos chantiers.",
+  "registerPasswordLabel": "Mot de passe (8 caractères minimum)",
+  "registerPasswordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+  "registerSubmit": "Créer mon compte",
+  "registerEmailTaken": "Un compte existe déjà avec cet email.",
+  "registerHaveAccount": "Déjà un compte ?",
+  "registerLoginLink": "Se connecter",
+
+  "accountTypePro": "Professionnel",
+  "accountTypeIndividual": "Particulier",
+  "accountCompanyNameLabel": "Nom de l'entreprise",
+  "accountCompanyNameRequired": "Saisissez le nom de votre entreprise.",
+  "accountSiretLabel": "SIRET (14 chiffres)",
+  "accountSiretRequired": "Saisissez votre SIRET.",
+  "accountSiretInvalid": "Le SIRET doit contenir 14 chiffres.",
+  "accountVatLabel": "N° de TVA (FR + 11 chiffres)",
+  "accountVatRequired": "Saisissez votre numéro de TVA.",
+  "accountVatInvalid": "Format attendu : FR suivi de 11 chiffres.",
+  "accountFullNameLabel": "Nom complet",
+  "accountFullNameRequired": "Saisissez votre nom.",
+
+  "homeGreeting": "Bonjour {name}",
+  "@homeGreeting": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "homeGreetingAnonymous": "Bonjour",
+  "homeAccountReady": "Votre compte est prêt.",
+  "homeAccountIndividual": "Compte particulier",
+  "homeProfileTooltip": "Mon compte",
+
+  "profileTitle": "Mon compte",
+  "profileSave": "Enregistrer",
+  "profileSaved": "Profil mis à jour.",
+  "profilePasswordSection": "Changer de mot de passe",
+  "profileCurrentPasswordLabel": "Mot de passe actuel",
+  "profileCurrentPasswordRequired": "Saisissez votre mot de passe actuel.",
+  "profileNewPasswordLabel": "Nouveau mot de passe",
+  "profileSignOut": "Se déconnecter",
+  "profileDeleteAccount": "Supprimer mon compte",
+  "profileDeleteConfirmTitle": "Supprimer votre compte ?",
+  "profileDeleteConfirmBody": "Votre compte et vos données seront supprimés définitivement.",
+  "profileDeleteConfirmAction": "Supprimer"
+}

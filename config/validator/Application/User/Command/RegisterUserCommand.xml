@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constraint-mapping xmlns="http://symfony.com/schema/dic/constraint-mapping"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd">
+    <class name="App\Application\User\Command\RegisterUserCommand">
+        <property name="fullName">
+            <constraint name="NotBlank">
+                <option name="normalizer">trim</option>
+                <option name="message">Saisissez votre nom.</option>
+            </constraint>
+            <constraint name="Length">
+                <option name="max">255</option>
+            </constraint>
+        </property>
+        <property name="email">
+            <constraint name="NotBlank">
+                <option name="message">Saisissez votre email.</option>
+            </constraint>
+            <constraint name="Email">
+                <option name="message">Cet email n'est pas valide.</option>
+            </constraint>
+            <constraint name="Length">
+                <option name="max">255</option>
+            </constraint>
+        </property>
+        <property name="password">
+            <constraint name="NotBlank">
+                <option name="message">Saisissez un mot de passe.</option>
+            </constraint>
+            <constraint name="Length">
+                <option name="min">8</option>
+                <option name="minMessage">Le mot de passe doit contenir au moins 8 caractères.</option>
+                <option name="max">4096</option>
+            </constraint>
+        </property>
+        <!-- Règle métier : entreprise, SIRET et TVA OBLIGATOIRES pour les pros -->
+        <property name="companyName">
+            <constraint name="When">
+                <option name="expression">this.professional == true</option>
+                <option name="constraints">
+                    <constraint name="NotBlank">
+                        <option name="normalizer">trim</option>
+                        <option name="message">Saisissez le nom de votre entreprise.</option>
+                    </constraint>
+                </option>
+            </constraint>
+            <constraint name="Length">
+                <option name="max">255</option>
+            </constraint>
+        </property>
+        <property name="siret">
+            <constraint name="When">
+                <option name="expression">this.professional == true</option>
+                <option name="constraints">
+                    <constraint name="NotBlank">
+                        <option name="message">Saisissez votre SIRET.</option>
+                    </constraint>
+                </option>
+            </constraint>
+            <constraint name="Regex">
+                <option name="pattern">/^\d{14}$/</option>
+                <option name="message">Le SIRET doit contenir 14 chiffres.</option>
+            </constraint>
+        </property>
+        <property name="vatNumber">
+            <constraint name="When">
+                <option name="expression">this.professional == true</option>
+                <option name="constraints">
+                    <constraint name="NotBlank">
+                        <option name="message">Saisissez votre numéro de TVA.</option>
+                    </constraint>
+                </option>
+            </constraint>
+            <constraint name="Regex">
+                <option name="pattern">/^FR\d{11}$/</option>
+                <option name="message">Format attendu : FR suivi de 11 chiffres.</option>
+            </constraint>
+        </property>
+    </class>
+</constraint-mapping>
