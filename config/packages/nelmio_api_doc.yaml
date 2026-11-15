@@ -1,0 +1,92 @@
+# Doc OpenAPI de l'API : JSON sur /api/v1/doc, interface Swagger sur /api/doc.
+nelmio_api_doc:
+    # Assets Swagger UI servis en local (public/bundles/), sans CDN
+    html_config:
+        assets_mode: bundle
+    documentation:
+        info:
+            title: Hector API
+            description: API de Hector, l'assistant des électriciens sur les chantiers (application mobile Flutter).
+            version: 1.0.0
+        components:
+            securitySchemes:
+                bearerAuth:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        security:
+            - bearerAuth: []
+        # Routes d'auth sans contrôleur (interceptées par les authenticators) : doc statique
+        paths:
+            /api/v1/auth/login:
+                post:
+                    tags: [Auth]
+                    summary: 'Authentification email / mot de passe'
+                    security: []
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    required: [email, password]
+                                    properties:
+                                        email: { type: string, format: email, example: electricien@hector.test }
+                                        password: { type: string, format: password, example: password123 }
+                    responses:
+                        '200':
+                            description: 'Couple de tokens JWT'
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token: { type: string }
+                                            refresh_token: { type: string }
+                        '401': { description: 'Identifiants invalides ou trop de tentatives' }
+            /api/v1/auth/token/refresh:
+                post:
+                    tags: [Auth]
+                    summary: 'Renouvellement des tokens (rotation : le refresh token est à usage unique)'
+                    security: []
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    required: [refresh_token]
+                                    properties:
+                                        refresh_token: { type: string }
+                    responses:
+                        '200':
+                            description: 'Nouveau couple token / refresh_token'
+                            content:
+                                application/json:
+                                    schema:
+                                        type: object
+                                        properties:
+                                            token: { type: string }
+                                            refresh_token: { type: string }
+                        '401': { description: 'Refresh token invalide, expiré ou déjà utilisé' }
+            /api/v1/auth/token/invalidate:
+                post:
+                    tags: [Auth]
+                    summary: 'Déconnexion : révoque le refresh token'
+                    security: []
+                    requestBody:
+                        required: true
+                        content:
+                            application/json:
+                                schema:
+                                    type: object
+                                    required: [refresh_token]
+                                    properties:
+                                        refresh_token: { type: string }
+                    responses:
+                        '200': { description: 'Refresh token révoqué (ou déjà invalide)' }
+                        '400': { description: 'Refresh token absent de la requête' }
+    areas:
+        default:
+            path_patterns:
+                - ^/api/v1

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity
+    name="App\Domain\Company\Company"
+    table="company">
+    <unique-constraints>
+        <unique-constraint columns="siret" name="uk_company_siret"/>
+    </unique-constraints>
+    <id name="uuid" type="guid" column="uuid"/>
+    <field name="name" type="string" column="name" length="255" nullable="false"/>
+    <field name="siret" type="string" column="siret" length="14" nullable="false"/>
+    <field name="vatNumber" type="string" column="vat_number" length="20" nullable="false"/>
+  </entity>
+</doctrine-mapping>
