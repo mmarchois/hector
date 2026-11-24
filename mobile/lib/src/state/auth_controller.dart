@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/api.dart';
+import '../data/api_errors.dart';
 import '../data/auth/token_storage.dart';
 import '../domain/user_profile.dart';
 
@@ -16,10 +17,16 @@ class AuthUnknown extends AuthState {
   const AuthUnknown();
 }
 
+/// Sans session. Les conditions d'utilisation s'acceptent sur l'écran de
+/// bienvenue, avant d'ouvrir un compte invité, de se connecter ou de s'inscrire.
 class AuthSignedOut extends AuthState {
-  const AuthSignedOut();
+  const AuthSignedOut({this.acceptedTermsOfUseVersion});
+
+  /// Version des conditions acceptée pendant cette visite, sinon null.
+  final String? acceptedTermsOfUseVersion;
 }
 
+/// Session ouverte, avec un compte complet ou un compte invité ([UserProfile.guest]).
 class AuthSignedIn extends AuthState {
   const AuthSignedIn(this.user);
 
@@ -127,7 +134,37 @@ class AuthController extends Notifier<AuthState> {
     state = AuthSignedIn(await _fetchAndCacheUser(tokens.accessToken));
   }
 
-  /// Crée le compte puis connecte directement l'utilisateur.
+  /// Conditions d'utilisation acceptées sur l'écran de bienvenue.
+  void acceptTermsOfUse(String version) {
+    state = AuthSignedOut(acceptedTermsOfUseVersion: version);
+  }
+
+  /// Retire une acceptation devenue caduque (conditions modifiées entre-temps).
+  void withdrawTermsOfUse() {
+    state = const AuthSignedOut();
+  }
+
+  /// Essai sans compte : ouvre un compte invité, conditions déjà acceptées.
+  /// Lève [TermsOfUseOutdatedException], [TooManyGuestAccountsException] ou
+  /// DioException (réseau).
+  Future<void> startAsGuest() async {
+    final current = state;
+    final version = current is AuthSignedOut
+        ? current.acceptedTermsOfUseVersion
+        : null;
+    if (version == null) {
+      throw StateError('Conditions d\'utilisation non acceptées.');
+    }
+
+    final tokens = await ref
+        .read(authRepositoryProvider)
+        .createGuest(acceptedTermsOfUseVersion: version);
+    await ref.read(tokenStorageProvider).write(tokens);
+    state = AuthSignedIn(await _fetchAndCacheUser(tokens.accessToken));
+  }
+
+  /// Crée le compte puis connecte directement l'utilisateur. Pour un invité,
+  /// convertit son compte : il garde ses données et sa session.
   Future<void> register({
     required String fullName,
     required String email,
@@ -137,6 +174,25 @@ class AuthController extends Notifier<AuthState> {
     String? siret,
     String? vatNumber,
   }) async {
+    final current = state;
+    if (current is AuthSignedIn && current.user.guest) {
+      final user = await ref
+          .read(profileRepositoryProvider)
+          .convertGuest(
+            fullName: fullName,
+            email: email,
+            password: password,
+            professional: professional,
+            companyName: companyName,
+            siret: siret,
+            vatNumber: vatNumber,
+          );
+      await _cacheUser(user);
+      state = AuthSignedIn(user);
+
+      return;
+    }
+
     await ref
         .read(authRepositoryProvider)
         .register(
@@ -147,6 +203,9 @@ class AuthController extends Notifier<AuthState> {
           companyName: companyName,
           siret: siret,
           vatNumber: vatNumber,
+          acceptedTermsOfUseVersion: current is AuthSignedOut
+              ? current.acceptedTermsOfUseVersion
+              : null,
         );
     await signIn(email: email, password: password);
   }

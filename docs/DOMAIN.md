@@ -279,7 +279,7 @@ Règles :
 - **ID1.** Un compte est invité ou complet. Un invité n'a ni e-mail ni mot de passe et ne peut pas se connecter par identifiants ; un compte complet a les deux.
 - **ID2.** Convertir un invité en compte complet garde son uuid et tout ce qui lui est rattaché. La conversion est définitive.
 - **ID3.** Un invité a la qualification la plus restrictive, celle d'un particulier.
-- **ID4.** Un invité inactif au-delà de la durée de conservation annoncée est supprimé avec ses données.
+- **ID4.** Un invité inactif au-delà de la durée de conservation annoncée est supprimé avec ses données. Mise en œuvre (lot L3) : est inactif un invité qui n'a plus aucune session valide. Une session vit 30 jours après son dernier renouvellement, et un invité n'a pas d'identifiants pour en rouvrir une : passé ce délai, ses données ne sont plus accessibles à personne. La durée de conservation vaut donc 30 jours, à confirmer avec la question P7. La commande `app:guests:purge` est à planifier chaque jour en production (D15).
 
 ## 5. Ce que le modèle initial laisse volontairement de côté
 

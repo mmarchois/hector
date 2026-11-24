@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import '../../domain/user_profile.dart';
 import '../api_errors.dart';
+import '../auth/auth_repository.dart';
 
 /// Mise à jour et suppression du compte (PUT/DELETE /api/v1/auth/me).
 /// Utilise le Dio authentifié (Bearer + refresh automatique).
@@ -43,6 +44,40 @@ class ProfileRepository {
         throw EmailAlreadyExistsException();
       }
       throw ApiValidationException.fromDio(e) ?? e;
+    }
+  }
+
+  /// Convertit le compte invité courant en compte complet : même compte, donc
+  /// mêmes données et même session (pas de reconnexion). Passe par le Dio
+  /// authentifié pour que le Bearer de l'invité soit envoyé et renouvelé.
+  /// Lève [EmailAlreadyExistsException] (409), [ApiValidationException] (422)
+  /// ou DioException.
+  Future<UserProfile> convertGuest({
+    required String fullName,
+    required String email,
+    required String password,
+    required bool professional,
+    String? companyName,
+    String? siret,
+    String? vatNumber,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/api/v1/auth/register',
+        data: {
+          'fullName': fullName,
+          'email': email,
+          'password': password,
+          'professional': professional,
+          'companyName': ?companyName,
+          'siret': ?siret,
+          'vatNumber': ?vatNumber,
+        },
+      );
+
+      return UserProfile.fromJson(response.data!);
+    } on DioException catch (e) {
+      throw registrationErrorFrom(e);
     }
   }
 

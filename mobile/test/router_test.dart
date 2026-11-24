@@ -14,20 +14,49 @@ void main() {
       expect(redirectFor(const AuthUnknown(), '/demarrage'), isNull);
     });
 
-    test('déconnecté : seules connexion et inscription sont accessibles', () {
-      expect(redirectFor(const AuthSignedOut(), '/'), '/connexion');
-      expect(redirectFor(const AuthSignedOut(), '/profil'), '/connexion');
-      expect(redirectFor(const AuthSignedOut(), '/demarrage'), '/connexion');
-      expect(redirectFor(const AuthSignedOut(), '/connexion'), isNull);
-      expect(redirectFor(const AuthSignedOut(), '/inscription'), isNull);
+    test('déconnecté : l\'écran de bienvenue d\'abord', () {
+      const signedOut = AuthSignedOut();
+      expect(redirectFor(signedOut, '/'), '/bienvenue');
+      expect(redirectFor(signedOut, '/profil'), '/bienvenue');
+      expect(redirectFor(signedOut, '/demarrage'), '/bienvenue');
+      expect(redirectFor(signedOut, '/bienvenue'), isNull);
+      // Conditions d'utilisation à accepter avant de se connecter ou de s'inscrire
+      expect(redirectFor(signedOut, '/connexion'), '/bienvenue');
+      expect(redirectFor(signedOut, '/inscription'), '/bienvenue');
+    });
+
+    test('conditions acceptées : connexion et inscription accessibles', () {
+      const accepted = AuthSignedOut(acceptedTermsOfUseVersion: '2026-11-24');
+      expect(redirectFor(accepted, '/connexion'), isNull);
+      expect(redirectFor(accepted, '/inscription'), isNull);
+      expect(redirectFor(accepted, '/bienvenue'), isNull);
+      expect(redirectFor(accepted, '/'), '/bienvenue');
     });
 
     test('connecté : les écrans publics ramènent à l\'accueil', () {
       expect(redirectFor(signedIn, '/connexion'), '/');
       expect(redirectFor(signedIn, '/inscription'), '/');
+      expect(redirectFor(signedIn, '/bienvenue'), '/');
       expect(redirectFor(signedIn, '/demarrage'), '/');
       expect(redirectFor(signedIn, '/'), isNull);
       expect(redirectFor(signedIn, '/profil'), isNull);
+    });
+
+    test('invité : il peut créer son compte ou se connecter au sien', () {
+      const guest = AuthSignedIn(
+        UserProfile(
+          uuid: 'g1',
+          email: '',
+          fullName: '',
+          roles: ['ROLE_USER'],
+          professional: false,
+          guest: true,
+        ),
+      );
+      expect(redirectFor(guest, '/inscription'), isNull);
+      expect(redirectFor(guest, '/connexion'), isNull);
+      expect(redirectFor(guest, '/bienvenue'), '/');
+      expect(redirectFor(guest, '/'), isNull);
     });
   });
 

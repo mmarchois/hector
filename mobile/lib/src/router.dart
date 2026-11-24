@@ -6,11 +6,15 @@ import 'presentation/home_screen.dart';
 import 'presentation/login_screen.dart';
 import 'presentation/profile_screen.dart';
 import 'presentation/register_screen.dart';
+import 'presentation/welcome_screen.dart';
 import 'state/auth_controller.dart';
 import 'theme.dart';
 
-/// Routes accessibles sans session.
-const _publicPaths = {'/connexion', '/inscription'};
+const _welcomePath = '/bienvenue';
+
+/// Écrans de compte : accessibles sans session une fois les conditions
+/// acceptées, et à un invité qui crée son compte ou rejoint le sien.
+const _accountPaths = {'/connexion', '/inscription'};
 
 const _splashPath = '/demarrage';
 
@@ -20,13 +24,23 @@ String? redirectFor(AuthState auth, String location) {
     case AuthUnknown():
       // Session en cours de restauration : écran d'attente
       return location == _splashPath ? null : _splashPath;
-    case AuthSignedOut():
-      return _publicPaths.contains(location) ? null : '/connexion';
-    case AuthSignedIn():
-      final awayFromApp =
-          _publicPaths.contains(location) || location == _splashPath;
+    case AuthSignedOut(:final acceptedTermsOfUseVersion):
+      if (location == _welcomePath) {
+        return null;
+      }
+      // Conditions d'utilisation d'abord, quel que soit le chemin choisi ensuite
+      final accepted = acceptedTermsOfUseVersion != null;
 
-      return awayFromApp ? '/' : null;
+      return accepted && _accountPaths.contains(location) ? null : _welcomePath;
+    case AuthSignedIn(:final user):
+      if (location == _splashPath || location == _welcomePath) {
+        return '/';
+      }
+      if (_accountPaths.contains(location)) {
+        return user.guest ? null : '/';
+      }
+
+      return null;
   }
 }
 
@@ -46,6 +60,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: _splashPath,
         builder: (context, state) => const _SplashScreen(),
+      ),
+      GoRoute(
+        path: _welcomePath,
+        builder: (context, state) => const WelcomeScreen(),
       ),
       GoRoute(
         path: '/connexion',

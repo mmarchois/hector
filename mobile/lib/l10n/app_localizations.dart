@@ -124,6 +124,66 @@ abstract class AppLocalizations {
   /// **'Annuler'**
   String get cancel;
 
+  /// No description provided for @retry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get retry;
+
+  /// No description provided for @welcomeIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Posez vos questions à Hector sans créer de compte. Vous pourrez en créer un ensuite pour garder vos conversations.'**
+  String get welcomeIntro;
+
+  /// No description provided for @welcomeAcceptTerms.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai lu et j\'accepte les conditions d\'utilisation'**
+  String get welcomeAcceptTerms;
+
+  /// No description provided for @welcomeReadTerms.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lire les conditions d\'utilisation'**
+  String get welcomeReadTerms;
+
+  /// No description provided for @welcomeStart.
+  ///
+  /// In fr, this message translates to:
+  /// **'Commencer sans compte'**
+  String get welcomeStart;
+
+  /// No description provided for @welcomeHaveAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'ai déjà un compte'**
+  String get welcomeHaveAccount;
+
+  /// No description provided for @welcomeTermsUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger les conditions d\'utilisation. Vérifiez votre réseau : un nouvel essai est lancé automatiquement.'**
+  String get welcomeTermsUnavailable;
+
+  /// No description provided for @termsOfUseTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions d\'utilisation'**
+  String get termsOfUseTitle;
+
+  /// No description provided for @termsOfUseOutdated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les conditions d\'utilisation ont changé : relisez-les et acceptez la nouvelle version.'**
+  String get termsOfUseOutdated;
+
+  /// No description provided for @tooManyGuestAccounts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de comptes ouverts depuis cette connexion. Réessayez plus tard ou connectez-vous.'**
+  String get tooManyGuestAccounts;
+
   /// No description provided for @loginTitle.
   ///
   /// In fr, this message translates to:
@@ -219,6 +279,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Un compte existe déjà avec cet email.'**
   String get registerEmailTaken;
+
+  /// No description provided for @registerGuestSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous gardez tout ce que vous avez commencé sans compte.'**
+  String get registerGuestSubtitle;
 
   /// No description provided for @registerHaveAccount.
   ///
@@ -334,6 +400,24 @@ abstract class AppLocalizations {
   /// **'Mon compte'**
   String get homeProfileTooltip;
 
+  /// No description provided for @homeGuestIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous utilisez Hector sans compte.'**
+  String get homeGuestIntro;
+
+  /// No description provided for @homeCreateAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un compte'**
+  String get homeCreateAccount;
+
+  /// No description provided for @homeCreateAccountHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gardez vos conversations et retrouvez-les sur un autre appareil.'**
+  String get homeCreateAccountHint;
+
   /// No description provided for @profileTitle.
   ///
   /// In fr, this message translates to:
@@ -405,6 +489,24 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Supprimer'**
   String get profileDeleteConfirmAction;
+
+  /// No description provided for @profileGuestIntro.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous utilisez Hector sans compte. Créez-en un pour garder vos conversations et les retrouver sur un autre appareil.'**
+  String get profileGuestIntro;
+
+  /// No description provided for @profileGuestDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer mes données'**
+  String get profileGuestDelete;
+
+  /// No description provided for @profileGuestDeleteConfirmBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les données de votre essai sans compte seront supprimées définitivement.'**
+  String get profileGuestDeleteConfirmBody;
 }
 
 class _AppLocalizationsDelegate

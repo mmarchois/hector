@@ -41,3 +41,17 @@ class EmailAlreadyExistsException implements Exception {}
 
 /// Identifiants refusés (401 sur /auth/login).
 class InvalidCredentialsException implements Exception {}
+
+/// Les conditions d'utilisation ont changé depuis leur lecture
+/// (409, reason `terms_of_use_outdated`) : il faut accepter la nouvelle version.
+class TermsOfUseOutdatedException implements Exception {}
+
+/// Trop de comptes invités ouverts depuis cette connexion (429 sur /auth/guest).
+class TooManyGuestAccountsException implements Exception {}
+
+/// Motif lisible par l'application dans une erreur de l'API : {code, reason, message}.
+String? apiErrorReason(DioException e) {
+  final data = e.response?.data;
+
+  return data is Map<String, dynamic> ? data['reason'] as String? : null;
+}

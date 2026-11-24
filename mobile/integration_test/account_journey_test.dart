@@ -31,66 +31,87 @@ void main() {
     await tester.pump();
   }
 
-  testWidgets('inscription, profil, mot de passe, déconnexion, suppression', (
-    tester,
-  ) async {
-    final stamp = DateTime.now().millisecondsSinceEpoch;
-    final email = 'e2e-$stamp@hector.test';
-    final siret = stamp.toString().padLeft(14, '0');
-
-    // Aucune session héritée d'un lancement précédent
-    await const FlutterSecureStorage().deleteAll();
-    await tester.pumpWidget(const ProviderScope(child: HectorApp()));
+  /// Écran de bienvenue : conditions acceptées, puis connexion à un compte.
+  Future<void> acceptTermsAndGoToLogin(WidgetTester tester) async {
+    await waitFor(tester, field('acceptTermsOfUse'));
+    await tapVisible(tester, field('acceptTermsOfUse'));
+    await tapVisible(tester, field('haveAccount'));
     await waitFor(tester, find.text('Se connecter'));
+  }
 
-    // Inscription d'un professionnel
-    await tapVisible(tester, find.text('Créer un compte'));
-    await waitFor(tester, find.text('Créer mon compte'));
-    await tester.enterText(field('companyName'), 'E2E Élec');
-    await tester.enterText(field('siret'), siret);
-    await tester.enterText(field('vatNumber'), 'FR12345678901');
-    await tester.enterText(field('fullName'), 'Camille Essai');
-    await tester.enterText(field('email'), email);
-    await tester.enterText(field('password'), 'motdepasse123');
-    await tapVisible(tester, find.text('Créer mon compte'));
+  testWidgets(
+    'essai sans compte, inscription, profil, mot de passe, déconnexion, suppression',
+    (tester) async {
+      final stamp = DateTime.now().millisecondsSinceEpoch;
+      final email = 'e2e-$stamp@hector.test';
+      final siret = stamp.toString().padLeft(14, '0');
 
-    // Session ouverte : accueil personnalisé
-    await waitFor(tester, find.text('Bonjour Camille'));
-    expect(find.text('E2E Élec'), findsOneWidget);
-    expect(find.text(email), findsOneWidget);
+      // Aucune session héritée d'un lancement précédent
+      await const FlutterSecureStorage().deleteAll();
+      await tester.pumpWidget(const ProviderScope(child: HectorApp()));
 
-    // Profil prérempli, puis changement de nom et de mot de passe
-    await tapVisible(tester, find.byTooltip('Mon compte'));
-    await waitFor(tester, find.text('Enregistrer'));
-    expect(find.widgetWithText(TextFormField, email), findsOneWidget);
-    await tester.enterText(field('fullName'), 'Camille Volta');
-    await tester.enterText(field('currentPassword'), 'motdepasse123');
-    await tester.enterText(field('newPassword'), 'nouveau-mot-de-passe');
-    await tapVisible(tester, find.text('Enregistrer'));
-    await waitFor(tester, find.text('Profil mis à jour.'));
+      // Premier lancement : conditions d'utilisation, puis essai sans compte
+      await waitFor(tester, field('acceptTermsOfUse'));
+      expect(
+        tester.widget<FilledButton>(field('startAsGuest')).onPressed,
+        isNull,
+      );
+      await tapVisible(tester, field('acceptTermsOfUse'));
+      await tapVisible(tester, field('startAsGuest'));
+      await waitFor(tester, find.text('Vous utilisez Hector sans compte.'));
 
-    // Déconnexion puis reconnexion avec le nouveau mot de passe
-    await tapVisible(tester, find.text('Se déconnecter'));
-    await waitFor(tester, find.text('Se connecter'));
-    await tester.enterText(field('email'), email);
-    await tester.enterText(field('password'), 'motdepasse123');
-    await tapVisible(tester, find.text('Se connecter'));
-    await waitFor(tester, find.text('Email ou mot de passe incorrect.'));
-    await tester.enterText(field('password'), 'nouveau-mot-de-passe');
-    await tapVisible(tester, find.text('Se connecter'));
-    await waitFor(tester, find.text('Bonjour Camille'));
+      // L'invité crée son compte de professionnel : même compte, même session
+      await tapVisible(tester, field('createAccount'));
+      await waitFor(tester, find.text('Créer mon compte'));
+      await tester.enterText(field('companyName'), 'E2E Élec');
+      await tester.enterText(field('siret'), siret);
+      await tester.enterText(field('vatNumber'), 'FR12345678901');
+      await tester.enterText(field('fullName'), 'Camille Essai');
+      await tester.enterText(field('email'), email);
+      await tester.enterText(field('password'), 'motdepasse123');
+      await tapVisible(tester, find.text('Créer mon compte'));
 
-    // Suppression du compte : retour à la connexion, compte inutilisable
-    await tapVisible(tester, find.byTooltip('Mon compte'));
-    await waitFor(tester, find.text('Supprimer mon compte'));
-    expect(find.widgetWithText(TextFormField, 'Camille Volta'), findsOneWidget);
-    await tapVisible(tester, find.text('Supprimer mon compte'));
-    await waitFor(tester, find.text('Supprimer'));
-    await tester.tap(find.text('Supprimer'));
-    await waitFor(tester, find.text('Se connecter'));
-    await tester.enterText(field('email'), email);
-    await tester.enterText(field('password'), 'nouveau-mot-de-passe');
-    await tapVisible(tester, find.text('Se connecter'));
-    await waitFor(tester, find.text('Email ou mot de passe incorrect.'));
-  });
+      // Session ouverte : accueil personnalisé
+      await waitFor(tester, find.text('Bonjour Camille'));
+      expect(find.text('E2E Élec'), findsOneWidget);
+      expect(find.text(email), findsOneWidget);
+
+      // Profil prérempli, puis changement de nom et de mot de passe
+      await tapVisible(tester, find.byTooltip('Mon compte'));
+      await waitFor(tester, find.text('Enregistrer'));
+      expect(find.widgetWithText(TextFormField, email), findsOneWidget);
+      await tester.enterText(field('fullName'), 'Camille Volta');
+      await tester.enterText(field('currentPassword'), 'motdepasse123');
+      await tester.enterText(field('newPassword'), 'nouveau-mot-de-passe');
+      await tapVisible(tester, find.text('Enregistrer'));
+      await waitFor(tester, find.text('Profil mis à jour.'));
+
+      // Déconnexion puis reconnexion avec le nouveau mot de passe
+      await tapVisible(tester, find.text('Se déconnecter'));
+      await acceptTermsAndGoToLogin(tester);
+      await tester.enterText(field('email'), email);
+      await tester.enterText(field('password'), 'motdepasse123');
+      await tapVisible(tester, find.text('Se connecter'));
+      await waitFor(tester, find.text('Email ou mot de passe incorrect.'));
+      await tester.enterText(field('password'), 'nouveau-mot-de-passe');
+      await tapVisible(tester, find.text('Se connecter'));
+      await waitFor(tester, find.text('Bonjour Camille'));
+
+      // Suppression du compte : retour à l'accueil sans session, compte inutilisable
+      await tapVisible(tester, find.byTooltip('Mon compte'));
+      await waitFor(tester, find.text('Supprimer mon compte'));
+      expect(
+        find.widgetWithText(TextFormField, 'Camille Volta'),
+        findsOneWidget,
+      );
+      await tapVisible(tester, find.text('Supprimer mon compte'));
+      await waitFor(tester, find.text('Supprimer'));
+      await tester.tap(find.text('Supprimer'));
+      await acceptTermsAndGoToLogin(tester);
+      await tester.enterText(field('email'), email);
+      await tester.enterText(field('password'), 'nouveau-mot-de-passe');
+      await tapVisible(tester, find.text('Se connecter'));
+      await waitFor(tester, find.text('Email ou mot de passe incorrect.'));
+    },
+  );
 }

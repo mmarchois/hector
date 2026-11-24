@@ -91,6 +91,26 @@ const profileJson = <String, dynamic>{
   'vatNumber': 'FR12345678901',
 };
 
+/// Profil d'un compte invité : ni nom ni email (essai sans compte).
+const guestProfileJson = <String, dynamic>{
+  'uuid': 'g1',
+  'guest': true,
+  'email': null,
+  'fullName': null,
+  'roles': ['ROLE_USER'],
+  'professional': false,
+  'companyName': null,
+  'siret': null,
+  'vatNumber': null,
+};
+
+const termsOfUseJson = <String, dynamic>{
+  'version': '2026-11-24',
+  'content':
+      "# Conditions d'utilisation d'Hector\n\n## Ce qu'est Hector\n\n"
+      '- Hector ne remplace pas un électricien.',
+};
+
 /// Conteneur Riverpod branché sur un stockage en mémoire et une API scriptée :
 /// tout le câblage réel (Dio « nu », Dio authentifié, interceptor) est exercé.
 ProviderContainer buildContainer(

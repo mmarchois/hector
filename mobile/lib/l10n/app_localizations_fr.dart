@@ -26,6 +26,41 @@ class AppLocalizationsFr extends AppLocalizations {
   String get cancel => 'Annuler';
 
   @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get welcomeIntro =>
+      'Posez vos questions à Hector sans créer de compte. Vous pourrez en créer un ensuite pour garder vos conversations.';
+
+  @override
+  String get welcomeAcceptTerms =>
+      'J\'ai lu et j\'accepte les conditions d\'utilisation';
+
+  @override
+  String get welcomeReadTerms => 'Lire les conditions d\'utilisation';
+
+  @override
+  String get welcomeStart => 'Commencer sans compte';
+
+  @override
+  String get welcomeHaveAccount => 'J\'ai déjà un compte';
+
+  @override
+  String get welcomeTermsUnavailable =>
+      'Impossible de charger les conditions d\'utilisation. Vérifiez votre réseau : un nouvel essai est lancé automatiquement.';
+
+  @override
+  String get termsOfUseTitle => 'Conditions d\'utilisation';
+
+  @override
+  String get termsOfUseOutdated =>
+      'Les conditions d\'utilisation ont changé : relisez-les et acceptez la nouvelle version.';
+
+  @override
+  String get tooManyGuestAccounts =>
+      'Trop de comptes ouverts depuis cette connexion. Réessayez plus tard ou connectez-vous.';
+
+  @override
   String get loginTitle => 'Connexion';
 
   @override
@@ -74,6 +109,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get registerEmailTaken => 'Un compte existe déjà avec cet email.';
+
+  @override
+  String get registerGuestSubtitle =>
+      'Vous gardez tout ce que vous avez commencé sans compte.';
 
   @override
   String get registerHaveAccount => 'Déjà un compte ?';
@@ -136,6 +175,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeProfileTooltip => 'Mon compte';
 
   @override
+  String get homeGuestIntro => 'Vous utilisez Hector sans compte.';
+
+  @override
+  String get homeCreateAccount => 'Créer un compte';
+
+  @override
+  String get homeCreateAccountHint =>
+      'Gardez vos conversations et retrouvez-les sur un autre appareil.';
+
+  @override
   String get profileTitle => 'Mon compte';
 
   @override
@@ -172,4 +221,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get profileDeleteConfirmAction => 'Supprimer';
+
+  @override
+  String get profileGuestIntro =>
+      'Vous utilisez Hector sans compte. Créez-en un pour garder vos conversations et les retrouver sur un autre appareil.';
+
+  @override
+  String get profileGuestDelete => 'Supprimer mes données';
+
+  @override
+  String get profileGuestDeleteConfirmBody =>
+      'Les données de votre essai sans compte seront supprimées définitivement.';
 }

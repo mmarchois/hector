@@ -2,11 +2,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config.dart';
+import '../domain/terms_of_use.dart';
 import '../state/auth_controller.dart';
 import 'auth/auth_interceptor.dart';
 import 'auth/auth_repository.dart';
 import 'auth/token_storage.dart';
 import 'profile/profile_repository.dart';
+import 'terms_of_use_repository.dart';
 
 /// Transport HTTP des clients Dio : null = transport natif de la plateforme.
 /// Les tests le remplacent par un adaptateur scripté, ce qui exerce tout le
@@ -59,4 +61,17 @@ final apiDioProvider = Provider<Dio>((ref) {
 
 final profileRepositoryProvider = Provider<ProfileRepository>(
   (ref) => ProfileRepository(ref.watch(apiDioProvider)),
+);
+
+final termsOfUseRepositoryProvider = Provider<TermsOfUseRepository>(
+  (ref) => TermsOfUseRepository(ref.watch(bareDioProvider)),
+);
+
+/// Conditions d'utilisation en vigueur, chargées à la demande (écran de
+/// bienvenue). `ref.invalidate` relance le chargement. Pas de relance
+/// automatique de Riverpod, qui abandonne après quelques essais : l'écran de
+/// bienvenue réessaie lui-même, à intervalle fixe et sans limite.
+final termsOfUseProvider = FutureProvider.autoDispose<TermsOfUse>(
+  (ref) => ref.watch(termsOfUseRepositoryProvider).fetch(),
+  retry: (retryCount, error) => null,
 );

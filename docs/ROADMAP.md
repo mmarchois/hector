@@ -112,6 +112,11 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - Un premier lancement sans réseau affiche un message clair et réessaie au retour du réseau.
 
 **Tests.** Unitaires des handlers : création, conversion, purge. Intégration : création, limite par IP, refus de la connexion par identifiants, conversion avec conservation des données et de la session, purge. Mobile : premier lancement, conversion, démarrage hors ligne.
+**Réalisé (24 novembre 2026).** Écarts et précisions :
+- Les conditions d'utilisation s'acceptent sur l'écran de bienvenue, avant l'essai sans compte comme avant la connexion ou l'inscription. Elles sont servies par l'API (`GET /api/v1/terms-of-use`) et versionnées dans `resources/legal/` ; le texte est provisoire jusqu'au lot L19.
+- Un invité est purgé quand il n'a plus de session valide, c'est-à-dire après 30 jours sans activité (DOMAIN.md, ID4).
+- Le refus de modifier le profil d'un invité est une 403 avec `reason: guest_account`. Des conditions acceptées mais périmées donnent une 409 avec `reason: terms_of_use_outdated`.
+- Sans réseau au premier lancement, l'écran de bienvenue réessaie seul toutes les 10 secondes.
 
 ### L4 — Conversations et messages, sans IA
 

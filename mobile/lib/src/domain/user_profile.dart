@@ -6,6 +6,7 @@ class UserProfile {
     required this.fullName,
     required this.roles,
     required this.professional,
+    this.guest = false,
     this.companyName,
     this.siret,
     this.vatNumber,
@@ -14,10 +15,12 @@ class UserProfile {
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       uuid: json['uuid'] as String,
-      email: json['email'] as String,
-      fullName: json['fullName'] as String,
+      // Un invité n'a ni email ni nom : chaînes vides côté application
+      email: json['email'] as String? ?? '',
+      fullName: json['fullName'] as String? ?? '',
       roles: (json['roles'] as List<dynamic>).cast<String>(),
       professional: json['professional'] as bool? ?? false,
+      guest: json['guest'] as bool? ?? false,
       companyName: json['companyName'] as String?,
       siret: json['siret'] as String?,
       vatNumber: json['vatNumber'] as String?,
@@ -38,6 +41,10 @@ class UserProfile {
   final String fullName;
   final List<String> roles;
   final bool professional;
+
+  /// Compte ouvert sans inscription (essai sans compte) : il peut créer un
+  /// compte sans rien perdre, mais n'a pas de profil à modifier.
+  final bool guest;
   final String? companyName;
   final String? siret;
   final String? vatNumber;
@@ -47,6 +54,7 @@ class UserProfile {
   Map<String, dynamic> toJson() {
     return {
       'uuid': uuid,
+      'guest': guest,
       'email': email,
       'fullName': fullName,
       'roles': roles,

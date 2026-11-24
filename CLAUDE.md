@@ -32,6 +32,7 @@ Symfony 8.1 : version sans support long, maintenue jusqu'en janvier 2027. Passer
 - Validation : jamais dans les DTO ni les entités, toujours en XML sur la Command (`config/validator/Application/<Contexte>/Command/`). Le middleware `validation` du bus la déclenche ; `ApiExceptionListener` la rend en 422 `{code, message, violations: [{property, message}]}`. Les propriétés d'une Command portent le même nom que les champs de la requête, pour que `property` désigne un champ connu du client.
 - Les handlers lèvent des exceptions du domaine ; le contrôleur les traduit en exception HTTP (409, 404…) ou en `ViolationHttpException` (422 sur un champ).
 - Messages destinés à l'utilisateur : en français, lisibles tels quels (l'application mobile les affiche).
+- Essai sans compte (`docs/ARCHITECTURE.md`, D17) : un invité est un `User` sans nom, email ni mot de passe (`isGuest()`), ouvert par `POST /api/v1/auth/guest`. `POST /api/v1/auth/register` appelée avec son jeton convertit ce même compte. Une erreur qui appelle une action du client porte un `reason` (`ReasonHttpException`). `app:guests:purge` supprime les invités sans session.
 - Identité : les JWT et refresh tokens portent l'uuid de l'utilisateur (`SecurityUser::getUserIdentifier()`), pas l'email ; `UserProvider` accepte un email (connexion) ou un uuid (token).
 
 ## Ajouter une fonctionnalité à l'API
@@ -48,3 +49,5 @@ Symfony 8.1 : version sans support long, maintenue jusqu'en janvier 2027. Passer
 - Textes de l'interface dans `lib/l10n/app_fr.arb`, puis `flutter gen-l10n` (fichiers générés versionnés).
 - Tests : API simulée par `ScriptedAdapter` (`test/support/fakes.dart`) injecté via `httpClientAdapterProvider`, ce qui exerce le vrai câblage (Bearer, refresh, rejeu).
 - Toute route ajoutée à l'API est répercutée à la main dans `data/` ; la spec de référence est `/api/v1/doc`.
+- Sans session : écran de bienvenue (conditions d'utilisation), puis compte invité ou connexion. Un écran empilé par `push` n'est pas redirigé par le router : après une connexion ou une inscription, revenir à l'accueil explicitement.
+- Tests d'écran : un appel réseau attendu hors des `pump` passe par `tester.runAsync`, sinon les minuteries de Dio ne s'écoulent pas.

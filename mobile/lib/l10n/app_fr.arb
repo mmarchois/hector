@@ -7,6 +7,17 @@
   "networkError": "Connexion au serveur impossible. Vérifiez votre réseau et réessayez.",
   "unexpectedError": "Une erreur est survenue. Réessayez dans un instant.",
   "cancel": "Annuler",
+  "retry": "Réessayer",
+
+  "welcomeIntro": "Posez vos questions à Hector sans créer de compte. Vous pourrez en créer un ensuite pour garder vos conversations.",
+  "welcomeAcceptTerms": "J'ai lu et j'accepte les conditions d'utilisation",
+  "welcomeReadTerms": "Lire les conditions d'utilisation",
+  "welcomeStart": "Commencer sans compte",
+  "welcomeHaveAccount": "J'ai déjà un compte",
+  "welcomeTermsUnavailable": "Impossible de charger les conditions d'utilisation. Vérifiez votre réseau : un nouvel essai est lancé automatiquement.",
+  "termsOfUseTitle": "Conditions d'utilisation",
+  "termsOfUseOutdated": "Les conditions d'utilisation ont changé : relisez-les et acceptez la nouvelle version.",
+  "tooManyGuestAccounts": "Trop de comptes ouverts depuis cette connexion. Réessayez plus tard ou connectez-vous.",
 
   "loginTitle": "Connexion",
   "loginEmailLabel": "Email",
@@ -25,6 +36,7 @@
   "registerPasswordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
   "registerSubmit": "Créer mon compte",
   "registerEmailTaken": "Un compte existe déjà avec cet email.",
+  "registerGuestSubtitle": "Vous gardez tout ce que vous avez commencé sans compte.",
   "registerHaveAccount": "Déjà un compte ?",
   "registerLoginLink": "Se connecter",
 
@@ -51,6 +63,9 @@
   "homeAccountReady": "Votre compte est prêt.",
   "homeAccountIndividual": "Compte particulier",
   "homeProfileTooltip": "Mon compte",
+  "homeGuestIntro": "Vous utilisez Hector sans compte.",
+  "homeCreateAccount": "Créer un compte",
+  "homeCreateAccountHint": "Gardez vos conversations et retrouvez-les sur un autre appareil.",
 
   "profileTitle": "Mon compte",
   "profileSave": "Enregistrer",
@@ -63,5 +78,8 @@
   "profileDeleteAccount": "Supprimer mon compte",
   "profileDeleteConfirmTitle": "Supprimer votre compte ?",
   "profileDeleteConfirmBody": "Votre compte et vos données seront supprimés définitivement.",
-  "profileDeleteConfirmAction": "Supprimer"
+  "profileDeleteConfirmAction": "Supprimer",
+  "profileGuestIntro": "Vous utilisez Hector sans compte. Créez-en un pour garder vos conversations et les retrouver sur un autre appareil.",
+  "profileGuestDelete": "Supprimer mes données",
+  "profileGuestDeleteConfirmBody": "Les données de votre essai sans compte seront supprimées définitivement."
 }

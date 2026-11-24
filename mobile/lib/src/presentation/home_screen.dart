@@ -50,33 +50,49 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              l10n.homeAccountReady,
+              user.guest ? l10n.homeGuestIntro : l10n.homeAccountReady,
               style: theme.textTheme.bodyLarge?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 24),
-            Card(
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
+            if (user.guest)
+              Card(
+                child: ListTile(
+                  key: const Key('createAccount'),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  leading: const Icon(Icons.person_add_alt_1_outlined),
+                  title: Text(l10n.homeCreateAccount),
+                  subtitle: Text(l10n.homeCreateAccountHint),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/inscription'),
                 ),
-                leading: Icon(
-                  user.professional
-                      ? Icons.business_outlined
-                      : Icons.person_outline,
+              )
+            else
+              Card(
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 8,
+                  ),
+                  leading: Icon(
+                    user.professional
+                        ? Icons.business_outlined
+                        : Icons.person_outline,
+                  ),
+                  title: Text(
+                    user.professional
+                        ? (user.companyName ?? user.fullName)
+                        : l10n.homeAccountIndividual,
+                  ),
+                  subtitle: Text(user.email),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/profil'),
                 ),
-                title: Text(
-                  user.professional
-                      ? (user.companyName ?? user.fullName)
-                      : l10n.homeAccountIndividual,
-                ),
-                subtitle: Text(user.email),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => context.push('/profil'),
               ),
-            ),
           ],
         ),
       ),
