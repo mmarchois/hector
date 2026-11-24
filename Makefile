@@ -126,6 +126,10 @@ test_unit: ## Run unit tests only
 test_integration: ## Run integration tests only
 	${BIN_PHP} ./bin/phpunit --testsuite=Integration ${ARGS}
 
+# Suite vide jusqu'aux premiers calculateurs (lot L13) : retirer alors --do-not-fail-on-empty-test-suite
+test_critical: ## Run critical tests only (calculations and safety rules, no LLM)
+	${BIN_PHP} ./bin/phpunit --testsuite=Critical --do-not-fail-on-empty-test-suite ${ARGS}
+
 ##
 ## ----------------
 ## Mobile (Flutter)

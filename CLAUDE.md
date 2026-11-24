@@ -9,14 +9,14 @@ PHP et Composer ne sont pas installés sur la machine : tout passe par Docker (`
 | Besoin | Commande |
 |--------|----------|
 | Démarrer | `make start` |
-| Tests API | `make test`, `make test_unit`, `make test_integration` (`ARGS="--filter Nom"`) |
-| Qualité API | `make check` (CS Fixer, PSR-4, PHPStan niveau 6, conteneur, schéma) ; `make format` corrige le style |
+| Tests API | `make test`, `make test_unit`, `make test_integration`, `make test_critical` (`ARGS="--filter Nom"`) |
+| Qualité API | `make check` (CS Fixer, PSR-4, PHPStan niveau 6 avec les règles d'architecture, conteneur, schéma) ; `make format` corrige le style |
 | Console / Composer | `make console CMD="debug:router"`, `make composer CMD="require x/y"` |
 | Migration | `make dbmigration` puis `make dbmigrate` (et `make dbmigrate ARGS="--env=test"`) |
 | Fixtures de test | `make dbfixtures` (vide la base visée) |
 | Mobile | `make mobile_test` ; `make mobile_e2e` (simulateur lancé + API locale) |
 
-Sans TTY (agent), remplacer `docker compose exec php` par `docker compose exec -T php`.
+Sans TTY (agent, intégration continue), passer `BIN_SHELL="docker compose exec -T php"` aux cibles `make`.
 
 Ports locaux : 8000 (API) et 5432 (base) par défaut ; un `docker-compose.override.yml` ignoré par git peut les déplacer : `docker compose ps` donne les ports réels du poste. `make mobile_e2e` vise `API_URL=http://localhost:8000` par défaut : le passer explicitement si le port diffère.
 
@@ -27,6 +27,8 @@ Symfony 8.1 : version sans support long, maintenue jusqu'en janvier 2027. Passer
 - `src/Domain` : entités (setters fluides, constructeur `uuid`), exceptions, spécifications, interfaces de repository, ports (`Domain/Port`). Aucune dépendance au framework.
 - `src/Application` : une `XxxCommand` / `XxxQuery` (`final readonly`, implémente `CommandInterface` / `QueryInterface`) et son `XxxHandler` (`__invoke`). Les handlers sont enregistrés par convention de nom et de dossier (`config/services.yaml`), sans attribut.
 - `src/Infrastructure` : adaptateurs, contrôleurs (`Controller/Api/V1/<Contexte>/`, un contrôleur invocable par route), DTO (`Dto/`), Doctrine (mapping XML dans `Persistence/Doctrine/Mapping`, fichier `<Contexte>.<Entité>.orm.xml`), sécurité.
+- Dépendances vérifiées par PHPStan (phpat, `tests/Architecture/ArchitectureRules.php`) : `Domain` ne dépend que de `Domain` (aucun framework, aucune bibliothèque), `Application` que d'`Application` et de `Domain`. Un contexte (dossier de `src/Domain` ou `src/Application`) est isolé par défaut : un lien vers un autre se déclare dans `ALLOWED_LINKS`, d'après `docs/DOMAIN.md`, § 2. Les contextes ne se branchent sur `Conversation` que depuis leur dossier `Application/<Contexte>/Capability`. `Domain/Port` est commun à tous.
+- Une entité purement technique (ex. `Infrastructure/Security/RefreshToken`) vit dans `Infrastructure`, son mapping dans `Persistence/Doctrine/InfrastructureMapping`.
 - Validation : jamais dans les DTO ni les entités, toujours en XML sur la Command (`config/validator/Application/<Contexte>/Command/`). Le middleware `validation` du bus la déclenche ; `ApiExceptionListener` la rend en 422 `{code, message, violations: [{property, message}]}`. Les propriétés d'une Command portent le même nom que les champs de la requête, pour que `property` désigne un champ connu du client.
 - Les handlers lèvent des exceptions du domaine ; le contrôleur les traduit en exception HTTP (409, 404…) ou en `ViolationHttpException` (422 sur un champ).
 - Messages destinés à l'utilisateur : en français, lisibles tels quels (l'application mobile les affiche).

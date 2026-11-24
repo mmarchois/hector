@@ -107,12 +107,13 @@ tests/
   Critical/                            nouveau : calculs et règles critiques, sans modèle de langage
 ```
 
-Règles de dépendance, à faire vérifier par un outil dans `make check` (lot L2) :
+Règles de dépendance, vérifiées dans `make check` par PHPat, une extension de PHPStan (`tests/Architecture/ArchitectureRules.php`, lot L2). Deptrac faisait aussi l'affaire, mais demandait un outil et une configuration de plus :
 
-- `Domain` n'importe ni `Application`, ni `Infrastructure`, ni le framework, ni le SDK d'un fournisseur.
-- `Application` n'importe ni `Infrastructure` ni le SDK d'un fournisseur.
-- Un contexte n'importe pas les entités d'un autre. Il passe par un identifiant et par une interface que l'autre contexte publie. Les liens permis sont ceux du tableau des relations de DOMAIN.md, § 2.
-- `Calculation` et `Safety` n'importent rien qui touche au modèle de langage.
+- `Domain` ne dépend que de `Domain` : ni `Application`, ni `Infrastructure`, ni framework, ni bibliothèque, ni SDK d'un fournisseur. Les classes natives de PHP sont permises.
+- `Application` ne dépend que d'`Application` et de `Domain`.
+- Un contexte n'utilise que les contextes du tableau des relations de DOMAIN.md, § 2, recopié dans les règles. Un nouveau dossier de contexte est isolé par défaut. L'outil vérifie le lien entre contextes, pas la classe utilisée : passer par un identifiant et par une interface publiée reste une règle de relecture.
+- Les contextes ne se branchent sur `Conversation` que depuis leur dossier `Application/<Contexte>/Capability`, et n'y voient que son interface de capacité. `Calculation` et `Safety` n'atteignent donc jamais le port du modèle de langage. `Conversation` n'utilise aucun contexte (CV7).
+- `Domain/Port` (dates, identifiants, hachage) est commun à tous les contextes.
 
 ## 5. Le tour de conversation
 

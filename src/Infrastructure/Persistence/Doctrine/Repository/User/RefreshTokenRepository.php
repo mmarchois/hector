@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Doctrine\Repository\User;
 
-use App\Domain\User\RefreshToken;
 use App\Domain\User\Repository\RefreshTokenRepositoryInterface;
+use App\Infrastructure\Security\RefreshToken;
 use Doctrine\ORM\EntityManagerInterface;
 
 final readonly class RefreshTokenRepository implements RefreshTokenRepositoryInterface

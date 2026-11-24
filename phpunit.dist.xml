@@ -24,6 +24,10 @@
         <testsuite name="Integration">
             <directory>tests/Integration</directory>
         </testsuite>
+        <!-- Calculs et règles critiques, sans modèle de langage (docs/ARCHITECTURE.md, § 12) -->
+        <testsuite name="Critical">
+            <directory>tests/Critical</directory>
+        </testsuite>
     </testsuites>
 
     <source ignoreSuppressionOfDeprecations="true"

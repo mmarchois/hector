@@ -16,6 +16,14 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Infrastructure/Persistence/Doctrine/Mapping'
                 prefix: 'App\Domain'
                 alias: 'App\Domain'
+            # Entités purement techniques (jeton de rafraîchissement). Dossier distinct :
+            # le dossier ci-dessus est parcouru récursivement avec le préfixe App\Domain.
+            Infrastructure:
+                is_bundle: false
+                type: xml
+                dir: '%kernel.project_dir%/src/Infrastructure/Persistence/Doctrine/InfrastructureMapping'
+                prefix: 'App\Infrastructure'
+                alias: 'App\Infrastructure'
 
 when@test:
     doctrine:
