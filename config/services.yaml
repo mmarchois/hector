@@ -4,6 +4,9 @@
 parameters:
     # Version des conditions d'utilisation (resources/legal/terms-of-use.md) : à changer avec le texte
     app.terms_of_use.version: '2026-11-24'
+    # Allocation gratuite (question P10) : valeurs PROVISOIRES, à fixer sur le coût mesuré d'un tour
+    app.free_allowance.guest_messages: 10
+    app.free_allowance.account_messages_per_day: 30
 
 services:
     # default configuration for services in *this* file
@@ -40,6 +43,11 @@ services:
             - '../src/Infrastructure/Controller/Api/ReasonHttpException.php'
         tags: ['controller.service_arguments']
 
+    App\Application\Conversation\Service\FreeAllowancePolicy:
+        arguments:
+            $guestMessages: '%app.free_allowance.guest_messages%'
+            $accountMessagesPerDay: '%app.free_allowance.account_messages_per_day%'
+
     # -------------------
     # Command & Query bus
     # -------------------
@@ -72,7 +80,16 @@ when@dev:
             tags: ['doctrine.fixture.orm']
 
 when@test:
+    parameters:
+        app.free_allowance.guest_messages: 3
+        app.free_allowance.account_messages_per_day: 5
+
     services:
+        # Faux modèle de langage scriptable : make test n'appelle jamais le fournisseur
+        App\Tests\Support\FakeChatModel:
+            public: true
+        App\Application\Conversation\Port\ChatModelInterface: '@App\Tests\Support\FakeChatModel'
+
         App\Infrastructure\Persistence\Doctrine\Fixtures\:
             resource: '../src/Infrastructure/Persistence/Doctrine/Fixtures/'
             autowire: true

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Conversation\Command;
 
+use App\Application\Conversation\Service\FreeAllowancePolicy;
 use App\Domain\Conversation\Block;
 use App\Domain\Conversation\Conversation;
 use App\Domain\Conversation\Exception\ConversationNotFoundException;
@@ -22,6 +23,7 @@ final readonly class SendMessageCommandHandler
         private ConversationRepositoryInterface $conversationRepository,
         private MessageRepositoryInterface $messageRepository,
         private TurnRepositoryInterface $turnRepository,
+        private FreeAllowancePolicy $freeAllowance,
         private IdFactoryInterface $idFactory,
         private DateUtilsInterface $dateUtils,
     ) {
@@ -35,6 +37,9 @@ final readonly class SendMessageCommandHandler
         }
 
         $now = $this->dateUtils->getNow();
+        // CV8 : refusé avant d'enregistrer quoi que ce soit, et donc avant tout appel au modèle
+        $this->freeAllowance->assertAllowed($command->ownerUuid, $now);
+
         $text = trim($command->text);
         $message = $this->messageRepository->add(
             new Message($this->idFactory->make(), $conversation, MessageRole::User, [Block::text($text)], $now),

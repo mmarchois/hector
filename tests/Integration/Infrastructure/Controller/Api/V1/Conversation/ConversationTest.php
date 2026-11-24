@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Infrastructure\Controller\Api\V1\Conversation;
 
-use App\Application\Conversation\Service\TurnRunner;
 use App\Infrastructure\Persistence\Doctrine\Fixtures\UserFixture;
 use App\Tests\Integration\Infrastructure\Controller\Api\AbstractApiTestCase;
+use App\Tests\Support\FakeChatModel;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
@@ -48,7 +48,7 @@ final class ConversationTest extends AbstractApiTestCase
             'fallbackText' => 'Un différentiel 30 mA déclenche de façon aléatoire.',
         ]], $turn['userMessage']['blocks']);
         self::assertSame('assistant', $turn['assistantMessage']['role']);
-        self::assertSame(TurnRunner::PLACEHOLDER_REPLY, $turn['assistantMessage']['blocks'][0]['fallbackText']);
+        self::assertSame(FakeChatModel::DEFAULT_REPLY, $turn['assistantMessage']['blocks'][0]['fallbackText']);
         self::assertSame([], $turn['assistantMessage']['citations']);
 
         // Le tour se relit, et le premier message titre la conversation

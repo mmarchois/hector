@@ -37,6 +37,6 @@ final readonly class AnswerTurnCommandHandler
         );
         $conversation->recordActivity($now);
 
-        return $turn->answer($answer, $now, $command->degraded);
+        return $turn->answer($answer, $now, $command->degraded, $command->trace);
     }
 }

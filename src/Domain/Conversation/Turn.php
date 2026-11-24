@@ -16,6 +16,8 @@ class Turn
     private TurnStatus $status = TurnStatus::InProgress;
     private ?Message $assistantMessage = null;
     private ?\DateTimeImmutable $finishedAt = null;
+    private ?TurnFailure $failure = null;
+    private TurnTrace $trace;
 
     public function __construct(
         private string $uuid,
@@ -26,6 +28,7 @@ class Turn
         if ($userMessage->getRole() !== MessageRole::User || $userMessage->getConversation() !== $conversation) {
             throw new \InvalidArgumentException('Un tour part d\'un message de l\'utilisateur de la même conversation.');
         }
+        $this->trace = new TurnTrace();
     }
 
     public function getUuid(): string
@@ -63,8 +66,18 @@ class Turn
         return $this->finishedAt;
     }
 
+    public function getFailure(): ?TurnFailure
+    {
+        return $this->failure;
+    }
+
+    public function getTrace(): TurnTrace
+    {
+        return $this->trace;
+    }
+
     /** Réponse de l'assistant : terminée, ou dégradée quand elle remplace un brouillon rejeté. */
-    public function answer(Message $assistantMessage, \DateTimeImmutable $at, bool $degraded = false): self
+    public function answer(Message $assistantMessage, \DateTimeImmutable $at, bool $degraded = false, ?TurnTrace $trace = null): self
     {
         $this->assertInProgress();
         if ($assistantMessage->getRole() !== MessageRole::Assistant || $assistantMessage->getConversation() !== $this->conversation) {
@@ -74,16 +87,19 @@ class Turn
         $this->assistantMessage = $assistantMessage;
         $this->status = $degraded ? TurnStatus::Degraded : TurnStatus::Completed;
         $this->finishedAt = $at;
+        $this->trace = $trace ?? $this->trace;
 
         return $this;
     }
 
     /** Échec sans réponse (fournisseur indisponible…) : l'utilisateur peut relancer. */
-    public function fail(\DateTimeImmutable $at): self
+    public function fail(\DateTimeImmutable $at, TurnFailure $failure, ?TurnTrace $trace = null): self
     {
         $this->assertInProgress();
         $this->status = TurnStatus::Failed;
+        $this->failure = $failure;
         $this->finishedAt = $at;
+        $this->trace = $trace ?? $this->trace;
 
         return $this;
     }

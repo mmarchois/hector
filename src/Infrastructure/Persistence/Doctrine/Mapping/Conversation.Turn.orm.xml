@@ -5,6 +5,9 @@
     <field name="status" type="string" column="status" length="16" enum-type="App\Domain\Conversation\TurnStatus" nullable="false"/>
     <field name="createdAt" type="datetimetz_immutable" column="created_at" nullable="false"/>
     <field name="finishedAt" type="datetimetz_immutable" column="finished_at" nullable="true"/>
+    <field name="failure" type="string" column="failure" length="16" enum-type="App\Domain\Conversation\TurnFailure" nullable="true"/>
+    <!-- Trace du tour (CV6), dans la même ligne : écrite une fois, à la fin du tour -->
+    <embedded name="trace" class="App\Domain\Conversation\TurnTrace" column-prefix="trace_"/>
     <many-to-one field="conversation" target-entity="App\Domain\Conversation\Conversation">
         <join-column name="conversation_uuid" referenced-column-name="uuid" nullable="false" on-delete="CASCADE"/>
     </many-to-one>

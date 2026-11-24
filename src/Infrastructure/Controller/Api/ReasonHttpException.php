@@ -15,6 +15,10 @@ final class ReasonHttpException extends HttpException
 {
     public const string GUEST_ACCOUNT = 'guest_account';
     public const string TERMS_OF_USE_OUTDATED = 'terms_of_use_outdated';
+    /** Allocation gratuite d'un invité épuisée : créer un compte débloque la suite */
+    public const string SIGNUP_REQUIRED = 'signup_required';
+    /** Allocation gratuite d'un compte épuisée : attendre (plus tard, s'abonner) */
+    public const string FREE_ALLOWANCE_EXHAUSTED = 'free_allowance_exhausted';
 
     public function __construct(
         int $statusCode,

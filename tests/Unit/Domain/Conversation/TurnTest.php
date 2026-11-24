@@ -10,6 +10,7 @@ use App\Domain\Conversation\Exception\TurnAlreadyFinishedException;
 use App\Domain\Conversation\Message;
 use App\Domain\Conversation\MessageRole;
 use App\Domain\Conversation\Turn;
+use App\Domain\Conversation\TurnFailure;
 use App\Domain\Conversation\TurnStatus;
 use PHPUnit\Framework\TestCase;
 
@@ -61,7 +62,7 @@ final class TurnTest extends TestCase
     public function testAFailedTurnHasNoAnswerAndCannotBeAnsweredLater(): void
     {
         $turn = new Turn('t1', $this->conversation, $this->message('m1', MessageRole::User), $this->now);
-        $turn->fail($this->now);
+        $turn->fail($this->now, TurnFailure::Unavailable);
 
         self::assertSame(TurnStatus::Failed, $turn->getStatus());
         self::assertNull($turn->getAssistantMessage());

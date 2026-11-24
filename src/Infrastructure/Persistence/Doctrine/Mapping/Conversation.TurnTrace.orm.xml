@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <embeddable name="App\Domain\Conversation\TurnTrace">
+    <field name="model" type="string" length="64" nullable="true"/>
+    <field name="promptVersion" type="string" column="prompt_version" length="64" nullable="true"/>
+    <field name="stopReason" type="string" column="stop_reason" length="32" nullable="true"/>
+    <field name="inputTokens" type="integer" column="input_tokens" nullable="true"/>
+    <field name="outputTokens" type="integer" column="output_tokens" nullable="true"/>
+    <field name="cacheReadInputTokens" type="integer" column="cache_read_input_tokens" nullable="true"/>
+    <field name="cacheCreationInputTokens" type="integer" column="cache_creation_input_tokens" nullable="true"/>
+    <field name="durationMs" type="integer" column="duration_ms" nullable="true"/>
+    <field name="error" type="string" length="255" nullable="true"/>
+  </embeddable>
+</doctrine-mapping>

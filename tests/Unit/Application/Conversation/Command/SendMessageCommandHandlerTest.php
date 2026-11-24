@@ -6,6 +6,9 @@ namespace App\Tests\Unit\Application\Conversation\Command;
 
 use App\Application\Conversation\Command\SendMessageCommand;
 use App\Application\Conversation\Command\SendMessageCommandHandler;
+use App\Application\Conversation\Port\Participant;
+use App\Application\Conversation\Port\ParticipantInterface;
+use App\Application\Conversation\Service\FreeAllowancePolicy;
 use App\Domain\Conversation\Conversation;
 use App\Domain\Conversation\Exception\ConversationNotFoundException;
 use App\Domain\Conversation\MessageRole;
@@ -71,6 +74,10 @@ final class SendMessageCommandHandlerTest extends TestCase
         $dateUtils = $this->createStub(DateUtilsInterface::class);
         $dateUtils->method('getNow')->willReturn(new \DateTimeImmutable('2026-11-24 10:00:00'));
 
-        return new SendMessageCommandHandler($conversationRepository, $messageRepository, $turnRepository, $idFactory, $dateUtils);
+        $participants = $this->createStub(ParticipantInterface::class);
+        $participants->method('profileOf')->willReturn(new Participant(guest: false, professional: true));
+        $allowance = new FreeAllowancePolicy($participants, $this->createStub(TurnRepositoryInterface::class), 10, 30);
+
+        return new SendMessageCommandHandler($conversationRepository, $messageRepository, $turnRepository, $allowance, $idFactory, $dateUtils);
     }
 }

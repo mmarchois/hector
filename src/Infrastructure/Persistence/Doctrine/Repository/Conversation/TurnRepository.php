@@ -30,4 +30,19 @@ final class TurnRepository extends ServiceEntityRepository implements TurnReposi
     {
         return $this->find($uuid);
     }
+
+    public function countByOwner(string $ownerUuid, ?\DateTimeImmutable $since = null): int
+    {
+        $queryBuilder = $this->createQueryBuilder('t')
+            ->select('COUNT(t.uuid)')
+            ->join('t.conversation', 'c')
+            ->where('c.ownerUuid = :owner')
+            ->setParameter('owner', $ownerUuid);
+
+        if ($since !== null) {
+            $queryBuilder->andWhere('t.createdAt >= :since')->setParameter('since', $since);
+        }
+
+        return (int) $queryBuilder->getQuery()->getSingleScalarResult();
+    }
 }

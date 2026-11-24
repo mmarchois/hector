@@ -152,6 +152,15 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - Le tour se termine et s'enregistre même si le client se déconnecte.
 
 **Tests.** Unitaires de l'exécution du tour avec le faux modèle : succès, délai, refus, boucle bornée. Contrat de l'adaptateur sur des réponses enregistrées. Intégration du parcours complet avec le faux modèle. Test vivant à la main, hors `make test`.
+**Réalisé (24 novembre 2026).** Précisions et écarts :
+- Fournisseur de départ : Anthropic, modèle `claude-opus-5-5`, effort `medium`, via le SDK officiel `anthropic-ai/sdk` (D3 reste à trancher par la mesure du lot L8). Réglages dans `.env` (`CHAT_*`), clé dans `.env.local`.
+- Les replis côté serveur en cas de refus sont activés (`fallbacks: default`, bêta `server-side-fallback-2026-07-01`) : le fournisseur réessaie sur un autre modèle, et la trace garde le modèle qui a réellement répondu. Un refus qui persiste donne une réponse dégradée fixe.
+- Pas encore d'appel d'outils ni de sortie structurée : ils arrivent avec les capacités et le contrôle des réponses (lots L7, L10). Le port est fait pour les accueillir sans changer d'appelant.
+- Allocation gratuite **provisoire** : 10 messages pour un invité, 30 par 24 heures pour un compte (`config/services.yaml`). Refus en 429, `reason: signup_required` ou `free_allowance_exhausted`.
+- Limite de débit : 10 messages par minute et par utilisateur.
+- **Reporté au lot L15 :** le critère « un signal de danger reçoit le message de sécurité même allocation épuisée ». Il suppose les règles fixes de Prévention, qui n'existent pas encore. D'ici là, les consignes demandent au modèle de traiter le danger en premier, ce qui n'est pas un mécanisme vérifiable.
+- Réponses du test de contrat : construites d'après le format documenté de l'API, à remplacer par des réponses réellement enregistrées au premier `make test_live`.
+- Délais : 90 secondes par appel, une seule nouvelle tentative, `fastcgi_read_timeout` de nginx à 240 secondes. Le mobile reste à 30 secondes jusqu'au lot L6.
 
 ### L6 — Écran de conversation (mobile)
 

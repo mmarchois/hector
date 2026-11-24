@@ -14,6 +14,12 @@ framework:
             limit: 20
             interval: '1 hour'
 
+        # Messages envoyés : limite par utilisateur, contre les abus et l'emballement des coûts
+        conversation_turn:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '1 minute'
+
 when@test:
     framework:
         cache:

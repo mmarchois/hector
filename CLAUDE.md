@@ -33,6 +33,7 @@ Symfony 8.1 : version sans support long, maintenue jusqu'en janvier 2027. Passer
 - Les handlers lèvent des exceptions du domaine ; le contrôleur les traduit en exception HTTP (409, 404…) ou en `ViolationHttpException` (422 sur un champ).
 - Messages destinés à l'utilisateur : en français, lisibles tels quels (l'application mobile les affiche).
 - Essai sans compte (`docs/ARCHITECTURE.md`, D17) : un invité est un `User` sans nom, email ni mot de passe (`isGuest()`), ouvert par `POST /api/v1/auth/guest`. `POST /api/v1/auth/register` appelée avec son jeton convertit ce même compte. Une erreur qui appelle une action du client porte un `reason` (`ReasonHttpException`). `app:guests:purge` supprime les invités sans session.
+- Modèle de langage : seul `TurnRunner` l'appelle, par le port `ChatModelInterface` (`Application/Conversation/Port`) ; l'adaptateur Anthropic vit dans `Infrastructure/Adapter/Llm/Anthropic` et aucune classe du SDK n'en sort. En test, `tests/Support/FakeChatModel` le remplace (programmable, `disableReboot()` pour le garder d'une requête à l'autre) ; `make test` n'appelle jamais le fournisseur. `make test_live` fait un vrai appel payant, avec la clé de `.env.local`. Consignes versionnées dans `resources/prompts`.
 - Identité : les JWT et refresh tokens portent l'uuid de l'utilisateur (`SecurityUser::getUserIdentifier()`), pas l'email ; `UserProvider` accepte un email (connexion) ou un uuid (token).
 
 ## Ajouter une fonctionnalité à l'API
