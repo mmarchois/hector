@@ -176,3 +176,11 @@ L'ordre proposé suit ce que le socle rend facile et ce que le terrain réclame 
 4. **Photo** : lecture de plaques signalétiques et de références de matériel d'abord. Une image ne sert jamais à conclure sur l'état électrique d'une installation.
 5. **Nouveaux domaines**, un par un : IRVE, puis les autres selon la demande. Chaque domaine apporte ses documents, ses calculs et ses vérifications sans modifier le socle (ARCHITECTURE.md, § 6).
 6. **Lecture de schémas, conception, vidéo.**
+7. **Apprendre des diagnostics confirmés** (idée du 24 novembre 2026), dès que la bêta en a produit assez. Les fréquences de causes confirmées sur le terrain, pour un symptôme et un contexte d'installation semblables, servent à ordonner les hypothèses et les vérifications proposées, et à repérer les manques du catalogue. Conditions :
+   - seules les causes confirmées par un retour du terrain (L18) sont comptées ;
+   - une fréquence est présentée comme une hypothèse, avec son nombre de cas, jamais comme une conclusion (DG6) ;
+   - elle ne change jamais les gestes permis, qui restent décidés par la politique de prévention ;
+   - les données sont agrégées et anonymisées, au-delà d'un nombre minimal de cas, avec le consentement de l'utilisateur (P7) ;
+   - l'expert relit avant toute mise en service.
+
+   Il ne s'agit pas d'entraîner le modèle de langage : ce sont des statistiques calculées par le domaine et fournies au modèle comme contexte.
