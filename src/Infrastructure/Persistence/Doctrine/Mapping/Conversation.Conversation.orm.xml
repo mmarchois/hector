@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <!-- Propriétaire par son uuid, sans association : le socle ne connaît pas User (CV7) -->
+  <entity name="App\Domain\Conversation\Conversation" table="conversation">
+    <indexes>
+        <index columns="owner_uuid,updated_at" name="idx_conversation_owner_updated_at"/>
+    </indexes>
+    <id name="uuid" type="guid" column="uuid"/>
+    <field name="ownerUuid" type="guid" column="owner_uuid" nullable="false"/>
+    <field name="title" type="string" column="title" length="80" nullable="true"/>
+    <field name="createdAt" type="datetimetz_immutable" column="created_at" nullable="false"/>
+    <field name="updatedAt" type="datetimetz_immutable" column="updated_at" nullable="false"/>
+  </entity>
+</doctrine-mapping>

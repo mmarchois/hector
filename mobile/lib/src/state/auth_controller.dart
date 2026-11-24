@@ -127,10 +127,30 @@ class AuthController extends Notifier<AuthState> {
   }
 
   /// Lève InvalidCredentialsException (401) ou DioException (réseau).
+  /// Un invité qui se connecte à son compte y retrouve ses conversations :
+  /// son jeton d'invité sert à demander le rattachement (question P11).
   Future<void> signIn({required String email, required String password}) async {
+    final current = state;
+    final guestTokens = current is AuthSignedIn && current.user.guest
+        ? await ref.read(tokenStorageProvider).read()
+        : null;
+
     final repository = ref.read(authRepositoryProvider);
     final tokens = await repository.login(email: email, password: password);
     await ref.read(tokenStorageProvider).write(tokens);
+
+    if (guestTokens != null) {
+      try {
+        await repository.mergeGuest(
+          accessToken: tokens.accessToken,
+          guestRefreshToken: guestTokens.refreshToken,
+        );
+      } on DioException {
+        // Rattachement impossible (réseau, session d'invité expirée) : la
+        // connexion reste valable ; l'essai sera purgé avec le compte invité.
+      }
+    }
+
     state = AuthSignedIn(await _fetchAndCacheUser(tokens.accessToken));
   }
 

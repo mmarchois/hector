@@ -105,6 +105,20 @@ class AuthRepository {
     }
   }
 
+  /// Rattache au compte connecté les données d'un compte invité, qui est
+  /// ensuite supprimé. Lève DioException (réseau, 422 si la session d'invité
+  /// est expirée).
+  Future<void> mergeGuest({
+    required String accessToken,
+    required String guestRefreshToken,
+  }) async {
+    await _dio.post<void>(
+      '/api/v1/auth/merge-guest',
+      data: {'guestRefreshToken': guestRefreshToken},
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
+  }
+
   Future<UserProfile> me(String accessToken) async {
     final response = await _dio.get<Map<String, dynamic>>(
       '/api/v1/auth/me',

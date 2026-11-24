@@ -36,6 +36,7 @@ Règle générale : un contexte ne manipule jamais les entités d'un autre. Il e
 | Diagnostic | Prévention | Interroge la politique (« ce geste est-il permis pour cette qualification ? ») et le catalogue. |
 | Diagnostic | Calcul | Peut référencer une exécution de calcul comme élément d'appui, par identifiant. |
 | Prévention | Identité | Lit la qualification déclarée de l'utilisateur. |
+| Identité | contextes qui rattachent des données à un utilisateur | Ne dépend d'aucun. À la suppression d'un compte et au rattachement d'un invité, Identité appelle son port `UserOwnedDataInterface`, que l'infrastructure implémente pour chaque contexte (conversations, puis sessions de diagnostic…). |
 | Calcul | Réglementation | Une constante ou une formule cite sa source par une référence du registre. |
 | Conseil produits | Catalogue | Lit les références, leurs caractéristiques et leur provenance. |
 | Conseil produits | Calcul | S'appuie sur les calculateurs pour vérifier une compatibilité. |

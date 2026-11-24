@@ -131,6 +131,83 @@ void main() {
     );
 
     test(
+      'un invité qui se connecte à son compte y rattache son essai (P11)',
+      () async {
+        final storage = InMemoryTokenStorage()
+          ..tokens = guestTokens
+          ..userJson = jsonEncode(guestProfileJson);
+        final adapter = ScriptedAdapter((options) async {
+          if (options.path.endsWith('/login')) {
+            return jsonResponse(200, {
+              'token': 'access-1',
+              'refresh_token': 'refresh-1',
+            });
+          }
+          if (options.path.endsWith('/merge-guest')) {
+            return emptyResponse(204);
+          }
+          final bearer = options.headers['Authorization'];
+
+          return jsonResponse(
+            200,
+            bearer == 'Bearer access-1' ? profileJson : guestProfileJson,
+          );
+        });
+        final container = buildContainer(storage, adapter);
+        addTearDown(container.dispose);
+        final auth = container.read(authControllerProvider.notifier);
+        await auth.restoreSession();
+
+        await auth.signIn(email: 'jean@chantier.fr', password: 'motdepasse123');
+
+        expect(adapter.calls, [
+          'GET /api/v1/auth/me',
+          'POST /api/v1/auth/login',
+          'POST /api/v1/auth/merge-guest',
+          'GET /api/v1/auth/me',
+        ]);
+        final merge = adapter.requests[2];
+        expect(merge.headers['Authorization'], 'Bearer access-1');
+        expect(merge.data, {'guestRefreshToken': 'guest-refresh'});
+        final state = container.read(authControllerProvider) as AuthSignedIn;
+        expect(state.user.guest, isFalse);
+      },
+    );
+
+    test('rattachement impossible : la connexion reste valable', () async {
+      final storage = InMemoryTokenStorage()
+        ..tokens = guestTokens
+        ..userJson = jsonEncode(guestProfileJson);
+      final adapter = ScriptedAdapter((options) async {
+        if (options.path.endsWith('/login')) {
+          return jsonResponse(200, {
+            'token': 'access-1',
+            'refresh_token': 'refresh-1',
+          });
+        }
+        if (options.path.endsWith('/merge-guest')) {
+          return jsonResponse(422, {'code': 422, 'violations': []});
+        }
+
+        return jsonResponse(
+          200,
+          options.headers['Authorization'] == 'Bearer access-1'
+              ? profileJson
+              : guestProfileJson,
+        );
+      });
+      final container = buildContainer(storage, adapter);
+      addTearDown(container.dispose);
+      final auth = container.read(authControllerProvider.notifier);
+      await auth.restoreSession();
+
+      await auth.signIn(email: 'jean@chantier.fr', password: 'motdepasse123');
+
+      expect(storage.tokens?.accessToken, 'access-1');
+      expect(container.read(authControllerProvider), isA<AuthSignedIn>());
+    });
+
+    test(
       'sans compte invité, l\'inscription envoie la version acceptée',
       () async {
         final adapter = ScriptedAdapter((options) async {

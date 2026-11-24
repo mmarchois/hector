@@ -223,6 +223,7 @@ Le registre normatif (Réglementation) n'est pas un magasin de contenu : il dit 
 | `GET /api/v1/conversations/{uuid}/messages` | Lire les messages, par pages | L4 |
 | `POST /api/v1/conversations/{uuid}/messages` | Envoyer un message ; renvoie le tour et son statut | L4, L5 |
 | `GET /api/v1/turns/{uuid}` | Suivre un tour en cours | L4 |
+| `POST /api/v1/auth/merge-guest` | Rattacher au compte connecté les données d'un invité (P11) | L4 |
 | `POST /api/v1/messages/{uuid}/feedback` | Signaler ou noter une réponse | L18, L19 |
 | `GET /api/v1/passages/{uuid}` | Consulter une source citée, selon sa licence | L10 |
 | `GET /api/v1/calculators`, `POST /api/v1/calculations` | Lister les calculateurs, calculer sans conversation | L13 |

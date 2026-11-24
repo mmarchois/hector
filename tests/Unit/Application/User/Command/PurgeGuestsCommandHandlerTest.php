@@ -6,6 +6,7 @@ namespace App\Tests\Unit\Application\User\Command;
 
 use App\Application\User\Command\PurgeGuestsCommand;
 use App\Application\User\Command\PurgeGuestsCommandHandler;
+use App\Application\User\Port\UserOwnedDataInterface;
 use App\Domain\Port\DateUtilsInterface;
 use App\Domain\User\Repository\RefreshTokenRepositoryInterface;
 use App\Domain\User\Repository\UserRepositoryInterface;
@@ -40,10 +41,18 @@ final class PurgeGuestsCommandHandlerTest extends TestCase
         $dateUtils = $this->createStub(DateUtilsInterface::class);
         $dateUtils->method('getNow')->willReturn($now);
 
-        $count = (new PurgeGuestsCommandHandler($userRepository, $refreshTokenRepository, $dateUtils))(new PurgeGuestsCommand());
+        $ownedData = $this->createMock(UserOwnedDataInterface::class);
+        $erased = [];
+        $ownedData->expects(self::exactly(2))->method('erase')
+            ->willReturnCallback(static function (string $uuid) use (&$erased): void {
+                $erased[] = $uuid;
+            });
+
+        $count = (new PurgeGuestsCommandHandler($userRepository, $refreshTokenRepository, $dateUtils, [$ownedData]))(new PurgeGuestsCommand());
 
         self::assertSame(2, $count);
         self::assertSame(['guest-1', 'guest-2'], $removed);
         self::assertSame(['guest-1', 'guest-2'], $revoked);
+        self::assertSame(['guest-1', 'guest-2'], $erased);
     }
 }

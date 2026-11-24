@@ -131,6 +131,11 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - La spécification OpenAPI décrit les nouvelles routes.
 
 **Tests.** Unitaires des handlers. Intégration : propriété, pagination, validation, suppression en cascade, rattachement des conversations d'un invité.
+**Réalisé (24 novembre 2026).** Précisions :
+- Messages lus par pages en remontant le temps : `?before=<uuid>&limit=`, et `hasMore`. L'ordre des messages est celui de leurs uuid v7, croissants dans le temps.
+- Suppression du compte et rattachement passent par le port `UserOwnedDataInterface` du contexte User, implémenté dans l'infrastructure pour chaque contexte qui rattache des données à un utilisateur. Ni User ni Conversation ne dépendent l'un de l'autre.
+- Rattachement d'un invité : `POST /api/v1/auth/merge-guest`, avec le jeton de rafraîchissement de l'invité comme preuve. L'application l'appelle après la connexion. S'il échoue, la connexion reste valable et l'essai est purgé avec le compte invité.
+- Le tour s'exécute en deux transactions courtes (`TurnRunner`). La réponse fixe occupe déjà la place de l'appel au modèle du lot L5.
 
 ### L5 — Port du modèle de langage et premier tour réel
 
