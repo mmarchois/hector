@@ -10,7 +10,10 @@ import '../state/auth_controller.dart';
 import 'widgets/account_fields.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.returnTo = '/'});
+
+  /// Écran où revenir une fois la session ouverte (une conversation, ou l'accueil).
+  final String returnTo;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -64,7 +67,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       // Session ouverte (ou compte invité converti). L'écran est empilé (push) :
       // le router ne redirige pas une route empilée, retour explicite à l'accueil.
       if (mounted) {
-        GoRouter.maybeOf(context)?.go('/');
+        GoRouter.maybeOf(context)?.go(widget.returnTo);
       }
     } on EmailAlreadyExistsException {
       setState(() => _error = l10n.registerEmailTaken);

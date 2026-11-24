@@ -175,6 +175,13 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - Tous les textes sont dans `app_fr.arb`.
 
 **Tests.** Tests d'écrans avec l'adaptateur scripté : états, repli, relance, reprise, allocation épuisée. Parcours de bout en bout.
+**Réalisé (24 novembre 2026).** Précisions :
+- L'accueil liste les conversations et en ouvre une nouvelle ; l'écran de conversation porte en permanence la mention « assistant IA ».
+- Réseau coupé pendant l'attente : l'application ne renvoie pas le message. Elle propose de recharger la conversation, et retire le message en attente s'il y figure déjà (pas de doublon). Rouvrir la conversation donne le même résultat.
+- Tour échoué : le message de l'API s'affiche sous la question, avec « Réessayer », qui ouvre un nouveau tour.
+- Essai épuisé : le message refusé revient dans la zone de saisie. « Créer un compte » et « J'ai déjà un compte » ramènent ensuite dans la conversation (`?retour=`).
+- Délai de réception de 4 minutes pour l'envoi d'un message seulement. Un tour encore « en cours » est suivi toutes les 2 secondes.
+- Les consignes demandent du texte simple, sans Markdown : l'application affiche le texte tel quel.
 
 ### L7 — Réponse structurée et contrôle des réponses
 

@@ -7,6 +7,7 @@ import '../state/auth_controller.dart';
 import 'auth/auth_interceptor.dart';
 import 'auth/auth_repository.dart';
 import 'auth/token_storage.dart';
+import 'conversation/conversation_repository.dart';
 import 'profile/profile_repository.dart';
 import 'terms_of_use_repository.dart';
 
@@ -61,6 +62,10 @@ final apiDioProvider = Provider<Dio>((ref) {
 
 final profileRepositoryProvider = Provider<ProfileRepository>(
   (ref) => ProfileRepository(ref.watch(apiDioProvider)),
+);
+
+final conversationRepositoryProvider = Provider<ConversationRepository>(
+  (ref) => ConversationRepository(ref.watch(apiDioProvider)),
 );
 
 final termsOfUseRepositoryProvider = Provider<TermsOfUseRepository>(

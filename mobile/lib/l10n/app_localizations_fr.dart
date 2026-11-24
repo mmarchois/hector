@@ -232,4 +232,63 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get profileGuestDeleteConfirmBody =>
       'Les données de votre essai sans compte seront supprimées définitivement.';
+
+  @override
+  String get homeNewConversation => 'Nouvelle conversation';
+
+  @override
+  String get homeConversationsTitle => 'Vos conversations';
+
+  @override
+  String get homeNoConversation =>
+      'Aucune conversation pour l\'instant. Posez votre première question à Hector.';
+
+  @override
+  String get homeConversationsError =>
+      'Impossible de charger vos conversations.';
+
+  @override
+  String get conversationUntitled => 'Nouvelle conversation';
+
+  @override
+  String get chatAiNotice =>
+      'Hector est un assistant IA : ses réponses peuvent être fausses. Vérifiez les informations importantes.';
+
+  @override
+  String get chatComposerHint => 'Votre question';
+
+  @override
+  String get chatSendTooltip => 'Envoyer';
+
+  @override
+  String get chatThinking => 'Hector réfléchit…';
+
+  @override
+  String get chatLoadOlder => 'Afficher les messages précédents';
+
+  @override
+  String get chatLoadError => 'Impossible de charger la conversation.';
+
+  @override
+  String get chatEmpty =>
+      'Décrivez votre question ou votre panne. Hector vous répond, et vous pose des questions si besoin.';
+
+  @override
+  String get chatConnectionLost =>
+      'Connexion perdue pendant l\'attente. Hector a peut-être déjà répondu : rechargez la conversation.';
+
+  @override
+  String get chatReload => 'Recharger';
+
+  @override
+  String get chatRetry => 'Réessayer';
+
+  @override
+  String get chatDismiss => 'Abandonner';
+
+  @override
+  String get chatNotSent => 'Message non envoyé.';
+
+  @override
+  String get chatSignupTitle => 'Limite de l\'essai atteinte';
 }

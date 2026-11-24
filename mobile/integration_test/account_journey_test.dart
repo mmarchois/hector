@@ -24,6 +24,17 @@ void main() {
     fail('Élément attendu introuvable après 15 s : $finder');
   }
 
+  /// Attend qu'un élément disparaisse (fin d'un tour : jusqu'à 4 minutes).
+  Future<void> waitForGone(WidgetTester tester, Finder finder) async {
+    for (var i = 0; i < 2400; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (finder.evaluate().isEmpty) {
+        return;
+      }
+    }
+    fail('Élément toujours présent après 4 min : $finder');
+  }
+
   Future<void> tapVisible(WidgetTester tester, Finder finder) async {
     await tester.ensureVisible(finder);
     await tester.pumpAndSettle();
@@ -59,6 +70,19 @@ void main() {
       await tapVisible(tester, field('acceptTermsOfUse'));
       await tapVisible(tester, field('startAsGuest'));
       await waitFor(tester, find.text('Vous utilisez Hector sans compte.'));
+
+      // Première conversation, sans compte : la mention IA est affichée, et
+      // l'envoi aboutit à une réponse (ou, sans clé d'API, au message d'échec)
+      await tapVisible(tester, field('newConversation'));
+      await waitFor(tester, field('aiNotice'));
+      await tester.enterText(field('composer'), 'Mon différentiel saute');
+      await tester.pump();
+      await tapVisible(tester, field('send'));
+      await waitFor(tester, field('thinking'));
+      await waitForGone(tester, field('thinking'));
+      expect(find.text('Mon différentiel saute'), findsOneWidget);
+      await tapVisible(tester, find.byType(BackButton));
+      await waitFor(tester, find.text('Mon différentiel saute'));
 
       // L'invité crée son compte de professionnel : même compte, même session
       await tapVisible(tester, field('createAccount'));

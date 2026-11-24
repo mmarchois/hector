@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'presentation/chat_screen.dart';
 import 'presentation/home_screen.dart';
 import 'presentation/login_screen.dart';
 import 'presentation/profile_screen.dart';
@@ -44,6 +45,17 @@ String? redirectFor(AuthState auth, String location) {
   }
 }
 
+/// Écran où revenir après une connexion ou une inscription (`?retour=`) :
+/// seulement une conversation, sinon l'accueil.
+String returnPathFrom(Uri uri) {
+  final back = uri.queryParameters['retour'];
+
+  return back != null &&
+          RegExp(r'^/conversations/[0-9a-f-]{36}$').hasMatch(back)
+      ? back
+      : '/';
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
   // Le redirect est réévalué à chaque changement d'état d'auth.
   final refresh = ValueNotifier(0);
@@ -67,11 +79,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/connexion',
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) =>
+            LoginScreen(returnTo: returnPathFrom(state.uri)),
       ),
       GoRoute(
         path: '/inscription',
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) =>
+            RegisterScreen(returnTo: returnPathFrom(state.uri)),
+      ),
+      GoRoute(
+        path: '/conversations/:uuid',
+        builder: (context, state) =>
+            ChatScreen(conversationUuid: state.pathParameters['uuid']!),
       ),
       GoRoute(
         path: '/profil',

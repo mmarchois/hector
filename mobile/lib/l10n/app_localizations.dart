@@ -507,6 +507,114 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Les données de votre essai sans compte seront supprimées définitivement.'**
   String get profileGuestDeleteConfirmBody;
+
+  /// No description provided for @homeNewConversation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle conversation'**
+  String get homeNewConversation;
+
+  /// No description provided for @homeConversationsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos conversations'**
+  String get homeConversationsTitle;
+
+  /// No description provided for @homeNoConversation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune conversation pour l\'instant. Posez votre première question à Hector.'**
+  String get homeNoConversation;
+
+  /// No description provided for @homeConversationsError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger vos conversations.'**
+  String get homeConversationsError;
+
+  /// No description provided for @conversationUntitled.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle conversation'**
+  String get conversationUntitled;
+
+  /// No description provided for @chatAiNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hector est un assistant IA : ses réponses peuvent être fausses. Vérifiez les informations importantes.'**
+  String get chatAiNotice;
+
+  /// No description provided for @chatComposerHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre question'**
+  String get chatComposerHint;
+
+  /// No description provided for @chatSendTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get chatSendTooltip;
+
+  /// No description provided for @chatThinking.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hector réfléchit…'**
+  String get chatThinking;
+
+  /// No description provided for @chatLoadOlder.
+  ///
+  /// In fr, this message translates to:
+  /// **'Afficher les messages précédents'**
+  String get chatLoadOlder;
+
+  /// No description provided for @chatLoadError.
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de charger la conversation.'**
+  String get chatLoadError;
+
+  /// No description provided for @chatEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez votre question ou votre panne. Hector vous répond, et vous pose des questions si besoin.'**
+  String get chatEmpty;
+
+  /// No description provided for @chatConnectionLost.
+  ///
+  /// In fr, this message translates to:
+  /// **'Connexion perdue pendant l\'attente. Hector a peut-être déjà répondu : rechargez la conversation.'**
+  String get chatConnectionLost;
+
+  /// No description provided for @chatReload.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recharger'**
+  String get chatReload;
+
+  /// No description provided for @chatRetry.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réessayer'**
+  String get chatRetry;
+
+  /// No description provided for @chatDismiss.
+  ///
+  /// In fr, this message translates to:
+  /// **'Abandonner'**
+  String get chatDismiss;
+
+  /// No description provided for @chatNotSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Message non envoyé.'**
+  String get chatNotSent;
+
+  /// No description provided for @chatSignupTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Limite de l\'essai atteinte'**
+  String get chatSignupTitle;
 }
 
 class _AppLocalizationsDelegate

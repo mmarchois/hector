@@ -55,3 +55,28 @@ String? apiErrorReason(DioException e) {
 
   return data is Map<String, dynamic> ? data['reason'] as String? : null;
 }
+
+/// Conversation inconnue, ou d'un autre utilisateur (404).
+class ConversationNotFoundException implements Exception {}
+
+/// Erreur 429 accompagnée d'un message de l'API, à afficher tel quel.
+sealed class MessageLimitException implements Exception {
+  MessageLimitException(this.message);
+
+  final String message;
+}
+
+/// Allocation de l'essai sans compte épuisée : créer un compte débloque la suite.
+class SignupRequiredException extends MessageLimitException {
+  SignupRequiredException(super.message);
+}
+
+/// Allocation gratuite d'un compte épuisée pour les dernières 24 heures.
+class FreeAllowanceExhaustedException extends MessageLimitException {
+  FreeAllowanceExhaustedException(super.message);
+}
+
+/// Trop de messages envoyés à la suite.
+class TooManyMessagesException extends MessageLimitException {
+  TooManyMessagesException(super.message);
+}
