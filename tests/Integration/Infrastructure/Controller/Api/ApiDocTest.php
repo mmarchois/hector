@@ -18,6 +18,10 @@ final class ApiDocTest extends WebTestCase
 
         self::assertSame('Hector API', $doc['info']['title']);
         self::assertArrayHasKey('/api/v1/auth/register', $doc['paths']);
+        self::assertArrayHasKey('/api/v1/auth/guest', $doc['paths']);
+        self::assertArrayHasKey('/api/v1/terms-of-use', $doc['paths']);
+        self::assertSame([], $doc['paths']['/api/v1/auth/guest']['post']['security']);
+        self::assertArrayHasKey('CreateGuestRequest', $doc['components']['schemas']);
         self::assertSame(['get', 'put', 'delete'], array_keys($doc['paths']['/api/v1/auth/me']));
         // Routes d'auth documentées statiquement (pas de contrôleur)
         self::assertArrayHasKey('/api/v1/auth/login', $doc['paths']);

@@ -2,6 +2,8 @@
 # Files in the packages/ subdirectory configure your dependencies.
 
 parameters:
+    # Version des conditions d'utilisation (resources/legal/terms-of-use.md) : à changer avec le texte
+    app.terms_of_use.version: '2026-11-24'
 
 services:
     # default configuration for services in *this* file
@@ -28,6 +30,7 @@ services:
         exclude:
             - '../src/Infrastructure/Controller/**/Dto/'
             - '../src/Infrastructure/Controller/Api/ViolationHttpException.php'
+            - '../src/Infrastructure/Controller/Api/ReasonHttpException.php'
         tags: ['controller.service_arguments']
 
     # -------------------

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\EventListener;
 
+use App\Infrastructure\Controller\Api\ReasonHttpException;
 use App\Infrastructure\Controller\Api\ViolationHttpException;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
@@ -58,6 +59,11 @@ final readonly class ApiExceptionListener
             'code' => $statusCode,
             'message' => $message,
         ];
+
+        // Motif lisible par le client, pour qu'il propose la bonne suite (créer un compte…)
+        if ($throwable instanceof ReasonHttpException) {
+            $payload['reason'] = $throwable->reason;
+        }
 
         // En dev uniquement : chaîne d'exceptions pour le debug
         if ($this->debug && !$throwable instanceof HttpExceptionInterface) {

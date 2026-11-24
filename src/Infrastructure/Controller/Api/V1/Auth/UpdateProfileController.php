@@ -7,8 +7,10 @@ namespace App\Infrastructure\Controller\Api\V1\Auth;
 use App\Application\CommandBusInterface;
 use App\Application\User\Command\SaveProfileCommand;
 use App\Domain\User\Exception\EmailAlreadyExistsException;
+use App\Domain\User\Exception\GuestAccountException;
 use App\Domain\User\Exception\InvalidCurrentPasswordException;
 use App\Domain\User\User;
+use App\Infrastructure\Controller\Api\ReasonHttpException;
 use App\Infrastructure\Controller\Api\V1\Auth\Dto\ProfileResponse;
 use App\Infrastructure\Controller\Api\V1\Auth\Dto\UpdateProfileRequest;
 use App\Infrastructure\Controller\Api\ViolationHttpException;
@@ -35,6 +37,7 @@ final readonly class UpdateProfileController
     #[OA\RequestBody(content: new OA\JsonContent(ref: new Model(type: UpdateProfileRequest::class)))]
     #[OA\Response(response: 200, description: 'Profil mis à jour', content: new OA\JsonContent(ref: new Model(type: ProfileResponse::class)))]
     #[OA\Response(response: 401, description: 'Non authentifié')]
+    #[OA\Response(response: 403, description: 'Compte invité : il doit d\'abord créer un compte (reason: guest_account)')]
     #[OA\Response(response: 409, description: 'Email déjà utilisé')]
     #[OA\Response(response: 422, description: 'Données invalides ou mot de passe actuel incorrect (violations par champ)')]
     public function __invoke(#[MapRequestPayload] UpdateProfileRequest $request): Response
@@ -56,6 +59,12 @@ final readonly class UpdateProfileController
             throw new ConflictHttpException('Un compte existe déjà avec cet email.');
         } catch (InvalidCurrentPasswordException) {
             throw new ViolationHttpException(['currentPassword' => 'Mot de passe actuel incorrect.']);
+        } catch (GuestAccountException) {
+            throw new ReasonHttpException(
+                Response::HTTP_FORBIDDEN,
+                ReasonHttpException::GUEST_ACCOUNT,
+                'Créez un compte pour enregistrer un profil.',
+            );
         }
 
         return new JsonResponse(ProfileResponse::fromUser($user));

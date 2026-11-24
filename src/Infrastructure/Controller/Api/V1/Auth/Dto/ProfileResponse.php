@@ -14,8 +14,10 @@ final readonly class ProfileResponse implements \JsonSerializable
      */
     public function __construct(
         public string $uuid,
-        public string $email,
-        public string $fullName,
+        /** Compte invité : ni nom, ni email (décision D17) */
+        public bool $guest,
+        public ?string $email,
+        public ?string $fullName,
         public array $roles,
         public bool $professional,
         public ?string $companyName,
@@ -30,6 +32,7 @@ final readonly class ProfileResponse implements \JsonSerializable
 
         return new self(
             uuid: $user->getUuid(),
+            guest: $user->isGuest(),
             email: $user->getEmail(),
             fullName: $user->getFullName(),
             roles: $user->getRoles(),
