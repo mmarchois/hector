@@ -70,4 +70,20 @@ class Passage
     {
         return $this->fingerprint;
     }
+
+    /**
+     * KN5 : ce qu'on a le droit de montrer du passage. Null si la licence de la source
+     * interdit tout extrait : la citation renvoie alors au document sans le reproduire.
+     */
+    public function excerpt(): ?string
+    {
+        $license = $this->version->getSource()->getLicense();
+        if (!$license->excerptAllowed) {
+            return null;
+        }
+
+        $max = $license->excerptMaxCharacters;
+
+        return $max === null || mb_strlen($this->text) <= $max ? $this->text : rtrim(mb_substr($this->text, 0, $max)) . '…';
+    }
 }

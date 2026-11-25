@@ -11,6 +11,8 @@ interface PassageRepositoryInterface
 {
     public function add(Passage $passage): Passage;
 
+    public function findOneByUuid(string $uuid): ?Passage;
+
     /** Passages d'un brouillon, avant une nouvelle ingestion. */
     public function removeByVersion(DocumentVersion $version): void;
 

@@ -27,6 +27,11 @@ final class PassageRepository extends ServiceEntityRepository implements Passage
         return $passage;
     }
 
+    public function findOneByUuid(string $uuid): ?Passage
+    {
+        return $this->find($uuid);
+    }
+
     public function removeByVersion(DocumentVersion $version): void
     {
         $this->createQueryBuilder('p')

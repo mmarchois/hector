@@ -131,6 +131,11 @@ when@test:
         App\Application\Conversation\Port\ChatModelInterface: '@App\Tests\Support\FakeChatModel'
         app.evaluation.judge_model: '@App\Tests\Support\FakeChatModel'
 
+        # Accessible aux tests d'intégration de la recherche, même sans autre service qui l'utilise
+        App\Application\Knowledge\Port\PassageSearchInterface:
+            alias: App\Infrastructure\Adapter\Knowledge\PostgresPassageSearch
+            public: true
+
         App\Infrastructure\Persistence\Doctrine\Fixtures\:
             resource: '../src/Infrastructure/Persistence/Doctrine/Fixtures/'
             autowire: true
