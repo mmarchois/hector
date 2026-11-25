@@ -79,9 +79,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       // Ouvert depuis l'accueil ou le profil (invité) : retour possible
       appBar: Navigator.of(context).canPop() ? AppBar() : null,
       body: SafeArea(
-        child: Center(
+        child: Align(
+          alignment: Alignment.topCenter,
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: Form(
@@ -90,24 +91,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Center(child: HectorMark()),
-                      const SizedBox(height: 20),
-                      Text(
-                        l10n.appTitle,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: HectorMark(size: 64),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 28),
+                      Text(l10n.appTitle, style: theme.textTheme.displaySmall),
+                      const SizedBox(height: 10),
                       Text(
                         l10n.appTagline,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.bodyLarge?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 17,
                         ),
                       ),
-                      const SizedBox(height: 36),
+                      const SizedBox(height: 32),
                       TextFormField(
                         key: const Key('email'),
                         controller: _emailController,
@@ -153,7 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 12),
                       Wrap(
-                        alignment: WrapAlignment.center,
+                        alignment: WrapAlignment.start,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(

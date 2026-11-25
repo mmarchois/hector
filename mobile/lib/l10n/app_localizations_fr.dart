@@ -270,8 +270,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chatLoadError => 'Impossible de charger la conversation.';
 
   @override
-  String get chatEmpty =>
-      'Décrivez votre question ou votre panne. Hector vous répond, et vous pose des questions si besoin.';
+  String get chatEmpty => 'Décrivez votre question ou votre panne.';
+
+  @override
+  String get chatEmptyHint =>
+      'Hector vous répond, et vous pose des questions si besoin.';
 
   @override
   String get chatConnectionLost =>
@@ -291,4 +294,76 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get chatSignupTitle => 'Limite de l\'essai atteinte';
+
+  @override
+  String get homeAccountTitle => 'Votre compte';
+
+  @override
+  String get statementSourcedFact => 'Fait sourcé';
+
+  @override
+  String get statementDeclaredFact => 'Vous avez indiqué';
+
+  @override
+  String get statementCalculationResult => 'Résultat de calcul';
+
+  @override
+  String get statementGeneralExplanation => 'Explication · non sourcée';
+
+  @override
+  String get statementHypothesis => 'Hypothèse';
+
+  @override
+  String get statementRecommendation => 'Recommandation';
+
+  @override
+  String get statementMissingInformation => 'Information manquante';
+
+  @override
+  String get statementReportedOpinion => 'Avis rapporté';
+
+  @override
+  String get blockQuestion => 'Question';
+
+  @override
+  String get blockWarning => 'Attention';
+
+  @override
+  String get chatAssistantSubtitle => 'Assistant IA';
+
+  @override
+  String get homeAskHint => 'Posez votre question à Hector';
+
+  @override
+  String get homeSuggestion1 => 'Mon différentiel saute';
+
+  @override
+  String get homeSuggestion2 => 'Une prise ne fonctionne plus';
+
+  @override
+  String get homeSuggestion3 => 'Quelle section de câble choisir ?';
+
+  @override
+  String get homeSuggestion4 => 'Mon disjoncteur déclenche';
+
+  @override
+  String get welcomeFeature1Title => 'Dépannage guidé';
+
+  @override
+  String get welcomeFeature1Body =>
+      'Décrivez la panne : Hector vous pose les bonnes questions.';
+
+  @override
+  String get welcomeFeature2Title => 'Faits, hypothèses, conseils';
+
+  @override
+  String get welcomeFeature2Body =>
+      'Chaque réponse dit ce qui est établi et ce qui est supposé.';
+
+  @override
+  String get welcomeFeature3Title => 'La sécurité d\'abord';
+
+  @override
+  String get welcomeFeature3Body =>
+      'Hector ne remplace pas un électricien, et vous le dit quand il en faut un.';
 }

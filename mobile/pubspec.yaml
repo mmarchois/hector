@@ -33,3 +33,21 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+
+  # Licence de la police, affichée dans l'application (LicenseRegistry, main.dart)
+  assets:
+    - assets/fonts/OFL-PlusJakartaSans.txt
+
+  # Police embarquée, sous licence SIL Open Font License 1.1
+  fonts:
+    - family: Plus Jakarta Sans
+      fonts:
+        - asset: assets/fonts/PlusJakartaSans-Regular.ttf
+        - asset: assets/fonts/PlusJakartaSans-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/PlusJakartaSans-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/PlusJakartaSans-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/PlusJakartaSans-ExtraBold.ttf
+          weight: 800

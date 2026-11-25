@@ -200,6 +200,16 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Suite critique : pour chaque règle du contrôle, au moins un cas accepté et un cas rejeté. Intégration avec le faux modèle : brouillon invalide puis valide, brouillon invalide deux fois. Tests d'écrans.
 
+**Réalisé (25 novembre 2026).** Précisions et écarts :
+- Le modèle répond par une sortie structurée (schéma JSON) : blocs `statement` avec leur nature, `question`, `warning`. Le contrôle (`DraftValidator`, domaine) rejette un fait sourcé ou un résultat de calcul sans source lue pendant le tour, une citation inconnue, un avis rapporté sans source, et tout renvoi à une disposition précise sans citation valide.
+- Tant qu'aucune base documentaire ni aucun calculateur n'existe (lots L10 et L14), aucune source n'est lue pendant un tour : un « fait sourcé » ou un « résultat de calcul » est donc toujours rejeté.
+- La détection des renvois (`ProvisionReference`) repose sur des formulations connues ; ses cas de référence sont dans `tests/Critical/Conversation/provision-references.json`, à compléter et à faire relire par l'expert. Elle a déjà écarté un faux positif (« section 2.5 », la section d'un conducteur).
+- Écart : un « fait déclaré » n'est pas encore relié au message de l'utilisateur dont il vient (CV4). À traiter avec les observations du diagnostic (lot L16).
+- Les valeurs chiffrées tirées d'une norme ne sont pas contrôlées par ce lot : seules les consignes demandent au modèle de ne pas en citer. Le registre normatif (lot L11) et les calculateurs (lot L14) fermeront ce point.
+- Mobile : chaque nature d'énoncé a sa pastille (icône, mot, teinte) ; recommandation, question et mise en garde sont en encart. Une nature inconnue de l'application s'affiche par son texte de repli, qui la nomme.
+- Design de l'application refait à cette occasion (demande du 25 novembre 2026 : une application moderne, dans les codes des applications actuelles) : voir `mobile/lib/src/theme.dart` et `make mobile_preview`.
+- Non vérifié : le parcours de bout en bout sur simulateur n'a pas été rejoué après le changement de design, et aucune réponse réelle du modèle n'a encore été observée au format structuré (pas de clé d'API).
+
 ### L8 — Jeu d'évaluation et outil de mesure
 
 **Objectif.** Mesurer la qualité avant de choisir un modèle et avant chaque changement de consignes.

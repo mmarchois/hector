@@ -110,49 +110,73 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final tokens = HectorTokens.of(context);
     final terms = ref.watch(termsOfUseProvider);
 
+    // La présentation en haut, les actions en bas, à portée de pouce. Sur un
+    // petit écran ou avec un texte agrandi, l'ensemble défile.
     return Scaffold(
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Center(child: HectorMark()),
-                  const SizedBox(height: 24),
-                  Text(
-                    l10n.appTitle,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.welcomeIntro,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  ...switch (terms) {
-                    AsyncData(:final value) => _actions(l10n, value),
-                    AsyncError() => [
-                      FormErrorText(l10n.welcomeTermsUnavailable),
-                      const SizedBox(height: 16),
-                      OutlinedButton(
-                        onPressed: () => ref.invalidate(termsOfUseProvider),
-                        child: Text(l10n.retry),
+        child: LayoutBuilder(
+          builder: (context, constraints) => SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: 480,
+                  minHeight: constraints.maxHeight - 44,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: HectorMark(size: 64),
                       ),
+                      const SizedBox(height: 28),
+                      Text(l10n.appTitle, style: theme.textTheme.displaySmall),
+                      const SizedBox(height: 10),
+                      Text(
+                        l10n.appTagline,
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: tokens.muted,
+                          fontSize: 17,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      _Feature(
+                        icon: Icons.bolt_rounded,
+                        title: l10n.welcomeFeature1Title,
+                        body: l10n.welcomeFeature1Body,
+                      ),
+                      _Feature(
+                        icon: Icons.fact_check_outlined,
+                        title: l10n.welcomeFeature2Title,
+                        body: l10n.welcomeFeature2Body,
+                      ),
+                      _Feature(
+                        icon: Icons.health_and_safety_outlined,
+                        title: l10n.welcomeFeature3Title,
+                        body: l10n.welcomeFeature3Body,
+                      ),
+                      const Spacer(),
+                      const SizedBox(height: 24),
+                      ...switch (terms) {
+                        AsyncData(:final value) => _actions(l10n, value),
+                        AsyncError() => [
+                          FormErrorText(l10n.welcomeTermsUnavailable),
+                          const SizedBox(height: 16),
+                          OutlinedButton(
+                            onPressed: () => ref.invalidate(termsOfUseProvider),
+                            child: Text(l10n.retry),
+                          ),
+                        ],
+                        _ => [const Center(child: CircularProgressIndicator())],
+                      },
                     ],
-                    _ => [const Center(child: CircularProgressIndicator())],
-                  },
-                ],
+                  ),
+                ),
               ),
             ),
           ),
@@ -162,24 +186,40 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
   }
 
   List<Widget> _actions(AppLocalizations l10n, TermsOfUse terms) {
+    final theme = Theme.of(context);
+
     return [
-      CheckboxListTile(
-        key: const Key('acceptTermsOfUse'),
-        value: _accepted,
-        onChanged: (value) => setState(() => _accepted = value ?? false),
-        controlAffinity: ListTileControlAffinity.leading,
-        contentPadding: EdgeInsets.zero,
-        title: Text(l10n.welcomeAcceptTerms),
+      // La case a sa zone de toucher autour d'elle : on la ramène sur la marge
+      Transform.translate(
+        offset: const Offset(-11, 0),
+        child: CheckboxListTile(
+          key: const Key('acceptTermsOfUse'),
+          value: _accepted,
+          onChanged: (value) => setState(() => _accepted = value ?? false),
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.zero,
+          horizontalTitleGap: 4,
+          title: Text(
+            l10n.welcomeAcceptTerms,
+            style: theme.textTheme.bodyMedium,
+          ),
+        ),
       ),
       Align(
         alignment: Alignment.centerLeft,
         child: TextButton(
+          style: TextButton.styleFrom(
+            padding: EdgeInsets.zero,
+            textStyle: theme.textTheme.titleSmall?.copyWith(
+              decoration: TextDecoration.underline,
+            ),
+          ),
           onPressed: () => _showTerms(terms),
           child: Text(l10n.welcomeReadTerms),
         ),
       ),
       if (_error != null) FormErrorText(_error!),
-      const SizedBox(height: 16),
+      const SizedBox(height: 12),
       FilledButton(
         key: const Key('startAsGuest'),
         onPressed: _accepted && !_starting ? () => _startAsGuest(terms) : null,
@@ -191,12 +231,61 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
               )
             : Text(l10n.welcomeStart),
       ),
-      const SizedBox(height: 8),
-      TextButton(
+      const SizedBox(height: 10),
+      OutlinedButton(
         key: const Key('haveAccount'),
         onPressed: _accepted && !_starting ? () => _logIn(terms) : null,
         child: Text(l10n.welcomeHaveAccount),
       ),
     ];
+  }
+}
+
+/// Ce qu'Hector apporte, en une ligne : une icône, un titre, une phrase.
+class _Feature extends StatelessWidget {
+  const _Feature({required this.icon, required this.title, required this.body});
+
+  final IconData icon;
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = HectorTokens.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: tokens.soft,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.titleMedium),
+                const SizedBox(height: 2),
+                Text(
+                  body,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: tokens.muted,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

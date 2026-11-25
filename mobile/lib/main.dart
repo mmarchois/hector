@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +10,14 @@ import 'src/state/auth_controller.dart';
 import 'src/theme.dart';
 
 void main() {
+  // La police embarquée est sous licence OFL : son texte accompagne
+  // l'application et figure dans sa page des licences.
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks([
+      'Plus Jakarta Sans',
+    ], await rootBundle.loadString('assets/fonts/OFL-PlusJakartaSans.txt'));
+  });
+
   runApp(const ProviderScope(child: HectorApp()));
 }
 

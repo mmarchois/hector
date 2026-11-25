@@ -22,19 +22,65 @@ class MessageBlock {
   }
 
   static const textType = 'text';
+  static const statementType = 'statement';
+  static const questionType = 'question';
+  static const warningType = 'warning';
 
   final String type;
   final int version;
   final String fallbackText;
   final Map<String, dynamic> data;
 
-  /// Texte à afficher : celui du bloc s'il est connu, sinon le texte de repli.
-  String get displayText {
-    if (type == textType && version == 1) {
-      return data['text'] as String? ?? fallbackText;
+  /// Nature d'un énoncé ; null pour un autre type, ou pour une nature que
+  /// cette version de l'application ne connaît pas.
+  StatementKind? get kind =>
+      type == statementType ? StatementKind.fromJson(data['kind']) : null;
+
+  /// Source nommée d'un avis rapporté.
+  String? get source => data['source'] as String?;
+
+  /// Vrai si cette version de l'application sait afficher ce bloc.
+  bool get known {
+    if (version != 1) {
+      return false;
     }
 
-    return fallbackText;
+    return switch (type) {
+      textType || questionType || warningType => true,
+      statementType => kind != null,
+      _ => false,
+    };
+  }
+
+  /// Texte à afficher : celui du bloc s'il est connu, sinon le texte de repli.
+  String get displayText =>
+      known ? (data['text'] as String? ?? fallbackText) : fallbackText;
+}
+
+/// Nature d'un énoncé de l'assistant : ce qui distingue un fait d'une hypothèse
+/// ou d'une recommandation (valeurs de l'API).
+enum StatementKind {
+  sourcedFact('sourced_fact'),
+  declaredFact('declared_fact'),
+  calculationResult('calculation_result'),
+  generalExplanation('general_explanation'),
+  hypothesis('hypothesis'),
+  recommendation('recommendation'),
+  missingInformation('missing_information'),
+  reportedOpinion('reported_opinion');
+
+  const StatementKind(this.value);
+
+  final String value;
+
+  static StatementKind? fromJson(Object? value) {
+    for (final kind in values) {
+      if (kind.value == value) {
+        return kind;
+      }
+    }
+
+    return null;
   }
 }
 

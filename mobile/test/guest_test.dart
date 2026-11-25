@@ -240,7 +240,23 @@ void main() {
   });
 
   group('écran de bienvenue', () {
+    // Taille d'un téléphone : la présentation et les actions tiennent à l'écran
+    void phone(WidgetTester tester) {
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+    }
+
+    // Avec la police de test, plus large, l'écran défile : on amène l'élément
+    // à l'écran avant de le toucher, comme le ferait l'utilisateur
+    Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+      await tester.ensureVisible(finder);
+      await tester.pumpAndSettle();
+      await tester.tap(finder);
+    }
+
     testWidgets('commencer exige d\'accepter les conditions', (tester) async {
+      phone(tester);
       final adapter = guestApi();
       final container = buildContainer(InMemoryTokenStorage(), adapter);
       addTearDown(container.dispose);
@@ -250,9 +266,9 @@ void main() {
       final start = find.byKey(const Key('startAsGuest'));
       expect(tester.widget<FilledButton>(start).onPressed, isNull);
 
-      await tester.tap(find.byKey(const Key('acceptTermsOfUse')));
+      await tapVisible(tester, find.byKey(const Key('acceptTermsOfUse')));
       await tester.pumpAndSettle();
-      await tester.tap(start);
+      await tapVisible(tester, start);
       await tester.pumpAndSettle();
 
       expect(adapter.calls, [
@@ -265,12 +281,13 @@ void main() {
     });
 
     testWidgets('les conditions se lisent en entier', (tester) async {
+      phone(tester);
       final container = buildContainer(InMemoryTokenStorage(), guestApi());
       addTearDown(container.dispose);
       await tester.pumpWidget(testApp(container, const WelcomeScreen()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Lire les conditions d\'utilisation'));
+      await tapVisible(tester, find.text('Lire les conditions d\'utilisation'));
       await tester.pumpAndSettle();
 
       expect(find.text('Conditions d\'utilisation d\'Hector'), findsOneWidget);
@@ -283,6 +300,7 @@ void main() {
     testWidgets('sans réseau : message clair, puis nouvel essai automatique', (
       tester,
     ) async {
+      phone(tester);
       var online = false;
       final adapter = ScriptedAdapter((options) async {
         if (!online) {
@@ -317,6 +335,7 @@ void main() {
     testWidgets('conditions modifiées entre-temps : à accepter de nouveau', (
       tester,
     ) async {
+      phone(tester);
       final adapter = ScriptedAdapter((options) async {
         return options.path.endsWith('/terms-of-use')
             ? jsonResponse(200, termsOfUseJson)
@@ -330,9 +349,9 @@ void main() {
       await tester.pumpWidget(testApp(container, const WelcomeScreen()));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('acceptTermsOfUse')));
+      await tapVisible(tester, find.byKey(const Key('acceptTermsOfUse')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('startAsGuest')));
+      await tapVisible(tester, find.byKey(const Key('startAsGuest')));
       await tester.pumpAndSettle();
 
       expect(find.textContaining('ont changé'), findsOneWidget);

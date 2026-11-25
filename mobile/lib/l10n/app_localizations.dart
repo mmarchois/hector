@@ -577,8 +577,14 @@ abstract class AppLocalizations {
   /// No description provided for @chatEmpty.
   ///
   /// In fr, this message translates to:
-  /// **'Décrivez votre question ou votre panne. Hector vous répond, et vous pose des questions si besoin.'**
+  /// **'Décrivez votre question ou votre panne.'**
   String get chatEmpty;
+
+  /// No description provided for @chatEmptyHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hector vous répond, et vous pose des questions si besoin.'**
+  String get chatEmptyHint;
 
   /// No description provided for @chatConnectionLost.
   ///
@@ -615,6 +621,144 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Limite de l\'essai atteinte'**
   String get chatSignupTitle;
+
+  /// No description provided for @homeAccountTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre compte'**
+  String get homeAccountTitle;
+
+  /// No description provided for @statementSourcedFact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fait sourcé'**
+  String get statementSourcedFact;
+
+  /// No description provided for @statementDeclaredFact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez indiqué'**
+  String get statementDeclaredFact;
+
+  /// No description provided for @statementCalculationResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultat de calcul'**
+  String get statementCalculationResult;
+
+  /// No description provided for @statementGeneralExplanation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Explication · non sourcée'**
+  String get statementGeneralExplanation;
+
+  /// No description provided for @statementHypothesis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hypothèse'**
+  String get statementHypothesis;
+
+  /// No description provided for @statementRecommendation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Recommandation'**
+  String get statementRecommendation;
+
+  /// No description provided for @statementMissingInformation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Information manquante'**
+  String get statementMissingInformation;
+
+  /// No description provided for @statementReportedOpinion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Avis rapporté'**
+  String get statementReportedOpinion;
+
+  /// No description provided for @blockQuestion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Question'**
+  String get blockQuestion;
+
+  /// No description provided for @blockWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Attention'**
+  String get blockWarning;
+
+  /// No description provided for @chatAssistantSubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Assistant IA'**
+  String get chatAssistantSubtitle;
+
+  /// No description provided for @homeAskHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Posez votre question à Hector'**
+  String get homeAskHint;
+
+  /// No description provided for @homeSuggestion1.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon différentiel saute'**
+  String get homeSuggestion1;
+
+  /// No description provided for @homeSuggestion2.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une prise ne fonctionne plus'**
+  String get homeSuggestion2;
+
+  /// No description provided for @homeSuggestion3.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelle section de câble choisir ?'**
+  String get homeSuggestion3;
+
+  /// No description provided for @homeSuggestion4.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mon disjoncteur déclenche'**
+  String get homeSuggestion4;
+
+  /// No description provided for @welcomeFeature1Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Dépannage guidé'**
+  String get welcomeFeature1Title;
+
+  /// No description provided for @welcomeFeature1Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Décrivez la panne : Hector vous pose les bonnes questions.'**
+  String get welcomeFeature1Body;
+
+  /// No description provided for @welcomeFeature2Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faits, hypothèses, conseils'**
+  String get welcomeFeature2Title;
+
+  /// No description provided for @welcomeFeature2Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Chaque réponse dit ce qui est établi et ce qui est supposé.'**
+  String get welcomeFeature2Body;
+
+  /// No description provided for @welcomeFeature3Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'La sécurité d\'abord'**
+  String get welcomeFeature3Title;
+
+  /// No description provided for @welcomeFeature3Body.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hector ne remplace pas un électricien, et vous le dit quand il en faut un.'**
+  String get welcomeFeature3Body;
 }
 
 class _AppLocalizationsDelegate

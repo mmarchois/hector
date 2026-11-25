@@ -5,8 +5,8 @@ BIN_CONSOLE = ${BIN_PHP} bin/console
 BIN_COMPOSER = ${BIN_SHELL} composer
 
 # URL de l'API utilisée par l'application mobile en local
-# (émulateur Android : http://10.0.2.2:8000).
-API_URL ?= http://localhost:8000
+# (émulateur Android : http://10.0.2.2:8003).
+API_URL ?= http://localhost:8003
 
 ##
 ## ----------------
@@ -149,8 +149,11 @@ mobile_install: ## Install Flutter dependencies
 mobile_test: ## Analyse + tests Flutter
 	cd mobile && flutter analyze && flutter test
 
-mobile_run_dev: ## Run the app against the local API (API_URL=http://localhost:8000)
+mobile_run_dev: ## Run the app against the local API (API_URL=http://localhost:8003)
 	cd mobile && flutter run --dart-define=API_BASE_URL=${API_URL}
+
+mobile_preview: ## Screenshots of every screen, light and dark, in mobile/build/preview
+	cd mobile && flutter test test_preview --update-goldens && open build/preview
 
 mobile_e2e: ## End-to-end journey on a running simulator/emulator against the local API
 	cd mobile && flutter test integration_test --dart-define=API_BASE_URL=${API_URL}

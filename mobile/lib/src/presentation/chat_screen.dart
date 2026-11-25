@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../domain/conversation.dart';
 import '../state/chat_controller.dart';
 import '../theme.dart';
+import 'widgets/kit.dart';
 
 /// Une conversation avec Hector.
 class ChatScreen extends ConsumerStatefulWidget {
@@ -52,6 +53,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
     final chat = ref.watch(chatControllerProvider(_uuid));
     final controller = ref.read(chatControllerProvider(_uuid).notifier);
 
@@ -66,12 +68,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            const HectorMark(size: 28),
-            const SizedBox(width: 12),
-            Text(l10n.appTitle),
+            const HectorMark(size: 36),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l10n.appTitle, style: theme.textTheme.titleMedium),
+                Text(
+                  l10n.chatAssistantSubtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: HectorTokens.of(context).muted,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-        bottom: _AiNotice(l10n.chatAiNotice),
       ),
       body: SafeArea(
         child: Column(
@@ -90,6 +102,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ref.read(chatDraftsProvider.notifier).save(_uuid, text),
               onSend: _send,
             ),
+            _AiNotice(l10n.chatAiNotice),
           ],
         ),
       ),
@@ -105,7 +118,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (chat.loadError && chat.messages.isEmpty) {
-      return _Centered(
+      return _Notice(
         text: l10n.chatLoadError,
         action: OutlinedButton(
           onPressed: controller.load,
@@ -115,6 +128,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     final pending = chat.pending;
+    if (chat.messages.isEmpty && pending == null && !chat.hasMore) {
+      return _Notice(
+        mark: true,
+        text: l10n.chatEmpty,
+        detail: l10n.chatEmptyHint,
+      );
+    }
+
     final items = <Widget>[
       if (chat.hasMore)
         Center(
@@ -123,10 +144,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: Text(l10n.chatLoadOlder),
           ),
         ),
-      if (chat.messages.isEmpty && pending == null)
-        _Centered(text: l10n.chatEmpty),
       for (final message in chat.messages) ...[
-        _Bubble(message.role, message.text),
+        if (message.role == MessageRole.user)
+          _UserMessage(message.text)
+        else
+          _AssistantMessage(message),
         if (chat.failures[message.uuid] case final failure?)
           _Status(
             text: failure,
@@ -137,7 +159,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
       ],
       if (pending != null) ...[
-        _Bubble(MessageRole.user, pending.text, faded: true),
+        _UserMessage(pending.text, faded: true),
         switch (pending.status) {
           PendingStatus.sending => const _Thinking(),
           PendingStatus.connectionLost => _Status(
@@ -173,7 +195,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return ListView.builder(
       key: const Key('messages'),
       reverse: true,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
       itemCount: items.length,
       itemBuilder: (context, index) => items[items.length - 1 - index],
     );
@@ -181,87 +203,233 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 /// Mention permanente : on parle à une IA (règlement européen sur l'IA, art. 50).
-class _AiNotice extends StatelessWidget implements PreferredSizeWidget {
+/// Sous la zone de saisie, là où les assistants grand public la placent ; le
+/// sous-titre de la barre du haut la répète.
+class _AiNotice extends StatelessWidget {
   const _AiNotice(this.text);
 
   final String text;
 
   @override
-  Size get preferredSize => const Size.fromHeight(40);
-
-  @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Container(
+    return Padding(
       key: const Key('aiNotice'),
-      width: double.infinity,
-      color: theme.colorScheme.secondaryContainer,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          Icon(
-            Icons.auto_awesome_outlined,
-            size: 18,
-            color: theme.colorScheme.onSecondaryContainer,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              text,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSecondaryContainer,
-              ),
-            ),
-          ),
-        ],
+      padding: const EdgeInsets.fromLTRB(28, 6, 28, 8),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: Theme.of(
+          context,
+        ).textTheme.labelSmall?.copyWith(color: HectorTokens.of(context).muted),
       ),
     );
   }
 }
 
-class _Bubble extends StatelessWidget {
-  const _Bubble(this.role, this.text, {this.faded = false});
+/// Message de l'utilisateur : une bulle douce, à droite.
+class _UserMessage extends StatelessWidget {
+  const _UserMessage(this.text, {this.faded = false});
 
-  final MessageRole role;
   final String text;
   final bool faded;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final mine = role == MessageRole.user;
 
     return Align(
-      alignment: mine ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: Alignment.centerRight,
       child: ConstrainedBox(
         constraints: BoxConstraints(
-          maxWidth: MediaQuery.sizeOf(context).width * 0.85,
+          maxWidth: MediaQuery.sizeOf(context).width * 0.8,
         ),
         child: Opacity(
-          opacity: faded ? 0.6 : 1,
+          opacity: faded ? 0.55 : 1,
           child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 6),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
             decoration: BoxDecoration(
-              color: mine
-                  ? theme.colorScheme.primaryContainer
-                  : theme.colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: SelectableText(
-              text,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: mine
-                    ? theme.colorScheme.onPrimaryContainer
-                    : theme.colorScheme.onSurface,
+              color: HectorTokens.of(context).soft,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(22),
+                topRight: Radius.circular(22),
+                bottomLeft: Radius.circular(22),
+                bottomRight: Radius.circular(6),
               ),
             ),
+            child: SelectableText(text, style: theme.textTheme.bodyLarge),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Réponse d'Hector : pas de bulle, ses blocs les uns sous les autres, chacun
+/// avec sa nature.
+class _AssistantMessage extends StatelessWidget {
+  const _AssistantMessage(this.message);
+
+  final ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final (index, block) in message.blocks.indexed) ...[
+            if (index > 0) const SizedBox(height: 18),
+            _BlockView(block),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Un bloc de réponse. Une pastille dit la nature de chaque énoncé ; ce qui
+/// appelle une action (recommandation, question, mise en garde) est mis en
+/// encart.
+class _BlockView extends StatelessWidget {
+  const _BlockView(this.block);
+
+  final MessageBlock block;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tokens = HectorTokens.of(context);
+    final l10n = AppLocalizations.of(context);
+    final body = theme.textTheme.bodyLarge;
+    final strong = theme.textTheme.titleMedium?.copyWith(height: 1.45);
+
+    // Type ou nature inconnus de cette version : le texte de repli (CV5)
+    if (!block.known || block.type == MessageBlock.textType) {
+      return SelectableText(block.displayText, style: body);
+    }
+
+    if (block.type == MessageBlock.questionType) {
+      return SoftCard(
+        child: _Labelled(
+          label: KindChip(
+            icon: Icons.forum_outlined,
+            label: l10n.blockQuestion,
+            tone: Tone.info,
+          ),
+          text: block.displayText,
+          style: strong,
+        ),
+      );
+    }
+
+    if (block.type == MessageBlock.warningType) {
+      final color = tokens.foreground(Tone.danger);
+
+      return SoftCard(
+        color: tokens.background(Tone.danger),
+        child: _Labelled(
+          label: Row(
+            children: [
+              Icon(Icons.warning_rounded, size: 20, color: color),
+              const SizedBox(width: 6),
+              Text(
+                l10n.blockWarning,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          text: block.displayText,
+          style: strong,
+        ),
+      );
+    }
+
+    final (icon, label, tone) = switch (block.kind!) {
+      StatementKind.sourcedFact => (
+        Icons.verified_outlined,
+        l10n.statementSourcedFact,
+        Tone.positive,
+      ),
+      StatementKind.calculationResult => (
+        Icons.calculate_outlined,
+        l10n.statementCalculationResult,
+        Tone.positive,
+      ),
+      StatementKind.declaredFact => (
+        Icons.person_outline_rounded,
+        l10n.statementDeclaredFact,
+        Tone.neutral,
+      ),
+      StatementKind.generalExplanation => (
+        Icons.menu_book_outlined,
+        l10n.statementGeneralExplanation,
+        Tone.neutral,
+      ),
+      StatementKind.reportedOpinion => (
+        Icons.format_quote_rounded,
+        block.source == null
+            ? l10n.statementReportedOpinion
+            : '${l10n.statementReportedOpinion} · ${block.source}',
+        Tone.neutral,
+      ),
+      StatementKind.hypothesis => (
+        Icons.lightbulb_outline_rounded,
+        l10n.statementHypothesis,
+        Tone.caution,
+      ),
+      StatementKind.missingInformation => (
+        Icons.help_outline_rounded,
+        l10n.statementMissingInformation,
+        Tone.info,
+      ),
+      StatementKind.recommendation => (
+        Icons.task_alt_rounded,
+        l10n.statementRecommendation,
+        Tone.accent,
+      ),
+    };
+
+    // Une recommandation ressort : encart teinté, pastille pleine
+    if (block.kind == StatementKind.recommendation) {
+      return SoftCard(
+        color: tokens.background(Tone.accent),
+        child: _Labelled(
+          label: KindChip(icon: icon, label: label, tone: tone, solid: true),
+          text: block.displayText,
+          style: body,
+        ),
+      );
+    }
+
+    return _Labelled(
+      label: KindChip(icon: icon, label: label, tone: tone),
+      text: block.displayText,
+      style: body,
+    );
+  }
+}
+
+class _Labelled extends StatelessWidget {
+  const _Labelled({required this.label, required this.text, this.style});
+
+  final Widget label;
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        label,
+        const SizedBox(height: 8),
+        SelectableText(text, style: style),
+      ],
     );
   }
 }
@@ -271,31 +439,39 @@ class _Thinking extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final tokens = HectorTokens.of(context);
 
-    return Padding(
+    return Align(
       key: const Key('thinking'),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          const SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          ),
-          const SizedBox(width: 12),
-          Text(
-            AppLocalizations.of(context).chatThinking,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+              decoration: BoxDecoration(
+                color: tokens.soft,
+                borderRadius: const BorderRadius.all(Radius.circular(22)),
+              ),
+              child: const TypingDots(),
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Text(
+              AppLocalizations.of(context).chatThinking,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: tokens.muted),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
+/// État d'un message resté sans réponse, sous ce message.
 class _Status extends StatelessWidget {
   const _Status({required this.text, required this.action});
 
@@ -305,18 +481,34 @@ class _Status extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final color = theme.colorScheme.error;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Text(
-            text,
-            textAlign: TextAlign.end,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.error,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(
+                  Icons.error_outline_rounded,
+                  size: 17,
+                  color: color,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  text,
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.bodyMedium?.copyWith(color: color),
+                ),
+              ),
+            ],
           ),
           action,
         ],
@@ -325,30 +517,55 @@ class _Status extends StatelessWidget {
   }
 }
 
-class _Centered extends StatelessWidget {
-  const _Centered({required this.text, this.action});
+/// Conversation vide ou illisible : un message au centre de l'écran.
+class _Notice extends StatelessWidget {
+  const _Notice({
+    required this.text,
+    this.detail,
+    this.action,
+    this.mark = false,
+  });
 
   final String text;
+  final String? detail;
   final Widget? action;
+  final bool mark;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            text,
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (mark) ...[
+              const HectorMark(size: 60),
+              const SizedBox(height: 20),
+            ],
+            Text(
+              text,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.headlineSmall,
             ),
-          ),
-          if (action != null) ...[const SizedBox(height: 16), action!],
-        ],
+            if (detail != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                detail!,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: HectorTokens.of(context).muted,
+                ),
+              ),
+            ],
+            if (action != null) ...[
+              const SizedBox(height: 20),
+              SizedBox(width: 200, child: action),
+            ],
+          ],
+        ),
       ),
     );
   }
@@ -375,39 +592,46 @@ class _LimitCard extends StatelessWidget {
 
     return Padding(
       key: const Key('limitCard'),
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (notice == LimitNotice.signupRequired)
-                Text(l10n.chatSignupTitle, style: theme.textTheme.titleMedium),
-              const SizedBox(height: 4),
-              Text(message),
-              if (notice == LimitNotice.signupRequired) ...[
-                const SizedBox(height: 16),
-                FilledButton(
-                  key: const Key('limitCreateAccount'),
-                  onPressed: () => context.push('/inscription?retour=$back'),
-                  child: Text(l10n.homeCreateAccount),
-                ),
-                const SizedBox(height: 8),
-                OutlinedButton(
-                  key: const Key('limitLogIn'),
-                  onPressed: () => context.push('/connexion?retour=$back'),
-                  child: Text(l10n.welcomeHaveAccount),
-                ),
-              ],
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+      child: SoftCard(
+        padding: const EdgeInsets.all(20),
+        radius: const BorderRadius.all(Radius.circular(24)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (notice == LimitNotice.signupRequired) ...[
+              Text(l10n.chatSignupTitle, style: theme.textTheme.headlineSmall),
+              const SizedBox(height: 6),
             ],
-          ),
+            Text(
+              message,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: notice == LimitNotice.signupRequired
+                    ? HectorTokens.of(context).muted
+                    : null,
+              ),
+            ),
+            if (notice == LimitNotice.signupRequired) ...[
+              const SizedBox(height: 18),
+              FilledButton(
+                key: const Key('limitCreateAccount'),
+                onPressed: () => context.push('/inscription?retour=$back'),
+                child: Text(l10n.homeCreateAccount),
+              ),
+              TextButton(
+                key: const Key('limitLogIn'),
+                onPressed: () => context.push('/connexion?retour=$back'),
+                child: Text(l10n.welcomeHaveAccount),
+              ),
+            ],
+          ],
         ),
       ),
     );
   }
 }
 
+/// Zone de saisie : une pilule flottante, avec son bouton d'envoi rond.
 class _Composer extends StatelessWidget {
   const _Composer({
     required this.controller,
@@ -424,45 +648,73 @@ class _Composer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tokens = HectorTokens.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 8, 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: TextField(
-              key: const Key('composer'),
-              controller: controller,
-              minLines: 1,
-              maxLines: 5,
-              maxLength: ChatScreen.maxLength,
-              buildCounter:
-                  (
-                    _, {
-                    required currentLength,
-                    required isFocused,
-                    maxLength,
-                  }) => null,
-              textCapitalization: TextCapitalization.sentences,
-              decoration: InputDecoration(hintText: l10n.chatComposerHint),
-              onChanged: onChanged,
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: tokens.soft,
+          borderRadius: const BorderRadius.all(Radius.circular(28)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Expanded(
+              child: TextField(
+                key: const Key('composer'),
+                controller: controller,
+                minLines: 1,
+                maxLines: 5,
+                maxLength: ChatScreen.maxLength,
+                buildCounter:
+                    (
+                      _, {
+                      required currentLength,
+                      required isFocused,
+                      maxLength,
+                    }) => null,
+                textCapitalization: TextCapitalization.sentences,
+                style: theme.textTheme.bodyLarge,
+                decoration: InputDecoration(
+                  hintText: l10n.chatComposerHint,
+                  filled: false,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.fromLTRB(20, 16, 8, 16),
+                ),
+                onChanged: onChanged,
+              ),
             ),
-          ),
-          const SizedBox(width: 4),
-          ListenableBuilder(
-            listenable: controller,
-            builder: (context, _) => IconButton.filled(
-              key: const Key('send'),
-              tooltip: l10n.chatSendTooltip,
-              iconSize: 28,
-              onPressed: sending || controller.text.trim().isEmpty
-                  ? null
-                  : onSend,
-              icon: const Icon(Icons.send_rounded),
+            Padding(
+              padding: const EdgeInsets.all(6),
+              child: ListenableBuilder(
+                listenable: controller,
+                builder: (context, _) => IconButton(
+                  key: const Key('send'),
+                  tooltip: l10n.chatSendTooltip,
+                  iconSize: 24,
+                  onPressed: sending || controller.text.trim().isEmpty
+                      ? null
+                      : onSend,
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size.square(44),
+                    backgroundColor: tokens.accent,
+                    foregroundColor: tokens.onAccent,
+                    disabledBackgroundColor: tokens.softer,
+                    disabledForegroundColor: tokens.muted.withValues(
+                      alpha: 0.7,
+                    ),
+                    shape: const CircleBorder(),
+                  ),
+                  icon: const Icon(Icons.arrow_upward_rounded),
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

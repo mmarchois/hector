@@ -18,7 +18,7 @@ PHP et Composer ne sont pas installés sur la machine : tout passe par Docker (`
 
 Sans TTY (agent, intégration continue), passer `BIN_SHELL="docker compose exec -T php"` aux cibles `make`.
 
-Ports locaux : 8000 (API) et 5432 (base) par défaut ; un `docker-compose.override.yml` ignoré par git peut les déplacer : `docker compose ps` donne les ports réels du poste. `make mobile_e2e` vise `API_URL=http://localhost:8000` par défaut : le passer explicitement si le port diffère.
+Ports locaux : 8003 (API) et 5432 (base) par défaut ; un `docker-compose.override.yml` ignoré par git peut les déplacer : `docker compose ps` donne les ports réels du poste. `make mobile_e2e` vise `API_URL=http://localhost:8003` par défaut : le passer explicitement si le port diffère.
 
 Symfony 8.1 : version sans support long, maintenue jusqu'en janvier 2027. Passer en 8.2 dès sa sortie stable, puis suivre chaque version mineure jusqu'à la 8.4 (support long).
 
@@ -34,6 +34,8 @@ Symfony 8.1 : version sans support long, maintenue jusqu'en janvier 2027. Passer
 - Messages destinés à l'utilisateur : en français, lisibles tels quels (l'application mobile les affiche).
 - Essai sans compte (`docs/ARCHITECTURE.md`, D17) : un invité est un `User` sans nom, email ni mot de passe (`isGuest()`), ouvert par `POST /api/v1/auth/guest`. `POST /api/v1/auth/register` appelée avec son jeton convertit ce même compte. Une erreur qui appelle une action du client porte un `reason` (`ReasonHttpException`). `app:guests:purge` supprime les invités sans session.
 - Modèle de langage : seul `TurnRunner` l'appelle, par le port `ChatModelInterface` (`Application/Conversation/Port`) ; l'adaptateur Anthropic vit dans `Infrastructure/Adapter/Llm/Anthropic` et aucune classe du SDK n'en sort. En test, `tests/Support/FakeChatModel` le remplace (programmable, `disableReboot()` pour le garder d'une requête à l'autre) ; `make test` n'appelle jamais le fournisseur. `make test_live` fait un vrai appel payant, avec la clé de `.env.local`. Consignes versionnées dans `resources/prompts`.
+- Réponse de l'assistant (lot L7) : le modèle renvoie un JSON contraint par `AnswerFormat::schema()` ; `DraftValidator` (domaine) contrôle le brouillon avant qu'il soit montré, `TurnRunner` fait une seule reprise avec les motifs puis répond par un texte dégradé fixe. Toute règle du contrôle a ses cas acceptés et rejetés dans `tests/Critical`. En test, `FakeChatModel::statement()` et `::draft()` fabriquent un brouillon valide.
+- Limites de consommation : allocation par compte en messages et en jetons (`FreeAllowancePolicy`), budget global sur 24 heures (`GlobalTokenBudget`, `CHAT_DAILY_TOKEN_BUDGET`), historique borné (`TurnContextBuilder`). Tout refus a lieu avant l'appel au modèle.
 - Identité : les JWT et refresh tokens portent l'uuid de l'utilisateur (`SecurityUser::getUserIdentifier()`), pas l'email ; `UserProvider` accepte un email (connexion) ou un uuid (token).
 
 ## Ajouter une fonctionnalité à l'API
@@ -52,3 +54,5 @@ Symfony 8.1 : version sans support long, maintenue jusqu'en janvier 2027. Passer
 - Toute route ajoutée à l'API est répercutée à la main dans `data/` ; la spec de référence est `/api/v1/doc`.
 - Sans session : écran de bienvenue (conditions d'utilisation), puis compte invité ou connexion. Un écran empilé par `push` n'est pas redirigé par le router : après une connexion ou une inscription, revenir à l'accueil explicitement.
 - Tests d'écran : un appel réseau attendu hors des `pump` passe par `tester.runAsync`, sinon les minuteries de Dio ne s'écoulent pas.
+- Design : fond net, formes très arrondies, surfaces douces sans contour, boutons en pilule, un seul accent (jaune `HectorColors.volt`, toujours avec un contenu noir), police Plus Jakarta Sans embarquée (`assets/fonts`). Tout passe par `theme.dart` (`HectorTheme`, `HectorTokens`) et `presentation/widgets/kit.dart` (`KindChip`, `SoftCard`, `GroupedList`…) : pas de couleur ni de rayon en dur dans un écran. `make mobile_preview` produit des captures de tous les écrans, en clair et en sombre, avec les vraies polices (`mobile/build/preview`) : à regarder avant de valider un changement visuel.
+- Un écran peut dépasser la fenêtre de test (800 × 600, police de test plus large) : amener un élément à l'écran (`ensureVisible`) avant de le toucher.

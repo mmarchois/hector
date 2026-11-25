@@ -8,7 +8,9 @@ import 'package:hector_mobile/src/data/auth/token_storage.dart';
 import 'package:hector_mobile/src/data/conversation/conversation_repository.dart';
 import 'package:hector_mobile/src/domain/conversation.dart';
 import 'package:hector_mobile/src/presentation/chat_screen.dart';
+import 'package:hector_mobile/src/presentation/widgets/kit.dart';
 import 'package:hector_mobile/src/state/chat_controller.dart';
+import 'package:hector_mobile/src/theme.dart';
 
 import 'support/fakes.dart';
 
@@ -347,6 +349,97 @@ void main() {
         find.text('Étape 2 : coupez le circuit de la cuisine.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('chaque nature d\'énoncé a sa pastille', (tester) async {
+      Map<String, dynamic> block(String type, String text, {String? kind}) => {
+        'type': type,
+        'version': 1,
+        'kind': ?kind,
+        'text': text,
+        'citations': <String>[],
+        'fallbackText': text,
+      };
+      final adapter = ScriptedAdapter(
+        (options) async => jsonResponse(
+          200,
+          page([
+            {
+              ...message('m2', 'assistant', ''),
+              'blocks': [
+                block(
+                  'statement',
+                  'Vous indiquez que ça saute la nuit.',
+                  kind: 'declared_fact',
+                ),
+                block(
+                  'statement',
+                  'Un défaut d\'isolement est possible.',
+                  kind: 'hypothesis',
+                ),
+                block(
+                  'statement',
+                  'Débranchez les appareils un à un.',
+                  kind: 'recommendation',
+                ),
+                block(
+                  'statement',
+                  'Je ne connais pas l\'âge de l\'installation.',
+                  kind: 'missing_information',
+                ),
+                block('question', 'Depuis quand ?'),
+                block('warning', 'Ne touchez pas la prise.'),
+                // Nature inconnue de cette version : texte de repli (CV5)
+                {
+                  ...block(
+                    'statement',
+                    'Trois cas semblables.',
+                    kind: 'field_experience',
+                  ),
+                  'fallbackText': 'Retour du terrain : Trois cas semblables.',
+                },
+              ],
+            },
+          ]),
+        ),
+      );
+      final c = container(adapter);
+      await tester.pumpWidget(
+        testApp(c, const ChatScreen(conversationUuid: conversation)),
+      );
+      await tester.pumpAndSettle();
+
+      for (final label in [
+        'Vous avez indiqué',
+        'Hypothèse',
+        'Recommandation',
+        'Information manquante',
+        'Question',
+        'Attention',
+      ]) {
+        expect(find.text(label), findsOneWidget, reason: label);
+      }
+      expect(find.text('Un défaut d\'isolement est possible.'), findsOneWidget);
+      expect(
+        find.text('Retour du terrain : Trois cas semblables.'),
+        findsOneWidget,
+      );
+      // Une teinte par nature ; seule la recommandation a une pastille pleine
+      final chips = tester.widgetList<KindChip>(find.byType(KindChip)).toList();
+      expect(chips.map((chip) => chip.tone), [
+        Tone.neutral,
+        Tone.caution,
+        Tone.accent,
+        Tone.info,
+        Tone.info,
+      ]);
+      expect(chips.map((chip) => chip.solid), [
+        false,
+        false,
+        true,
+        false,
+        false,
+      ]);
     });
 
     testWidgets('envoyer un message affiche la réponse', (tester) async {

@@ -184,7 +184,6 @@ class FormErrorText extends StatelessWidget {
       padding: const EdgeInsets.only(top: 16),
       child: Text(
         message,
-        textAlign: TextAlign.center,
         style: TextStyle(color: Theme.of(context).colorScheme.error),
       ),
     );
