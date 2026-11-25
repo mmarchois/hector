@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <!-- KN3 : un passage est identifié et localisé ; son rang dans la version est unique -->
+  <entity name="App\Domain\Knowledge\Passage" table="knowledge_passage">
+    <unique-constraints>
+        <unique-constraint columns="version_uuid,ordinal" name="uniq_knowledge_passage_ordinal"/>
+    </unique-constraints>
+    <id name="uuid" type="guid" column="uuid"/>
+    <field name="position" type="integer" column="ordinal" nullable="false"/>
+    <field name="page" type="integer" column="page" nullable="true"/>
+    <field name="section" type="string" column="section" length="500" nullable="true"/>
+    <field name="article" type="string" column="article" length="64" nullable="true"/>
+    <field name="text" type="text" column="text" nullable="false"/>
+    <field name="fingerprint" type="string" column="fingerprint" length="64" nullable="false"/>
+    <many-to-one field="version" target-entity="App\Domain\Knowledge\DocumentVersion">
+        <join-column name="version_uuid" referenced-column-name="uuid" nullable="false" on-delete="CASCADE"/>
+    </many-to-one>
+  </entity>
+</doctrine-mapping>

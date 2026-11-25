@@ -256,6 +256,15 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Unitaires du cycle de vie et des licences. Intégration des commandes sur des fichiers d'exemple, dont un document à tableaux. Test de reproductibilité.
 
+**Réalisé (25 novembre 2026).** Précisions et écarts :
+- Contexte `Knowledge` : sources (corpus, genre, licence), versions (brouillon, publiée, retirée), passages localisés, trace d'ingestion. Les règles KN1 à KN7 sont portées par le domaine, chacune avec ses tests.
+- Commandes : `app:knowledge:source:create`, `app:knowledge:ingest`, `app:knowledge:show` (relecture des passages), `app:knowledge:publish`, `app:knowledge:withdraw`.
+- Les fichiers d'origine sont conservés sous leur empreinte SHA-256 (`KNOWLEDGE_STORAGE_DIR`) : à sauvegarder avec la base.
+- Formats lus : Markdown (le format des fiches Hector : les titres donnent les sections, les tableaux arrivent intacts) et texte brut, paginé par ses sauts de page. Le découpage suit titres et paragraphes et ne coupe jamais un tableau.
+- Écart : pas d'extraction directe des PDF, et la méthode n'a pas été choisie sur un échantillon relu par l'expert (D14). Il n'y a encore ni corpus réel ni expert (questions P3 et P4). Un PDF converti en texte paginé par un outil externe peut être ingéré, mais ses tableaux sont alors à relire un par un.
+- Écart : la version remplacée est un identifiant libre, sans contrôle qu'elle appartient à la même source. Le rattachement à une édition du registre normatif viendra avec le lot L11.
+- Rien de ce qui est ingéré n'arrive encore dans les réponses : la recherche est le lot L10.
+
 ### L10 — Recherche par mots et réponses sourcées
 
 **Objectif.** Répondre en citant des passages réels.

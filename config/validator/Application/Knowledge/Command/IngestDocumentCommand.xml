@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constraint-mapping xmlns="http://symfony.com/schema/dic/constraint-mapping"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd">
+    <class name="App\Application\Knowledge\Command\IngestDocumentCommand">
+        <property name="sourceUuid">
+            <constraint name="Uuid"><option name="message">Identifiant de source invalide.</option></constraint>
+        </property>
+        <property name="filePath">
+            <constraint name="NotBlank"><option name="message">Indiquez le fichier à ingérer.</option></constraint>
+        </property>
+        <property name="label">
+            <constraint name="NotBlank">
+                <option name="normalizer">trim</option>
+                <option name="message">Donnez un libellé à cette version.</option>
+            </constraint>
+            <constraint name="Length"><option name="max">120</option></constraint>
+        </property>
+        <property name="publishedOn">
+            <constraint name="Date"><option name="message">Date de publication attendue au format AAAA-MM-JJ.</option></constraint>
+        </property>
+        <property name="effectiveFrom">
+            <constraint name="Date"><option name="message">Date d'effet attendue au format AAAA-MM-JJ.</option></constraint>
+        </property>
+        <property name="effectiveUntil">
+            <constraint name="Date"><option name="message">Date de fin d'effet attendue au format AAAA-MM-JJ.</option></constraint>
+        </property>
+        <property name="replacesUuid">
+            <constraint name="Uuid"><option name="message">Identifiant de la version remplacée invalide.</option></constraint>
+        </property>
+    </class>
+</constraint-mapping>

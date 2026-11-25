@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="App\Domain\Knowledge\IngestionRun" table="knowledge_ingestion_run">
+    <indexes>
+        <index columns="version_uuid,started_at" name="idx_knowledge_ingestion_run_version"/>
+    </indexes>
+    <id name="uuid" type="guid" column="uuid"/>
+    <field name="pipelineVersion" type="string" column="pipeline_version" length="32" nullable="false"/>
+    <field name="extractor" type="string" column="extractor" length="64" nullable="false"/>
+    <field name="chunker" type="string" column="chunker" length="64" nullable="false"/>
+    <field name="chunkerParameters" type="json" column="chunker_parameters" nullable="false"/>
+    <field name="embeddingModel" type="string" column="embedding_model" length="120" nullable="true"/>
+    <field name="passageCount" type="integer" column="passage_count" nullable="false"/>
+    <field name="startedAt" type="datetimetz_immutable" column="started_at" nullable="false"/>
+    <many-to-one field="version" target-entity="App\Domain\Knowledge\DocumentVersion">
+        <join-column name="version_uuid" referenced-column-name="uuid" nullable="false" on-delete="CASCADE"/>
+    </many-to-one>
+  </entity>
+</doctrine-mapping>

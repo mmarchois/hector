@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constraint-mapping xmlns="http://symfony.com/schema/dic/constraint-mapping"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd">
+    <class name="App\Application\Knowledge\Command\CreateSourceCommand">
+        <property name="corpus">
+            <constraint name="Choice">
+                <option name="choices"><value>regulatory</value><value>products</value></option>
+                <option name="message">Corpus inconnu : regulatory ou products.</option>
+            </constraint>
+        </property>
+        <property name="title">
+            <constraint name="NotBlank">
+                <option name="normalizer">trim</option>
+                <option name="message">Donnez un titre à la source.</option>
+            </constraint>
+            <constraint name="Length"><option name="max">255</option></constraint>
+        </property>
+        <property name="publisher">
+            <constraint name="NotBlank">
+                <option name="normalizer">trim</option>
+                <option name="message">Indiquez l'éditeur de la source.</option>
+            </constraint>
+            <constraint name="Length"><option name="max">255</option></constraint>
+        </property>
+        <property name="kind">
+            <constraint name="Choice">
+                <option name="choices"><value>standard</value><value>regulation</value><value>guide</value><value>manufacturer_manual</value><value>datasheet</value><value>hector_sheet</value></option>
+                <option name="message">Genre inconnu : standard, regulation, guide, manufacturer_manual, datasheet ou hector_sheet.</option>
+            </constraint>
+        </property>
+        <property name="licenseOrigin">
+            <constraint name="NotBlank">
+                <option name="normalizer">trim</option>
+                <option name="message">Indiquez d'où vient le droit d'utiliser cette source.</option>
+            </constraint>
+            <constraint name="Length"><option name="max">255</option></constraint>
+        </property>
+        <property name="excerptMaxCharacters">
+            <constraint name="Positive">
+                <option name="message">La longueur maximale d'un extrait est un nombre positif.</option>
+            </constraint>
+        </property>
+    </class>
+</constraint-mapping>
