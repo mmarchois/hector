@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Conversation\Command;
 
 use App\Application\Conversation\Service\FreeAllowancePolicy;
+use App\Application\Conversation\Service\GlobalTokenBudget;
 use App\Domain\Conversation\Block;
 use App\Domain\Conversation\Conversation;
 use App\Domain\Conversation\Exception\ConversationNotFoundException;
@@ -24,6 +25,7 @@ final readonly class SendMessageCommandHandler
         private MessageRepositoryInterface $messageRepository,
         private TurnRepositoryInterface $turnRepository,
         private FreeAllowancePolicy $freeAllowance,
+        private GlobalTokenBudget $globalTokenBudget,
         private IdFactoryInterface $idFactory,
         private DateUtilsInterface $dateUtils,
     ) {
@@ -39,6 +41,8 @@ final readonly class SendMessageCommandHandler
         $now = $this->dateUtils->getNow();
         // CV8 : refusé avant d'enregistrer quoi que ce soit, et donc avant tout appel au modèle
         $this->freeAllowance->assertAllowed($command->ownerUuid, $now);
+        // CV9 : coupe-circuit global, après l'allocation pour qu'un invité à court sache qu'il peut s'inscrire
+        $this->globalTokenBudget->assertAvailable($now);
 
         $text = trim($command->text);
         $message = $this->messageRepository->add(

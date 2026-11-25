@@ -14,4 +14,13 @@ interface TurnRepositoryInterface
 
     /** Nombre de tours ouverts par un utilisateur, depuis $since ou depuis toujours. */
     public function countByOwner(string $ownerUuid, ?\DateTimeImmutable $since = null): int;
+
+    /**
+     * Jetons consommés par les tours d'un utilisateur, depuis $since ou depuis toujours :
+     * entrée, sortie et cache (lu ou écrit), tels que relevés dans la trace.
+     */
+    public function sumTokensByOwner(string $ownerUuid, ?\DateTimeImmutable $since = null): int;
+
+    /** Jetons consommés par tous les tours depuis $since. */
+    public function sumTokens(\DateTimeImmutable $since): int;
 }

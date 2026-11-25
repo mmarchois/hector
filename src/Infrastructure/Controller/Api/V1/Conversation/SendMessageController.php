@@ -7,6 +7,7 @@ namespace App\Infrastructure\Controller\Api\V1\Conversation;
 use App\Application\Conversation\Service\TurnRunner;
 use App\Domain\Conversation\Exception\ConversationNotFoundException;
 use App\Domain\Conversation\Exception\FreeAllowanceExhaustedException;
+use App\Domain\Conversation\Exception\ServiceSaturatedException;
 use App\Infrastructure\Controller\Api\ReasonHttpException;
 use App\Infrastructure\Controller\Api\V1\Conversation\Dto\SendMessageRequest;
 use App\Infrastructure\Controller\Api\V1\Conversation\Dto\TurnResponse;
@@ -44,7 +45,8 @@ final readonly class SendMessageController
     #[OA\Response(response: 401, description: 'Non authentifié')]
     #[OA\Response(response: 404, description: 'Conversation inconnue ou d\'un autre utilisateur')]
     #[OA\Response(response: 422, description: 'Message vide ou trop long (violations par champ)')]
-    #[OA\Response(response: 429, description: 'Trop de messages à la suite, ou allocation gratuite épuisée (reason: signup_required pour un invité, free_allowance_exhausted sinon)')]
+    #[OA\Response(response: 429, description: 'Trop de messages à la suite, ou allocation gratuite épuisée, en messages ou en jetons (reason: signup_required pour un invité, free_allowance_exhausted sinon)')]
+    #[OA\Response(response: 503, description: 'Budget global de jetons des dernières 24 heures atteint (reason: service_saturated)')]
     public function __invoke(string $uuid, #[MapRequestPayload] SendMessageRequest $request): Response
     {
         $ownerUuid = $this->authenticatedUser->getUuid();
@@ -64,7 +66,9 @@ final readonly class SendMessageController
         } catch (FreeAllowanceExhaustedException $e) {
             throw $e->signupRequired
                 ? new ReasonHttpException(Response::HTTP_TOO_MANY_REQUESTS, ReasonHttpException::SIGNUP_REQUIRED, 'Vous avez atteint la limite de l\'essai sans compte. Créez un compte gratuit pour continuer.')
-                : new ReasonHttpException(Response::HTTP_TOO_MANY_REQUESTS, ReasonHttpException::FREE_ALLOWANCE_EXHAUSTED, 'Vous avez atteint la limite de messages des dernières 24 heures. Réessayez plus tard.');
+                : new ReasonHttpException(Response::HTTP_TOO_MANY_REQUESTS, ReasonHttpException::FREE_ALLOWANCE_EXHAUSTED, 'Vous avez atteint la limite d\'utilisation des dernières 24 heures. Réessayez plus tard.');
+        } catch (ServiceSaturatedException) {
+            throw new ReasonHttpException(Response::HTTP_SERVICE_UNAVAILABLE, ReasonHttpException::SERVICE_SATURATED, 'Hector est très sollicité en ce moment. Réessayez dans quelques heures. En cas de danger immédiat, appelez les secours (18 ou 112).');
         }
 
         return new JsonResponse(TurnResponse::fromTurn($turn), Response::HTTP_CREATED);

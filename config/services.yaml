@@ -7,6 +7,10 @@ parameters:
     # Allocation gratuite (question P10) : valeurs PROVISOIRES, à fixer sur le coût mesuré d'un tour
     app.free_allowance.guest_messages: 10
     app.free_allowance.account_messages_per_day: 30
+    # Même allocation, comptée en jetons (entrée, sortie et cache) : borne le coût d'un compte
+    # dont les échanges sont longs. PROVISOIRE, comme les nombres de messages
+    app.free_allowance.guest_tokens: 150000
+    app.free_allowance.account_tokens_per_day: 500000
 
 services:
     # default configuration for services in *this* file
@@ -47,6 +51,12 @@ services:
         arguments:
             $guestMessages: '%app.free_allowance.guest_messages%'
             $accountMessagesPerDay: '%app.free_allowance.account_messages_per_day%'
+            $guestTokens: '%app.free_allowance.guest_tokens%'
+            $accountTokensPerDay: '%app.free_allowance.account_tokens_per_day%'
+
+    App\Application\Conversation\Service\GlobalTokenBudget:
+        arguments:
+            $tokensPerDay: '%env(int:CHAT_DAILY_TOKEN_BUDGET)%'
 
     # -------------------
     # Command & Query bus
@@ -83,6 +93,8 @@ when@test:
     parameters:
         app.free_allowance.guest_messages: 3
         app.free_allowance.account_messages_per_day: 5
+        app.free_allowance.guest_tokens: 50000
+        app.free_allowance.account_tokens_per_day: 100000
 
     services:
         # Faux modèle de langage scriptable : make test n'appelle jamais le fournisseur

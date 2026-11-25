@@ -124,7 +124,8 @@ Règles :
 - **CV5.** Tout bloc porte un texte de repli lisible, pour les versions de l'application qui ne connaissent pas son type.
 - **CV6.** Tout message de l'assistant est relié à la trace de son tour.
 - **CV7.** Le socle ne connaît aucune notion électrique. L'activité en cours d'une conversation est un simple couple (capacité, identifiant).
-- **CV8.** Un tour n'est accepté que si l'allocation de son auteur le permet. Le refus a lieu avant tout appel au modèle de langage et dit ce qui débloque la suite (s'inscrire, plus tard s'abonner).
+- **CV8.** Un tour n'est accepté que si l'allocation de son auteur le permet. Le refus a lieu avant tout appel au modèle de langage et dit ce qui débloque la suite (s'inscrire, plus tard s'abonner). L'allocation se compte en messages et en jetons (entrée, sortie, cache) : la première limite atteinte s'applique.
+- **CV9.** Un budget global de jetons sur 24 heures glissantes, tous utilisateurs confondus, borne la dépense chez le fournisseur. Atteint, il fait refuser tout nouveau tour avant l'appel au modèle (503 `service_saturated`). L'historique transmis au modèle est borné en taille : les messages les plus anciens sont écartés d'abord.
 
 ### 4.2 Documentation
 

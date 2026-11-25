@@ -19,6 +19,8 @@ final class ReasonHttpException extends HttpException
     public const string SIGNUP_REQUIRED = 'signup_required';
     /** Allocation gratuite d'un compte épuisée : attendre (plus tard, s'abonner) */
     public const string FREE_ALLOWANCE_EXHAUSTED = 'free_allowance_exhausted';
+    /** Budget global de jetons atteint (règle CV9) : réessayer plus tard, rien à faire côté utilisateur */
+    public const string SERVICE_SATURATED = 'service_saturated';
 
     public function __construct(
         int $statusCode,
