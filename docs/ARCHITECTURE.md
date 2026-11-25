@@ -198,6 +198,7 @@ Trois magasins, trois cycles de vie :
 | Documentation, corpus réglementaire et technique | Textes, guides, fiches Hector, en versions datées | Lent : au rythme des éditions | Texte officiel ou relu, édition identifiée |
 | Documentation, corpus produits | Notices et fiches techniques de fabricants | Moyen : au rythme des gammes | Document du fabricant, daté |
 | Catalogue | Données structurées : références, caractéristiques, prix | Rapide pour les prix, moyen pour le reste | Source et date par valeur |
+| Retours du terrain (après le MVP) | Cas de dépannage relus et anonymisés | Continu : au rythme des relectures | Relecture humaine ; présenté comme hypothèse avec son nombre de cas (D18) |
 
 Le registre normatif (Réglementation) n'est pas un magasin de contenu : il dit quels textes et quelles éditions existent, et à quelles dates.
 
@@ -433,6 +434,24 @@ Demande du 16 novembre 2026 : utiliser l'application sans être connecté, comme
 - un message de sécurité n'est jamais bloqué par la limite : il est fixe et ne coûte aucun appel au modèle.
 
 Le paiement n'est pas conçu ici ; seul le contrat d'API lui réserve sa place.
+
+### D18 — Comment Hector apprend-il des dépannages réussis ?
+
+Demande du 25 novembre 2026 : qu'Hector apprenne de ce que les utilisateurs lui disent sur la façon dont ils ont réussi leur dépannage, si c'est juste, et que le modèle s'en trouve enrichi.
+
+| Option | Pour | Contre |
+|---|---|---|
+| A. Réentraîner ou affiner le modèle sur les conversations réussies | Le modèle « sait » sans qu'on lui fournisse rien | Le fournisseur ne propose pas l'affinage de ses modèles récents (à vérifier au moment de décider, l'offre évolue). Surtout : un retour faux ne peut plus être retiré, une réponse ne peut plus dire d'où elle vient, les données d'un utilisateur ne peuvent plus être effacées (RGPD), et chaque changement de modèle oblige à tout refaire. Un cas mal compris deviendrait une certitude du modèle |
+| B. Base de cas relus, recherchée à chaque tour et fournie au modèle comme contexte | Effet dès la publication d'un cas ; chaque usage est cité et tracé ; un cas se retire d'une commande ; indépendant du modèle choisi (D2) ; s'appuie sur la recherche des lots L10 et L12 | Une relecture humaine à tenir ; il faut un volume de cas pour que ça serve |
+| C. Ajouter les retours aux consignes du modèle | Aucun développement | Ne passe pas à l'échelle, coûte à chaque tour, aucune sélection selon la panne |
+
+**Recommandation : B**, contexte `Experience` (DOMAIN.md, § 4.10), en trois temps :
+
+1. **Recueil dès le MVP** (lot L18) : à la conclusion d'un diagnostic, Hector demande ce qui a résolu la panne et l'accord de partage. Le modèle propose une fiche structurée à partir du récit ; le domaine la contrôle (consignes interdites, registre normatif, unités). Rien n'est encore montré à d'autres utilisateurs. La bêta accumule ainsi des cas.
+2. **Relecture et publication** (lot L27) : file de relecture pour l'expert, anonymisation contrôlée, niveau de risque fixé par le relecteur, retrait par commande.
+3. **Usage en conversation** (lots L28, L29) : outil `rechercher_cas_terrain`, cité par identifiant et contrôlé par le serveur comme une citation de passage (D7), filtré par la politique de prévention selon la qualification du lecteur (EX7). Puis fréquences de causes confirmées pour ordonner les hypothèses, au-delà d'un nombre minimal de cas (EX10).
+
+Un cas du terrain reste une donnée, jamais une consigne : son texte passe par les mêmes parades que les documents contre les consignes cachées (SECURITY.md, § 7, risque T13).
 
 ## 14. Risques techniques
 

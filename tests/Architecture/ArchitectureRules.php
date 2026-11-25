@@ -34,6 +34,7 @@ final class ArchitectureRules
         'Safety' => ['User'],
         'Catalog' => ['Knowledge'],
         'ProductRecommendation' => ['Catalog', 'Calculation'],
+        'Experience' => ['Diagnosis', 'Safety', 'Regulation'],
     ];
 
     /** Socle : il n'utilise aucun contexte, et les contextes ne s'y branchent que par ses capacités. */

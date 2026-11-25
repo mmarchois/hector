@@ -110,7 +110,7 @@ Ces fonctions ne font pas partie du MVP, mais leurs règles orientent le modèle
 
 **Secrets et abus.** Clés d'API hors du dépôt. Quota par utilisateur et budget par tour, pour contenir les coûts et les abus. Journaux sans contenu de conversation en clair au-delà de ce qu'exige la trace.
 
-**Données personnelles.** Données traitées : compte, entreprise, conversations, descriptions d'installations chez des tiers, plus tard des images. Durée de conservation limitée et annoncée (P7). La suppression du compte efface conversations, sessions et traces nominatives. Réutilisation pour l'évaluation uniquement avec accord explicite.
+**Données personnelles.** Données traitées : compte, entreprise, conversations, descriptions d'installations chez des tiers, plus tard des images. Durée de conservation limitée et annoncée (P7). La suppression du compte efface conversations, sessions et traces nominatives. Réutilisation pour l'évaluation uniquement avec accord explicite. Un retour du terrain n'est partagé qu'avec l'accord de son auteur, donné pour ce retour ; seule sa fiche anonymisée et relue est publiée (DOMAIN.md, EX1 à EX3).
 
 ## 8. Cadre réglementaire
 
@@ -144,6 +144,7 @@ Gravité et probabilité sont des estimations de départ, à réviser à chaque 
 | T10 | Les colonnes hors ORM font échouer le contrôle du schéma | Faible | Forte | Type personnalisé ou exclusion déclarée | L10, L12 |
 | T11 | L'outillage IA de l'écosystème PHP manque de maturité | Moyenne | Moyenne | Port à nous, adaptateurs minces, repli hors ligne pour l'ingestion | L5, L9 |
 | T12 | Des comptes invités ouverts en masse contournent la limite gratuite et font monter les coûts | Moyenne | Forte dès l'ouverture | Limite de création par IP, budget global des invités, attestation d'appareil à étudier | L3, L19 |
+| T13 | Un retour du terrain faux, dangereux ou piégé est présenté à d'autres utilisateurs (erreur de bonne foi, malveillance, consignes cachées) | Très forte | Moyenne | Comptes complets seulement, contrôles automatiques puis relecture humaine obligatoire, gestes filtrés par la politique de prévention, présenté comme hypothèse, retrait immédiat, remise en relecture des cas infirmés | L18, L27, L28 |
 
 ### Réglementaires
 
@@ -157,6 +158,7 @@ Gravité et probabilité sont des estimations de départ, à réviser à chaque 
 | R6 | Une réponse s'appuie sur une édition qui ne s'applique pas au projet | Forte | Forte | Registre daté, question sur la date de référence, signalement des éditions remplacées | L11 |
 | R7 | Des données produits sont utilisées sans droit | Moyenne | Moyenne | Droits renseignés par source, pas de collecte automatique sans accord | L21 |
 | R8 | Le conseil en produits manque de transparence ou de neutralité | Moyenne | Moyenne | Classement reproductible, étendue et liens commerciaux affichés, test d'échange des marques | L25 |
+| R9 | Un retour du terrain publié permet d'identifier son auteur ou un tiers, ou est réutilisé sans base légale | Moyenne | Moyenne | Accord explicite par retour, texte d'origine jamais publié, anonymisation relue, aucun lien entre cas publié et auteur, seuil minimal avant toute fréquence, avis d'un juriste (P12) | L18, L27 |
 
 ### Fonctionnels
 
