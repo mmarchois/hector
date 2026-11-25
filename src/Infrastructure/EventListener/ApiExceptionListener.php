@@ -16,16 +16,20 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Messenger\Exception\ValidationFailedException as BusValidationFailedException;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Exception\ValidationFailedException as PayloadValidationFailedException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Toutes les erreurs de l'API sortent en JSON : {code, message} et, pour une
  * erreur de saisie (422), violations: [{property, message}].
  * Les 401 d'authentification sont déjà rendus en JSON par lexik.
+ * Les messages sont rendus dans la langue de la requête (décision D19) : le texte français
+ * écrit dans le code sert de clé de traduction.
  */
 #[AsEventListener(event: KernelEvents::EXCEPTION)]
 final readonly class ApiExceptionListener
 {
     public function __construct(
+        private TranslatorInterface $translator,
         #[Autowire('%kernel.debug%')]
         private bool $debug = false,
     ) {
@@ -52,7 +56,7 @@ final readonly class ApiExceptionListener
 
         // Ne jamais exposer le message des erreurs internes
         $message = $throwable instanceof HttpExceptionInterface && $throwable->getMessage() !== ''
-            ? $throwable->getMessage()
+            ? $this->translator->trans($throwable->getMessage())
             : (Response::$statusTexts[$statusCode] ?? 'Error');
 
         $payload = [
@@ -88,7 +92,7 @@ final readonly class ApiExceptionListener
         if ($throwable instanceof ViolationHttpException) {
             $violations = [];
             foreach ($throwable->violations as $property => $message) {
-                $violations[] = ['property' => $property, 'message' => $message];
+                $violations[] = ['property' => $property, 'message' => $this->translator->trans($message)];
             }
 
             return $violations;

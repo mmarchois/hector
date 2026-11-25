@@ -1,0 +1,38 @@
+# Traductions anglaises des messages destinés à l'utilisateur. La clé est le texte français,
+# tel qu'il est écrit dans le code : pas de fichier français à tenir, et un message non
+# traduit s'affiche en français plutôt que sous forme de clé.
+
+# Erreurs de l'API
+"Acceptez les conditions d'utilisation pour continuer.": "Accept the terms of use to continue."
+"Conversation introuvable.": "Conversation not found."
+"Créez un compte pour enregistrer un profil.": "Create an account to save a profile."
+"Hector est très sollicité en ce moment. Réessayez dans quelques heures. En cas de danger immédiat, appelez les secours (18 ou 112).": "Hector is in very high demand right now. Try again in a few hours. In case of immediate danger, call the emergency services (18 or 112)."
+"Les conditions d'utilisation ont changé : relisez-les et acceptez la nouvelle version.": "The terms of use have changed: read them again and accept the new version."
+"Mot de passe actuel incorrect.": "Current password is incorrect."
+"Session d'invité introuvable ou expirée.": "Guest session not found or expired."
+"Tour introuvable.": "Turn not found."
+"Trop de comptes ouverts depuis cette connexion. Réessayez plus tard ou connectez-vous.": "Too many accounts opened from this connection. Try again later or log in."
+"Un compte existe déjà avec cet email.": "An account already exists with this email."
+"Vous avez atteint la limite d'utilisation des dernières 24 heures. Réessayez plus tard.": "You have reached the usage limit for the last 24 hours. Try again later."
+"Vous avez atteint la limite de l'essai sans compte. Créez un compte gratuit pour continuer.": "You have reached the limit of the trial without an account. Create a free account to continue."
+"Vous envoyez trop de messages à la suite. Patientez un instant.": "You are sending too many messages in a row. Wait a moment."
+
+# Tour sans réponse
+"Hector n'a pas pu répondre : le service est momentanément indisponible. Réessayez dans un instant.": "Hector could not answer: the service is temporarily unavailable. Try again in a moment."
+"Hector n'a pas pu répondre à ce message à cause d'une erreur. Si elle se répète, signalez-la.": "Hector could not answer this message because of an error. If it happens again, report it."
+
+# Réponses fixes d'Hector
+"Je ne peux pas répondre à cette demande. Pour toute intervention sur une installation électrique, faites appel à un électricien qualifié.": "I can't answer this request. For any work on an electrical installation, call a qualified electrician."
+"Je n'ai pas pu formuler de réponse. Pouvez-vous reformuler votre question ?": "I couldn't put an answer together. Could you rephrase your question?"
+"Je n'ai pas pu formuler une réponse assez fiable à cette question. Pouvez-vous la préciser ou la reformuler ? Pour une intervention sur une installation, faites appel à un électricien qualifié.": "I couldn't put together a reliable enough answer to this question. Could you make it more specific or rephrase it? For any work on an installation, call a qualified electrician."
+
+# Natures d'énoncés (texte de repli des blocs)
+"Fait sourcé": "Sourced fact"
+"Ce que vous avez indiqué": "What you told me"
+"Résultat de calcul": "Calculation result"
+"Explication générale, non sourcée": "General explanation, unsourced"
+"Hypothèse": "Hypothesis"
+"Recommandation": "Recommendation"
+"Information manquante": "Missing information"
+"Avis rapporté": "Reported opinion"
+"Attention": "Warning"

@@ -7,6 +7,7 @@ namespace App\Infrastructure\Controller\Api\V1\Conversation\Dto;
 use App\Domain\Conversation\Turn;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Tour : le message envoyé et, une fois le tour terminé, la réponse. Le client suit un tour
@@ -43,13 +44,13 @@ final readonly class TurnResponse implements \JsonSerializable
     ) {
     }
 
-    /** Message affiché à l'utilisateur quand le tour a échoué. */
+    /** Message affiché à l'utilisateur quand le tour a échoué (texte français, clé de traduction). */
     private const array FAILURE_MESSAGES = [
         'unavailable' => 'Hector n\'a pas pu répondre : le service est momentanément indisponible. Réessayez dans un instant.',
         'error' => 'Hector n\'a pas pu répondre à ce message à cause d\'une erreur. Si elle se répète, signalez-la.',
     ];
 
-    public static function fromTurn(Turn $turn): self
+    public static function fromTurn(Turn $turn, TranslatorInterface $translator): self
     {
         $answer = $turn->getAssistantMessage();
 
@@ -62,7 +63,7 @@ final readonly class TurnResponse implements \JsonSerializable
             createdAt: $turn->getCreatedAt()->format(\DATE_ATOM),
             finishedAt: $turn->getFinishedAt()?->format(\DATE_ATOM),
             failure: ($failure = $turn->getFailure()) !== null
-                ? ['reason' => $failure->value, 'message' => self::FAILURE_MESSAGES[$failure->value]]
+                ? ['reason' => $failure->value, 'message' => $translator->trans(self::FAILURE_MESSAGES[$failure->value])]
                 : null,
         );
     }

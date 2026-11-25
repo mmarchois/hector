@@ -12,6 +12,8 @@ final readonly class PreparedTurn
         public ChatRequest $request,
         /** Empreinte des consignes envoyées, pour la trace du tour */
         public string $promptVersion,
+        /** Langue de la réponse : celle de l'application de l'utilisateur (décision D19) */
+        public string $locale = 'fr',
     ) {
     }
 }

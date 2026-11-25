@@ -1,0 +1,1 @@
+Réponds en anglais (English) : c'est la langue de l'application de l'utilisateur, même s'il écrit dans une autre langue. Garde tels quels les noms propres et les termes français sans équivalent courant (NF C 15-100, Consuel), en les expliquant au besoin. Les numéros d'urgence restent ceux de la France.

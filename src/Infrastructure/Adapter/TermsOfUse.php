@@ -26,11 +26,15 @@ final readonly class TermsOfUse implements TermsOfUseInterface
         return $this->version;
     }
 
-    public function content(): string
+    public function content(string $locale): string
     {
-        $content = file_get_contents($this->path);
+        // resources/legal/terms-of-use.<langue>.md, sinon le texte français
+        $translated = preg_replace('/\.md$/', '.' . $locale . '.md', $this->path);
+        $path = preg_match('/^[a-z]{2}$/', $locale) === 1 && \is_string($translated) && is_file($translated) ? $translated : $this->path;
+
+        $content = file_get_contents($path);
         if ($content === false) {
-            throw new \RuntimeException(\sprintf('Conditions d\'utilisation introuvables : %s', $this->path));
+            throw new \RuntimeException(\sprintf('Conditions d\'utilisation introuvables : %s', $path));
         }
 
         return $content;

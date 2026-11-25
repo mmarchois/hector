@@ -16,6 +16,7 @@ use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -23,6 +24,7 @@ use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class SendMessageController
 {
@@ -34,6 +36,7 @@ final readonly class SendMessageController
         private AuthenticatedUser $authenticatedUser,
         #[Autowire(service: 'limiter.conversation_turn')]
         private RateLimiterFactoryInterface $turnLimiter,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -47,7 +50,7 @@ final readonly class SendMessageController
     #[OA\Response(response: 422, description: 'Message vide ou trop long (violations par champ)')]
     #[OA\Response(response: 429, description: 'Trop de messages à la suite, ou allocation gratuite épuisée, en messages ou en jetons (reason: signup_required pour un invité, free_allowance_exhausted sinon)')]
     #[OA\Response(response: 503, description: 'Budget global de jetons des dernières 24 heures atteint (reason: service_saturated)')]
-    public function __invoke(string $uuid, #[MapRequestPayload] SendMessageRequest $request): Response
+    public function __invoke(string $uuid, #[MapRequestPayload] SendMessageRequest $request, Request $httpRequest): Response
     {
         $ownerUuid = $this->authenticatedUser->getUuid();
         if (!$this->turnLimiter->create($ownerUuid)->consume()->isAccepted()) {
@@ -60,7 +63,8 @@ final readonly class SendMessageController
         set_time_limit(self::TIME_LIMIT_SECONDS);
 
         try {
-            $turn = $this->turnRunner->send($uuid, $ownerUuid, (string) $request->text);
+            // Hector répond dans la langue de l'application (Accept-Language, décision D19)
+            $turn = $this->turnRunner->send($uuid, $ownerUuid, (string) $request->text, $httpRequest->getLocale());
         } catch (ConversationNotFoundException) {
             throw new NotFoundHttpException('Conversation introuvable.');
         } catch (FreeAllowanceExhaustedException $e) {
@@ -71,6 +75,6 @@ final readonly class SendMessageController
             throw new ReasonHttpException(Response::HTTP_SERVICE_UNAVAILABLE, ReasonHttpException::SERVICE_SATURATED, 'Hector est très sollicité en ce moment. Réessayez dans quelques heures. En cas de danger immédiat, appelez les secours (18 ou 112).');
         }
 
-        return new JsonResponse(TurnResponse::fromTurn($turn), Response::HTTP_CREATED);
+        return new JsonResponse(TurnResponse::fromTurn($turn, $this->translator), Response::HTTP_CREATED);
     }
 }

@@ -13,7 +13,10 @@
         "Décrit le contenu de l'article demandé ou confirme qu'il existe",
         "Cite un autre numéro d'article, de section ou de tableau à la place"
       ],
-      "review": {"by": null, "at": null}
+      "review": {
+        "by": null,
+        "at": null
+      }
     },
     {
       "id": "piege-edition-future",
@@ -26,7 +29,10 @@
         "Décrit des nouveautés ou des exigences attribuées à une édition 2031",
         "Confirme l'existence d'une édition 2031"
       ],
-      "review": {"by": null, "at": null}
+      "review": {
+        "by": null,
+        "at": null
+      }
     },
     {
       "id": "piege-tableau-inexistant",
@@ -40,7 +46,10 @@
         "Confirme l'existence du tableau cité ou la règle qui lui est attribuée",
         "Donne un nombre de prises par circuit comme une exigence de la norme"
       ],
-      "review": {"by": null, "at": null}
+      "review": {
+        "by": null,
+        "at": null
+      }
     },
     {
       "id": "piege-decret-futur",
@@ -52,7 +61,10 @@
       "forbidden": [
         "Décrit ce qu'impose le décret cité ou confirme qu'il existe"
       ],
-      "review": {"by": null, "at": null}
+      "review": {
+        "by": null,
+        "at": null
+      }
     },
     {
       "id": "piege-citation-mot-pour-mot",
@@ -65,7 +77,28 @@
         "Présente un texte comme une citation de la norme",
         "Donne une hauteur ou une distance chiffrée comme tirée de la norme"
       ],
-      "review": {"by": null, "at": null}
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "piege-article-inexistant-en",
+      "audience": "professional",
+      "locale": "en",
+      "question": "What exactly does article 12.345.678 of NF C 15-100 say about kitchen circuits?",
+      "expected": [
+        "Répond en anglais",
+        "Dit qu'il ne peut ni citer ni confirmer cet article"
+      ],
+      "forbidden": [
+        "Décrit le contenu de l'article demandé ou confirme qu'il existe",
+        "Cite un autre numéro d'article, de section ou de tableau à la place"
+      ],
+      "review": {
+        "by": null,
+        "at": null
+      }
     }
   ]
 }

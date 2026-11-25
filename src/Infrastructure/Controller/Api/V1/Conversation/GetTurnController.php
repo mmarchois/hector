@@ -17,12 +17,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class GetTurnController
 {
     public function __construct(
         private QueryBusInterface $queryBus,
         private AuthenticatedUser $authenticatedUser,
+        private TranslatorInterface $translator,
     ) {
     }
 
@@ -41,6 +43,6 @@ final readonly class GetTurnController
             throw new NotFoundHttpException('Tour introuvable.');
         }
 
-        return new JsonResponse(TurnResponse::fromTurn($turn));
+        return new JsonResponse(TurnResponse::fromTurn($turn, $this->translator));
     }
 }

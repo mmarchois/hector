@@ -58,17 +58,30 @@ abstract class AbstractApiTestCase extends WebTestCase
     }
 
     /**
+     * Le client de test de Symfony annonce l'anglais par défaut : ici, une requête est en
+     * français sauf si le test demande une autre langue (décision D19).
+     *
+     * @param array<string, mixed> $options
+     * @param array<string, mixed> $server
+     */
+    protected static function createClient(array $options = [], array $server = []): KernelBrowser
+    {
+        return parent::createClient($options, ['HTTP_ACCEPT_LANGUAGE' => 'fr', ...$server]);
+    }
+
+    /**
      * Requête authentifiée par Bearer token, corps JSON optionnel.
      *
      * @param array<string, mixed>|null $payload
      *
      * @return array<string, mixed> corps JSON décodé (vide si la réponse n'a pas de corps)
      */
-    protected function apiRequest(KernelBrowser $client, string $method, string $uri, string $token, ?array $payload = null): array
+    protected function apiRequest(KernelBrowser $client, string $method, string $uri, string $token, ?array $payload = null, ?string $language = null): array
     {
         $client->request($method, $uri, [], [], [
             'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
             'CONTENT_TYPE' => 'application/json',
+            ...($language !== null ? ['HTTP_ACCEPT_LANGUAGE' => $language] : []),
         ], $payload !== null ? json_encode($payload, \JSON_THROW_ON_ERROR) : null);
 
         return $this->json($client);

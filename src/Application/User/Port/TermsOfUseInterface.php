@@ -9,6 +9,9 @@ interface TermsOfUseInterface
 {
     public function currentVersion(): string;
 
-    /** Texte en Markdown, affiché tel quel par l'application mobile. */
-    public function content(): string;
+    /**
+     * Texte en Markdown, affiché tel quel par l'application mobile, dans la langue demandée
+     * ou, à défaut de traduction, en français. La version est la même dans toutes les langues.
+     */
+    public function content(string $locale): string;
 }

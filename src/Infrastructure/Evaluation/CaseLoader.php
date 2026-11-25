@@ -76,6 +76,11 @@ final class CaseLoader
             throw $fail('« audience » vaut guest, individual ou professional.');
         }
 
+        $locale = \is_string($item['locale'] ?? null) ? $item['locale'] : 'fr';
+        if (preg_match('/^[a-z]{2}$/', $locale) !== 1) {
+            throw $fail('« locale » est un code de langue à deux lettres (fr par défaut).');
+        }
+
         $question = \is_string($item['question'] ?? null) ? trim($item['question']) : '';
         if ($question === '') {
             throw $fail('« question » est requise.');
@@ -120,6 +125,7 @@ final class CaseLoader
             id: $id,
             family: $family,
             audience: $audience,
+            locale: $locale,
             participant: new Participant($guest, $professional),
             messages: $messages,
             expected: $expected,

@@ -29,6 +29,7 @@ use App\Domain\Conversation\Turn;
 use App\Domain\Conversation\TurnFailure;
 use App\Domain\Conversation\TurnStatus;
 use App\Tests\Support\FakeChatModel;
+use App\Tests\Support\FrenchAnswerTexts;
 use PHPUnit\Framework\TestCase;
 
 /** Lots L5 et L7 : un tour réel, son contrôle et sa reprise, avec le faux modèle. */
@@ -196,6 +197,6 @@ final class TurnRunnerTest extends TestCase
         $messages = $this->createStub(MessageRepositoryInterface::class);
         $messages->method('findPage')->willReturn([]);
 
-        return new TurnRunner($bus, new TurnContextBuilder($prompts, $participants, $messages), new AnswerEngine($this->model));
+        return new TurnRunner($bus, new TurnContextBuilder($prompts, $participants, $messages), new AnswerEngine($this->model, new FrenchAnswerTexts()));
     }
 }

@@ -25,6 +25,8 @@ final readonly class EvaluationCase
         public string $id,
         public EvaluationFamily $family,
         public string $audience,
+        /** Langue de l'application de l'utilisateur : celle dans laquelle Hector doit répondre */
+        public string $locale,
         public Participant $participant,
         public array $messages,
         public array $expected,

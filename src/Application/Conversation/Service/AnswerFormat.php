@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Conversation\Service;
 
+use App\Application\Conversation\Port\AnswerTexts;
 use App\Domain\Conversation\Block;
 use App\Domain\Conversation\StatementKind;
 
@@ -45,14 +46,14 @@ final class AnswerFormat
     }
 
     /**
-     * Blocs du brouillon. Un champ manquant ou inattendu donne un bloc que le contrôle rejette
+     * Blocs du brouillon, leurs intitulés de repli dans la langue de $texts. Un champ manquant ou inattendu donne un bloc que le contrôle rejette
      * (type inconnu, nature absente, texte vide), plutôt qu'une exception.
      *
      * @throws \JsonException brouillon qui n'est pas du JSON (réponse tronquée notamment)
      *
      * @return list<Block>
      */
-    public static function parse(string $json): array
+    public static function parse(string $json, ?AnswerTexts $texts = null): array
     {
         $data = json_decode($json, true, flags: \JSON_THROW_ON_ERROR);
         $items = \is_array($data) && \is_array($data['blocks'] ?? null) ? $data['blocks'] : [];
@@ -65,8 +66,8 @@ final class AnswerFormat
 
             $blocks[] = match ($type) {
                 Block::QUESTION => Block::question($text),
-                Block::WARNING => Block::warning($text),
-                Block::STATEMENT => self::statement($item, $text),
+                Block::WARNING => Block::warning($text, $texts?->warningLabel),
+                Block::STATEMENT => self::statement($item, $text, $texts),
                 default => Block::fromArray(['type' => $type, 'version' => 1, 'text' => $text, 'fallbackText' => $text]),
             };
         }
@@ -75,7 +76,7 @@ final class AnswerFormat
     }
 
     /** @param array<mixed> $item */
-    private static function statement(array $item, string $text): Block
+    private static function statement(array $item, string $text, ?AnswerTexts $texts): Block
     {
         $kind = StatementKind::tryFrom(\is_string($item['kind'] ?? null) ? $item['kind'] : '');
         if ($kind === null) {
@@ -86,6 +87,6 @@ final class AnswerFormat
         $citations = \is_array($item['citations'] ?? null) ? array_values(array_filter($item['citations'], \is_string(...))) : [];
         $source = \is_string($item['source'] ?? null) ? trim($item['source']) : null;
 
-        return Block::statement($kind, $text, $citations, $source);
+        return Block::statement($kind, $text, $citations, $source, $texts?->label($kind));
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\Conversation\Service;
 
+use App\Application\Conversation\Port\AnswerTexts;
+use App\Application\Conversation\Port\AnswerTextsInterface;
 use App\Application\Conversation\Port\ChatMessage;
 use App\Application\Conversation\Port\ChatModelException;
 use App\Application\Conversation\Port\ChatModelInterface;
@@ -25,7 +27,7 @@ use App\Domain\Conversation\TurnFailure;
  */
 final readonly class AnswerEngine
 {
-    /** Réponse fixe quand le fournisseur refuse de répondre. */
+    /** Réponse fixe quand le fournisseur refuse de répondre (texte français, traduit par AnswerTextsInterface). */
     public const string REFUSAL_REPLY = 'Je ne peux pas répondre à cette demande. Pour toute intervention sur une installation électrique, faites appel à un électricien qualifié.';
 
     /** Réponse fixe quand le modèle ne renvoie aucun texte. */
@@ -39,6 +41,7 @@ final readonly class AnswerEngine
 
     public function __construct(
         private ChatModelInterface $chatModel,
+        private AnswerTextsInterface $answerTexts,
     ) {
     }
 
@@ -46,6 +49,7 @@ final readonly class AnswerEngine
     {
         $request = new ChatRequest($prepared->request->system, $prepared->request->messages, AnswerFormat::schema());
         $trace = new TraceRecorder($prepared->promptVersion);
+        $texts = $this->answerTexts->for($prepared->locale);
 
         for ($attempt = 1; $attempt <= self::MAX_ATTEMPTS; ++$attempt) {
             try {
@@ -61,13 +65,13 @@ final readonly class AnswerEngine
             $trace->record($response);
 
             if ($response->stopReason === ChatStopReason::Refusal) {
-                return $this->fixed(self::REFUSAL_REPLY, $trace);
+                return $this->fixed($texts->refusalReply, $trace);
             }
             if (trim($response->text) === '') {
-                return $this->fixed(self::EMPTY_REPLY, $trace);
+                return $this->fixed($texts->emptyReply, $trace);
             }
 
-            [$blocks, $reasons] = $this->check($response);
+            [$blocks, $reasons] = $this->check($response, $texts);
             if ($reasons === []) {
                 return new TurnOutcome($blocks, degraded: false, failure: null, trace: $trace->trace());
             }
@@ -81,7 +85,7 @@ final readonly class AnswerEngine
             ], $request->outputSchema);
         }
 
-        return $this->fixed(self::DEGRADED_REPLY, $trace);
+        return $this->fixed($texts->degradedReply, $trace);
     }
 
     private function fixed(string $reply, TraceRecorder $trace): TurnOutcome
@@ -92,10 +96,10 @@ final readonly class AnswerEngine
     /**
      * @return array{list<Block>, list<string>} blocs du brouillon et motifs de rejet
      */
-    private function check(ChatResponse $response): array
+    private function check(ChatResponse $response, AnswerTexts $texts): array
     {
         try {
-            $blocks = AnswerFormat::parse($response->text);
+            $blocks = AnswerFormat::parse($response->text, $texts);
         } catch (\JsonException) {
             return [[], [$response->stopReason === ChatStopReason::MaxTokens
                 ? 'La réponse a été coupée avant la fin : fais plus court.'

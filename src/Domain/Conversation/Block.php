@@ -15,6 +15,9 @@ final readonly class Block
     public const string QUESTION = 'question';
     public const string WARNING = 'warning';
 
+    /** Intitulé par défaut d'une mise en garde dans son texte de repli. */
+    public const string WARNING_LABEL = 'Attention';
+
     /**
      * @param array<string, mixed> $content champs propres au type
      */
@@ -37,15 +40,17 @@ final readonly class Block
      *
      * @param list<string> $citations identifiants des passages ou exécutions de calcul cités
      * @param string|null  $source    source nommée d'un avis rapporté
+     * @param string|null  $label     intitulé de la nature dans la langue de l'utilisateur ;
+     *                                par défaut, l'intitulé français
      */
-    public static function statement(StatementKind $kind, string $text, array $citations = [], ?string $source = null): self
+    public static function statement(StatementKind $kind, string $text, array $citations = [], ?string $source = null, ?string $label = null): self
     {
         $content = ['kind' => $kind->value, 'text' => $text, 'citations' => $citations];
         if ($source !== null && $source !== '') {
             $content['source'] = $source;
         }
 
-        return new self(self::STATEMENT, 1, $content, \sprintf('%s : %s', $kind->label(), $text));
+        return new self(self::STATEMENT, 1, $content, \sprintf('%s : %s', $label ?? $kind->label(), $text));
     }
 
     /** Question posée à l'utilisateur. */
@@ -55,9 +60,9 @@ final readonly class Block
     }
 
     /** Mise en garde, affichée en évidence. */
-    public static function warning(string $text): self
+    public static function warning(string $text, ?string $label = null): self
     {
-        return new self(self::WARNING, 1, ['text' => $text], \sprintf('Attention : %s', $text));
+        return new self(self::WARNING, 1, ['text' => $text], \sprintf('%s : %s', $label ?? self::WARNING_LABEL, $text));
     }
 
     /**

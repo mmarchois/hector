@@ -41,7 +41,7 @@ final readonly class TurnContextBuilder
     ) {
     }
 
-    public function build(Turn $turn): PreparedTurn
+    public function build(Turn $turn, string $locale = 'fr'): PreparedTurn
     {
         $conversation = $turn->getConversation();
         $history = $this->messageRepository->findPage($conversation, $turn->getUserMessage()->getUuid(), self::HISTORY_LENGTH);
@@ -49,6 +49,7 @@ final readonly class TurnContextBuilder
         return $this->compose(
             $this->participants->profileOf($conversation->getOwnerUuid()),
             $this->normalize([...$history, $turn->getUserMessage()]),
+            $locale,
         );
     }
 
@@ -58,13 +59,18 @@ final readonly class TurnContextBuilder
      *
      * @param list<ChatMessage> $messages alternés, le premier et le dernier de l'utilisateur
      */
-    public function compose(Participant $participant, array $messages): PreparedTurn
+    public function compose(Participant $participant, array $messages, string $locale = 'fr'): PreparedTurn
     {
         // ID3 : un invité a la qualification la plus restrictive, celle d'un particulier
         $audience = $this->prompts->get(!$participant->guest && $participant->professional ? 'audience-professional' : 'audience-individual');
         $system = str_replace('{{audience}}', $audience->text, $this->prompts->get('conversation-system')->text);
+        // Hector répond dans la langue de l'application, pas dans celle du message : le contrôle
+        // des réponses ne couvre que les langues ouvertes (resources/prompts/language-<langue>.md)
+        if (str_contains($system, '{{language}}')) {
+            $system = str_replace('{{language}}', trim($this->prompts->get('language-' . $locale)->text), $system);
+        }
 
-        return new PreparedTurn(new ChatRequest($system, $this->trim($messages)), substr(hash('sha256', $system), 0, 12));
+        return new PreparedTurn(new ChatRequest($system, $this->trim($messages)), substr(hash('sha256', $system), 0, 12), $locale);
     }
 
     /**

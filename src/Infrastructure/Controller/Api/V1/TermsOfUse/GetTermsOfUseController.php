@@ -8,6 +8,7 @@ use App\Application\User\Port\TermsOfUseInterface;
 use Nelmio\ApiDocBundle\Attribute\Security;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -30,11 +31,11 @@ final readonly class GetTermsOfUseController
             new OA\Property(property: 'content', type: 'string', description: 'Markdown'),
         ]),
     )]
-    public function __invoke(): Response
+    public function __invoke(Request $request): Response
     {
         return new JsonResponse([
             'version' => $this->termsOfUse->currentVersion(),
-            'content' => $this->termsOfUse->content(),
+            'content' => $this->termsOfUse->content($request->getLocale()),
         ]);
     }
 }

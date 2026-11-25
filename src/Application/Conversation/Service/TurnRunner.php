@@ -24,14 +24,14 @@ final readonly class TurnRunner
     ) {
     }
 
-    public function send(string $conversationUuid, string $ownerUuid, string $text): Turn
+    public function send(string $conversationUuid, string $ownerUuid, string $text, string $locale = 'fr'): Turn
     {
         // 1. Message de l'utilisateur et tour « en cours » (transaction courte)
         /** @var Turn $turn */
         $turn = $this->commandBus->handle(new SendMessageCommand($conversationUuid, $ownerUuid, $text));
 
         // 2. Contexte, appels au modèle et contrôle, hors transaction
-        $outcome = $this->engine->run($this->contextBuilder->build($turn));
+        $outcome = $this->engine->run($this->contextBuilder->build($turn, $locale));
 
         // 3. Réponse ou échec, et trace (transaction courte)
         /** @var Turn $finished */

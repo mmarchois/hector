@@ -27,7 +27,7 @@ final readonly class Evaluator
 
     public function evaluate(EvaluationCase $case, bool $withJudge = true): CaseResult
     {
-        $prepared = $this->contextBuilder->compose($case->participant, $case->messages);
+        $prepared = $this->contextBuilder->compose($case->participant, $case->messages, $case->locale);
         $outcome = $this->engine->run($prepared);
         $trace = $outcome->trace;
         $answer = implode("\n", array_map(static fn (Block $block): string => $block->fallbackText, $outcome->blocks));
