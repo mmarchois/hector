@@ -9,25 +9,31 @@ PHP et Composer ne sont pas installés sur la machine : tout passe par Docker (`
 | Besoin | Commande |
 |--------|----------|
 | Démarrer | `make start` |
-| Tests API | `make test`, `make test_unit`, `make test_integration` (`ARGS="--filter Nom"`) |
-| Qualité API | `make check` (CS Fixer, PSR-4, PHPStan niveau 6, conteneur, schéma) ; `make format` corrige le style |
+| Tests API | `make test`, `make test_unit`, `make test_integration`, `make test_critical` (`ARGS="--filter Nom"`) |
+| Qualité API | `make check` (CS Fixer, PSR-4, PHPStan niveau 6 avec les règles d'architecture, conteneur, schéma) ; `make format` corrige le style |
 | Console / Composer | `make console CMD="debug:router"`, `make composer CMD="require x/y"` |
 | Migration | `make dbmigration` puis `make dbmigrate` (et `make dbmigrate ARGS="--env=test"`) |
 | Fixtures de test | `make dbfixtures` (vide la base visée) |
 | Mobile | `make mobile_test` ; `make mobile_e2e` (simulateur lancé + API locale) |
 
-Sans TTY (agent), remplacer `docker compose exec php` par `docker compose exec -T php`.
+Sans TTY (agent, intégration continue), passer `BIN_SHELL="docker compose exec -T php"` aux cibles `make`.
 
-Ports locaux : 8000 (API) et 5432 (base) par défaut ; un `docker-compose.override.yml` ignoré par git peut les déplacer : `docker compose ps` donne les ports réels du poste.
+Ports locaux : 8000 (API) et 5432 (base) par défaut ; un `docker-compose.override.yml` ignoré par git peut les déplacer : `docker compose ps` donne les ports réels du poste. `make mobile_e2e` vise `API_URL=http://localhost:8000` par défaut : le passer explicitement si le port diffère.
+
+Symfony 8.1 : version sans support long, maintenue jusqu'en janvier 2027. Passer en 8.2 dès sa sortie stable, puis suivre chaque version mineure jusqu'à la 8.4 (support long).
 
 ## Architecture de l'API (hexagonale, DDD, CQRS)
 
 - `src/Domain` : entités (setters fluides, constructeur `uuid`), exceptions, spécifications, interfaces de repository, ports (`Domain/Port`). Aucune dépendance au framework.
 - `src/Application` : une `XxxCommand` / `XxxQuery` (`final readonly`, implémente `CommandInterface` / `QueryInterface`) et son `XxxHandler` (`__invoke`). Les handlers sont enregistrés par convention de nom et de dossier (`config/services.yaml`), sans attribut.
 - `src/Infrastructure` : adaptateurs, contrôleurs (`Controller/Api/V1/<Contexte>/`, un contrôleur invocable par route), DTO (`Dto/`), Doctrine (mapping XML dans `Persistence/Doctrine/Mapping`, fichier `<Contexte>.<Entité>.orm.xml`), sécurité.
+- Dépendances vérifiées par PHPStan (phpat, `tests/Architecture/ArchitectureRules.php`) : `Domain` ne dépend que de `Domain` (aucun framework, aucune bibliothèque), `Application` que d'`Application` et de `Domain`. Un contexte (dossier de `src/Domain` ou `src/Application`) est isolé par défaut : un lien vers un autre se déclare dans `ALLOWED_LINKS`, d'après `docs/DOMAIN.md`, § 2. Les contextes ne se branchent sur `Conversation` que depuis leur dossier `Application/<Contexte>/Capability`. `Domain/Port` est commun à tous.
+- Une entité purement technique (ex. `Infrastructure/Security/RefreshToken`) vit dans `Infrastructure`, son mapping dans `Persistence/Doctrine/InfrastructureMapping`.
 - Validation : jamais dans les DTO ni les entités, toujours en XML sur la Command (`config/validator/Application/<Contexte>/Command/`). Le middleware `validation` du bus la déclenche ; `ApiExceptionListener` la rend en 422 `{code, message, violations: [{property, message}]}`. Les propriétés d'une Command portent le même nom que les champs de la requête, pour que `property` désigne un champ connu du client.
 - Les handlers lèvent des exceptions du domaine ; le contrôleur les traduit en exception HTTP (409, 404…) ou en `ViolationHttpException` (422 sur un champ).
 - Messages destinés à l'utilisateur : en français, lisibles tels quels (l'application mobile les affiche).
+- Essai sans compte (`docs/ARCHITECTURE.md`, D17) : un invité est un `User` sans nom, email ni mot de passe (`isGuest()`), ouvert par `POST /api/v1/auth/guest`. `POST /api/v1/auth/register` appelée avec son jeton convertit ce même compte. Une erreur qui appelle une action du client porte un `reason` (`ReasonHttpException`). `app:guests:purge` supprime les invités sans session.
+- Modèle de langage : seul `TurnRunner` l'appelle, par le port `ChatModelInterface` (`Application/Conversation/Port`) ; l'adaptateur Anthropic vit dans `Infrastructure/Adapter/Llm/Anthropic` et aucune classe du SDK n'en sort. En test, `tests/Support/FakeChatModel` le remplace (programmable, `disableReboot()` pour le garder d'une requête à l'autre) ; `make test` n'appelle jamais le fournisseur. `make test_live` fait un vrai appel payant, avec la clé de `.env.local`. Consignes versionnées dans `resources/prompts`.
 - Identité : les JWT et refresh tokens portent l'uuid de l'utilisateur (`SecurityUser::getUserIdentifier()`), pas l'email ; `UserProvider` accepte un email (connexion) ou un uuid (token).
 
 ## Ajouter une fonctionnalité à l'API
@@ -44,3 +50,5 @@ Ports locaux : 8000 (API) et 5432 (base) par défaut ; un `docker-compose.overri
 - Textes de l'interface dans `lib/l10n/app_fr.arb`, puis `flutter gen-l10n` (fichiers générés versionnés).
 - Tests : API simulée par `ScriptedAdapter` (`test/support/fakes.dart`) injecté via `httpClientAdapterProvider`, ce qui exerce le vrai câblage (Bearer, refresh, rejeu).
 - Toute route ajoutée à l'API est répercutée à la main dans `data/` ; la spec de référence est `/api/v1/doc`.
+- Sans session : écran de bienvenue (conditions d'utilisation), puis compte invité ou connexion. Un écran empilé par `push` n'est pas redirigé par le router : après une connexion ou une inscription, revenir à l'accueil explicitement.
+- Tests d'écran : un appel réseau attendu hors des `pump` passe par `tester.runAsync`, sinon les minuteries de Dio ne s'écoulent pas.

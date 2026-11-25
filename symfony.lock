@@ -110,6 +110,18 @@
             "config/routes/nelmio_api_doc.yaml"
         ]
     },
+    "php-http/discovery": {
+        "version": "1.20",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.18",
+            "ref": "f45b5dd173a27873ab19f5e3180b2f661c21de02"
+        },
+        "files": [
+            "config/packages/http_discovery.yaml"
+        ]
+    },
     "phpstan/phpstan": {
         "version": "2.3",
         "recipe": {
@@ -163,14 +175,16 @@
         ]
     },
     "symfony/framework-bundle": {
-        "version": "7.4",
+        "version": "8.1",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "7.4",
-            "ref": "5ea2ed9cd29ca8fc2cb9bca9cb7b7e0a8d2be1dc"
+            "version": "8.1",
+            "ref": "3eee55306efebbd99462341126bbd4cac7cd8ba7"
         },
         "files": [
+            ".editorconfig",
+            "AGENTS.md",
             "config/packages/cache.yaml",
             "config/packages/framework.yaml",
             "config/preload.php",
@@ -178,8 +192,7 @@
             "config/services.yaml",
             "public/index.php",
             "src/Controller/.gitignore",
-            "src/Kernel.php",
-            ".editorconfig"
+            "src/Kernel.php"
         ]
     },
     "symfony/messenger": {

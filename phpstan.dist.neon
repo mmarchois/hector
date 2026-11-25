@@ -1,3 +1,7 @@
+includes:
+    # Règles d'architecture (tests/Architecture), exécutées par PHPStan
+    - vendor/phpat/phpat/extension.neon
+
 parameters:
     level: 6
     paths:
@@ -5,3 +9,13 @@ parameters:
         - tests/
     excludePaths:
         - src/Infrastructure/Persistence/Doctrine/Migrations/
+    phpat:
+        # Les classes natives de PHP (DateTimeImmutable, exceptions…) sont permises partout
+        ignore_built_in_classes: true
+        show_rule_names: true
+
+services:
+    -
+        class: App\Tests\Architecture\ArchitectureRules
+        tags:
+            - phpat.test

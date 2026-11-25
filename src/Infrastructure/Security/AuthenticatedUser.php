@@ -18,12 +18,14 @@ final readonly class AuthenticatedUser
 
     public function getUuid(): string
     {
+        return $this->findUuid() ?? throw new UnauthorizedHttpException('Bearer');
+    }
+
+    /** Pour une route publique : uuid de l'auteur s'il a envoyé un jeton valide, sinon null. */
+    public function findUuid(): ?string
+    {
         $user = $this->security->getUser();
 
-        if (!$user instanceof SecurityUser) {
-            throw new UnauthorizedHttpException('Bearer');
-        }
-
-        return $user->getUuid();
+        return $user instanceof SecurityUser ? $user->getUuid() : null;
     }
 }

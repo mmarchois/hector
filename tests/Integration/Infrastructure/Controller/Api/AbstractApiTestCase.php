@@ -31,6 +31,32 @@ abstract class AbstractApiTestCase extends WebTestCase
         return ['token' => $data['token'], 'refresh_token' => $data['refresh_token']];
     }
 
+    /** Version en vigueur des conditions d'utilisation (paramètre du conteneur, client déjà créé). */
+    protected function termsOfUseVersion(): string
+    {
+        $version = static::getContainer()->getParameter('app.terms_of_use.version');
+        self::assertIsString($version);
+
+        return $version;
+    }
+
+    /**
+     * Ouvre un compte invité, conditions d'utilisation acceptées.
+     *
+     * @return array{token: string, refresh_token: string}
+     */
+    protected function openGuestAccount(KernelBrowser $client): array
+    {
+        $client->jsonRequest('POST', '/api/v1/auth/guest', [
+            'acceptedTermsOfUseVersion' => $this->termsOfUseVersion(),
+        ]);
+        self::assertResponseStatusCodeSame(201);
+
+        $data = $this->json($client);
+
+        return ['token' => $data['token'], 'refresh_token' => $data['refresh_token']];
+    }
+
     /**
      * Requête authentifiée par Bearer token, corps JSON optionnel.
      *

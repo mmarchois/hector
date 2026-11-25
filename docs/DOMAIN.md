@@ -9,7 +9,7 @@ Neuf contextes, dans un seul dépôt et un seul déploiement : sept pour le MVP,
 
 | Contexte | Nom dans le code | Nature | Responsabilité | Ce qu'il ne fait pas |
 |---|---|---|---|---|
-| Identité | `User`, `Company` (existants) | Générique | Comptes, entreprises, qualification déclarée | Aucune règle électrique |
+| Identité | `User`, `Company` (existants) | Générique | Comptes invités et complets, entreprises, qualification déclarée | Aucune règle électrique |
 | Conversation | `Conversation` | Socle | Conversations, messages, tours, format des réponses, trace de chaque tour | Ne connaît aucune notion électrique |
 | Documentation | `Knowledge` | Support | Sources, versions de documents, passages, licences, recherche | Ne juge pas ce qui est applicable ou en vigueur |
 | Réglementation | `Regulation` | Support | Registre des textes normatifs, de leurs éditions et de leurs dates | Ne stocke pas le contenu des textes (c'est Documentation) |
@@ -36,6 +36,7 @@ Règle générale : un contexte ne manipule jamais les entités d'un autre. Il e
 | Diagnostic | Prévention | Interroge la politique (« ce geste est-il permis pour cette qualification ? ») et le catalogue. |
 | Diagnostic | Calcul | Peut référencer une exécution de calcul comme élément d'appui, par identifiant. |
 | Prévention | Identité | Lit la qualification déclarée de l'utilisateur. |
+| Identité | contextes qui rattachent des données à un utilisateur | Ne dépend d'aucun. À la suppression d'un compte et au rattachement d'un invité, Identité appelle son port `UserOwnedDataInterface`, que l'infrastructure implémente pour chaque contexte (conversations, puis sessions de diagnostic…). |
 | Calcul | Réglementation | Une constante ou une formule cite sa source par une référence du registre. |
 | Conseil produits | Catalogue | Lit les références, leurs caractéristiques et leur provenance. |
 | Conseil produits | Calcul | S'appuie sur les calculateurs pour vérifier une compatibilité. |
@@ -47,6 +48,8 @@ Le code existant est en anglais, les messages destinés à l'utilisateur en fran
 
 | Terme métier | Dans le code | Définition |
 |---|---|---|
+| Compte invité | `User` sans identifiants (`isGuest()`) | Compte ouvert sans inscription au premier lancement de l'application |
+| Allocation gratuite | `FreeAllowance` | Ce qu'un compte peut consommer sans payer, selon son type |
 | Tour | `Turn` | Un message de l'utilisateur et la réponse qu'il déclenche |
 | Bloc | `Block` | Élément typé d'un message (énoncé, question, calcul, étape…) |
 | Énoncé | `Statement` | Phrase ou paragraphe d'une réponse, porteur d'une nature |
@@ -114,6 +117,7 @@ Règles :
 - **CV5.** Tout bloc porte un texte de repli lisible, pour les versions de l'application qui ne connaissent pas son type.
 - **CV6.** Tout message de l'assistant est relié à la trace de son tour.
 - **CV7.** Le socle ne connaît aucune notion électrique. L'activité en cours d'une conversation est un simple couple (capacité, identifiant).
+- **CV8.** Un tour n'est accepté que si l'allocation de son auteur le permet. Le refus a lieu avant tout appel au modèle de langage et dit ce qui débloque la suite (s'inscrire, plus tard s'abonner).
 
 ### 4.2 Documentation
 
@@ -269,7 +273,14 @@ Règles :
 
 ### 4.9 Identité (existant, à compléter)
 
-`User` et `Company` restent tels quels. Le lot L14 ajoute au profil la qualification déclarée, selon la réponse à la question P5.
+`User` et `Company` restent tels quels, avec deux ajouts : le compte invité au lot L3 (décision D17), puis la qualification déclarée au lot L15, selon la réponse à la question P5. Le nom et l'e-mail de `User` deviennent facultatifs, pour l'invité seulement.
+
+Règles :
+
+- **ID1.** Un compte est invité ou complet. Un invité n'a ni e-mail ni mot de passe et ne peut pas se connecter par identifiants ; un compte complet a les deux.
+- **ID2.** Convertir un invité en compte complet garde son uuid et tout ce qui lui est rattaché. La conversion est définitive.
+- **ID3.** Un invité a la qualification la plus restrictive, celle d'un particulier.
+- **ID4.** Un invité inactif au-delà de la durée de conservation annoncée est supprimé avec ses données. Mise en œuvre (lot L3) : est inactif un invité qui n'a plus aucune session valide. Une session vit 30 jours après son dernier renouvellement, et un invité n'a pas d'identifiants pour en rouvrir une : passé ce délai, ses données ne sont plus accessibles à personne. La durée de conservation vaut donc 30 jours, à confirmer avec la question P7. La commande `app:guests:purge` est à planifier chaque jour en production (D15).
 
 ## 5. Ce que le modèle initial laisse volontairement de côté
 

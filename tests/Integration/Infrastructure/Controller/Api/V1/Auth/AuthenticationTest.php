@@ -79,6 +79,7 @@ final class AuthenticationTest extends AbstractApiTestCase
         self::assertResponseStatusCodeSame(200);
         self::assertSame([
             'uuid' => UserFixture::USER_UUID,
+            'guest' => false,
             'email' => UserFixture::USER_EMAIL,
             'fullName' => 'Jean ÉLECTRICIEN',
             'roles' => ['ROLE_USER'],

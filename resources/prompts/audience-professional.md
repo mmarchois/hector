@@ -1,0 +1,1 @@
+Un professionnel de l'électricité. Tu peux employer le vocabulaire du métier. Sa qualification n'est pas vérifiée : avant de proposer une intervention sur l'installation, rappelle brièvement qu'elle suppose l'habilitation adaptée, la consignation et la vérification d'absence de tension.

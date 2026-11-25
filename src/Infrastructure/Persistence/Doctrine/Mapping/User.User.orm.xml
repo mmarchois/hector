@@ -10,8 +10,9 @@
         <index columns="company_uuid" name="idx_user_company_uuid"/>
     </indexes>
     <id name="uuid" type="guid" column="uuid"/>
-    <field name="fullName" type="string" column="full_name" nullable="false"/>
-    <field name="email" type="string" column="email" nullable="false"/>
+    <!-- Nom et email absents pour un compte invité (ID1) -->
+    <field name="fullName" type="string" column="full_name" nullable="true"/>
+    <field name="email" type="string" column="email" nullable="true"/>
     <field name="roles" type="json" column="roles" nullable="false"/>
     <field name="password" type="string" column="password" nullable="true"/>
     <field name="professional" type="boolean" column="professional" nullable="false">
@@ -20,6 +21,8 @@
     <field name="registrationDate" type="datetimetz_immutable" column="registration_date" nullable="false">
         <options><option name="default">CURRENT_TIMESTAMP</option></options>
     </field>
+    <field name="termsOfUseVersion" type="string" column="terms_of_use_version" length="64" nullable="true"/>
+    <field name="termsOfUseAcceptedAt" type="datetimetz_immutable" column="terms_of_use_accepted_at" nullable="true"/>
     <many-to-one field="company" target-entity="App\Domain\Company\Company">
         <join-column name="company_uuid" referenced-column-name="uuid" nullable="true"/>
     </many-to-one>

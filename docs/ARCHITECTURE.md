@@ -107,12 +107,13 @@ tests/
   Critical/                            nouveau : calculs et règles critiques, sans modèle de langage
 ```
 
-Règles de dépendance, à faire vérifier par un outil dans `make check` (lot L2) :
+Règles de dépendance, vérifiées dans `make check` par PHPat, une extension de PHPStan (`tests/Architecture/ArchitectureRules.php`, lot L2). Deptrac faisait aussi l'affaire, mais demandait un outil et une configuration de plus :
 
-- `Domain` n'importe ni `Application`, ni `Infrastructure`, ni le framework, ni le SDK d'un fournisseur.
-- `Application` n'importe ni `Infrastructure` ni le SDK d'un fournisseur.
-- Un contexte n'importe pas les entités d'un autre. Il passe par un identifiant et par une interface que l'autre contexte publie. Les liens permis sont ceux du tableau des relations de DOMAIN.md, § 2.
-- `Calculation` et `Safety` n'importent rien qui touche au modèle de langage.
+- `Domain` ne dépend que de `Domain` : ni `Application`, ni `Infrastructure`, ni framework, ni bibliothèque, ni SDK d'un fournisseur. Les classes natives de PHP sont permises.
+- `Application` ne dépend que d'`Application` et de `Domain`.
+- Un contexte n'utilise que les contextes du tableau des relations de DOMAIN.md, § 2, recopié dans les règles. Un nouveau dossier de contexte est isolé par défaut. L'outil vérifie le lien entre contextes, pas la classe utilisée : passer par un identifiant et par une interface publiée reste une règle de relecture.
+- Les contextes ne se branchent sur `Conversation` que depuis leur dossier `Application/<Contexte>/Capability`, et n'y voient que son interface de capacité. `Calculation` et `Safety` n'atteignent donc jamais le port du modèle de langage. `Conversation` n'utilise aucun contexte (CV7).
+- `Domain/Port` (dates, identifiants, hachage) est commun à tous les contextes.
 
 ## 5. Le tour de conversation
 
@@ -171,18 +172,18 @@ Les interfaces de repository suivent la convention existante (`Domain/<Contexte>
 
 | Port | Rôle | Premier adaptateur | Lot |
 |---|---|---|---|
-| `ChatModelInterface` | Envoie consignes, messages, outils et schéma de sortie ; reçoit texte, appels d'outils ou sortie structurée, motif d'arrêt (dont le refus), consommation | SDK du fournisseur retenu ; `FakeChatModel` scriptable en test | L4 |
-| `CapabilityInterface`, `ToolInterface` | Point d'extension du socle | Un par contexte métier | L4, puis chaque capacité |
-| `PromptCatalogInterface` | Fournit les consignes et leur version | Fichiers de `resources/prompts` | L4 |
-| `QuotaInterface` | Quota par utilisateur, budget par tour | `symfony/rate-limiter`, déjà présent | L4, L18 |
-| `FileStorageInterface` | Conserve les fichiers sources, avec leur empreinte | Système de fichiers | L8 |
-| `DocumentExtractorInterface` | Transforme un fichier en texte structuré et localisé | À choisir sur essai (D14) | L8 |
-| `PassageSearchInterface` | Cherche des passages dans des corpus nommés, avec filtres | PostgreSQL plein texte, puis hybride | L9, L11 |
-| `EmbeddingModelInterface` | Calcule des vecteurs, annonce son modèle et sa dimension | Fournisseur à choisir (D5) ; faux déterministe en test | L11 |
-| `SafetyPolicyInterface` | Publiée par Prévention : ce geste est-il permis pour cette qualification ? | Domaine | L14 |
-| `ProductDataImporterInterface` | Importe un lot de données produits depuis une source | Fichiers de fabricants | L20 |
-| `ProductSearchInterface` | Cherche des références par catégorie et critères | PostgreSQL | L21 |
-| `OfferFeedInterface` | Relève prix et disponibilités chez un distributeur | Selon la source retenue (P8) | L25 |
+| `ChatModelInterface` | Envoie consignes, messages, outils et schéma de sortie ; reçoit texte, appels d'outils ou sortie structurée, motif d'arrêt (dont le refus), consommation | SDK du fournisseur retenu ; `FakeChatModel` scriptable en test | L5 |
+| `CapabilityInterface`, `ToolInterface` | Point d'extension du socle | Un par contexte métier | L5, puis chaque capacité |
+| `PromptCatalogInterface` | Fournit les consignes et leur version | Fichiers de `resources/prompts` | L5 |
+| `QuotaInterface` | Allocation gratuite selon le type de compte, quota par utilisateur, budget par tour | `symfony/rate-limiter`, déjà présent | L5, L19 |
+| `FileStorageInterface` | Conserve les fichiers sources, avec leur empreinte | Système de fichiers | L9 |
+| `DocumentExtractorInterface` | Transforme un fichier en texte structuré et localisé | À choisir sur essai (D14) | L9 |
+| `PassageSearchInterface` | Cherche des passages dans des corpus nommés, avec filtres | PostgreSQL plein texte, puis hybride | L10, L12 |
+| `EmbeddingModelInterface` | Calcule des vecteurs, annonce son modèle et sa dimension | Fournisseur à choisir (D5) ; faux déterministe en test | L12 |
+| `SafetyPolicyInterface` | Publiée par Prévention : ce geste est-il permis pour cette qualification ? | Domaine | L15 |
+| `ProductDataImporterInterface` | Importe un lot de données produits depuis une source | Fichiers de fabricants | L21 |
+| `ProductSearchInterface` | Cherche des références par catégorie et critères | PostgreSQL | L22 |
+| `OfferFeedInterface` | Relève prix et disponibilités chez un distributeur | Selon la source retenue (P8) | L26 |
 
 Ports existants réutilisés : `DateUtilsInterface`, `IdFactoryInterface`, les deux bus. Ports prévisibles plus tard : transcription de la voix, analyse d'image, stockage d'objets.
 
@@ -200,7 +201,7 @@ Trois magasins, trois cycles de vie :
 
 Le registre normatif (Réglementation) n'est pas un magasin de contenu : il dit quels textes et quelles éditions existent, et à quelles dates.
 
-**Recherche documentaire.** Elle combine deux approches, parce que les questions d'électriciens contiennent des identifiants exacts (numéro d'article, calibre, référence de produit) que la recherche par le sens retrouve mal, et des formulations libres que la recherche par mots retrouve mal. Le lot L9 livre la recherche par mots, en plein texte français. Le lot L11 ajoute la recherche par vecteurs et la fusion des deux listes, et n'est conservé que s'il améliore la mesure faite sur le jeu d'évaluation. Une recherche nomme toujours les corpus visés et peut filtrer par genre de source, par domaine et par date d'effet.
+**Recherche documentaire.** Elle combine deux approches, parce que les questions d'électriciens contiennent des identifiants exacts (numéro d'article, calibre, référence de produit) que la recherche par le sens retrouve mal, et des formulations libres que la recherche par mots retrouve mal. Le lot L10 livre la recherche par mots, en plein texte français. Le lot L12 ajoute la recherche par vecteurs et la fusion des deux listes, et n'est conservé que s'il améliore la mesure faite sur le jeu d'évaluation. Une recherche nomme toujours les corpus visés et peut filtrer par genre de source, par domaine et par date d'effet.
 
 **Citations.** Le modèle reçoit des passages munis d'un identifiant et cite par identifiant. Le serveur vérifie que chaque identifiant cité fait partie des passages lus pendant le tour, puis compose lui-même l'affichage de la source : titre, éditeur, édition, dates, localisation (décision D7).
 
@@ -208,7 +209,7 @@ Le registre normatif (Réglementation) n'est pas un magasin de contenu : il dit 
 
 - PostgreSQL reste la seule base. Les entités suivent la convention existante : PHP pur, mapping XML.
 - Les passages, leurs index plein texte et leurs vecteurs sont lus et écrits en SQL par les adaptateurs de recherche, pas par l'ORM (point d'attention 4 du § 1.4).
-- L'extension vectorielle demande une image PostgreSQL qui l'inclut. C'est un changement du `docker-compose.yml`, à faire au lot L11.
+- L'extension vectorielle demande une image PostgreSQL qui l'inclut. C'est un changement du `docker-compose.yml`, à faire au lot L12.
 - Les traces de tour et le journal de diagnostic sont en ajout seul.
 - Les contenus métier de `resources/` sont chargés en base par une commande, avec leur version. Une commande d'exploitation peut désactiver immédiatement un document, une procédure ou un calculateur.
 
@@ -216,14 +217,17 @@ Le registre normatif (Réglementation) n'est pas un magasin de contenu : il dit 
 
 | Route | Rôle | Lot |
 |---|---|---|
-| `POST /api/v1/conversations`, `GET /api/v1/conversations` | Créer, lister ses conversations | L3 |
-| `GET /api/v1/conversations/{uuid}/messages` | Lire les messages, par pages | L3 |
-| `POST /api/v1/conversations/{uuid}/messages` | Envoyer un message ; renvoie le tour et son statut | L3, L4 |
-| `GET /api/v1/turns/{uuid}` | Suivre un tour en cours | L3 |
-| `POST /api/v1/messages/{uuid}/feedback` | Signaler ou noter une réponse | L17, L18 |
-| `GET /api/v1/passages/{uuid}` | Consulter une source citée, selon sa licence | L9 |
-| `GET /api/v1/calculators`, `POST /api/v1/calculations` | Lister les calculateurs, calculer sans conversation | L12 |
-| `GET /api/v1/diagnostics/{uuid}` | Lire l'état d'un diagnostic | L15 |
+| `POST /api/v1/auth/guest` | Ouvrir un compte invité ; renvoie ses jetons | L3 |
+| `POST /api/v1/auth/register` (existante) | Appelée avec le jeton d'un invité, convertit ce compte au lieu d'en créer un | L3 |
+| `POST /api/v1/conversations`, `GET /api/v1/conversations` | Créer, lister ses conversations | L4 |
+| `GET /api/v1/conversations/{uuid}/messages` | Lire les messages, par pages | L4 |
+| `POST /api/v1/conversations/{uuid}/messages` | Envoyer un message ; renvoie le tour et son statut | L4, L5 |
+| `GET /api/v1/turns/{uuid}` | Suivre un tour en cours | L4 |
+| `POST /api/v1/auth/merge-guest` | Rattacher au compte connecté les données d'un invité (P11) | L4 |
+| `POST /api/v1/messages/{uuid}/feedback` | Signaler ou noter une réponse | L18, L19 |
+| `GET /api/v1/passages/{uuid}` | Consulter une source citée, selon sa licence | L10 |
+| `GET /api/v1/calculators`, `POST /api/v1/calculations` | Lister les calculateurs, calculer sans conversation | L13 |
+| `GET /api/v1/diagnostics/{uuid}` | Lire l'état d'un diagnostic | L16 |
 
 Forme d'un message de l'assistant :
 
@@ -253,6 +257,7 @@ Forme d'un message de l'assistant :
 - Chaque nature d'énoncé a un rendu distinct (fait, hypothèse, recommandation, information manquante, avis rapporté). Les messages de sécurité ont un rendu qu'on ne peut confondre avec aucun autre.
 - Le client sait suivre un tour « en cours » dès le premier lot, que le serveur réponde d'un coup ou non (décision D8).
 - La mention « assistant IA » est visible en permanence sur l'écran de conversation.
+- Sans session, l'application ouvre un compte invité au lieu d'imposer l'écran de connexion (D17). L'état de session distingue invité et compte complet ; une erreur `signup_required` mène à l'inscription, puis ramène l'utilisateur là où il en était.
 
 ## 12. Stratégie de test
 
@@ -278,7 +283,7 @@ Les réponses d'un modèle ne sont pas reproductibles à l'identique. Les tests 
 | B. Service Python séparé | Écosystème le plus riche | Deux langages, deux déploiements, un contrat réseau à versionner, un domaine éclaté ; c'est la complexité prématurée que le cahier des charges écarte |
 | C. A, plus un outil hors ligne pour préparer les documents | Garde A pour tout ce qui sert l'utilisateur ; aucun service de plus à exploiter | Un second langage dans le dépôt |
 
-**Recommandation : A.** Les appels aux modèles sont des requêtes HTTP ; PHP n'est un handicap ni pour la conversation, ni pour les calculs, ni pour le diagnostic. C reste un repli, à décider au lot L8 sur pièces, si l'extraction en PHP se révèle insuffisante sur les vrais documents.
+**Recommandation : A.** Les appels aux modèles sont des requêtes HTTP ; PHP n'est un handicap ni pour la conversation, ni pour les calculs, ni pour le diagnostic. C reste un repli, à décider au lot L9 sur pièces, si l'extraction en PHP se révèle insuffisante sur les vrais documents.
 
 ### D2 — Comment s'abstraire du fournisseur de modèle ?
 
@@ -296,7 +301,7 @@ Critères : qualité en français technique mesurée sur notre jeu d'évaluation
 
 Candidats : Anthropic (Claude), Mistral (éditeur français), OpenAI, Google, ou un modèle ouvert hébergé par nos soins. Ce dernier supprime le transfert de données à un tiers, mais demande d'exploiter des serveurs de calcul, ce qui est disproportionné pour un MVP.
 
-**Recommandation : ne pas trancher sur une opinion.** Le lot L7 livre le jeu d'évaluation ; on y passe deux ou trois candidats et on choisit sur les chiffres. Pour démarrer le lot L4, je propose Claude, avec un SDK PHP officiel (`anthropic-ai/sdk`), les sorties structurées, les appels d'outils et la mise en cache des consignes. Cette proposition vient d'un modèle d'Anthropic : raison de plus pour la confronter à la mesure.
+**Recommandation : ne pas trancher sur une opinion.** Le lot L8 livre le jeu d'évaluation ; on y passe deux ou trois candidats et on choisit sur les chiffres. Pour démarrer le lot L5, je propose Claude, avec un SDK PHP officiel (`anthropic-ai/sdk`), les sorties structurées, les appels d'outils et la mise en cache des consignes. Cette proposition vient d'un modèle d'Anthropic : raison de plus pour la confronter à la mesure.
 
 Ordre de grandeur des coûts, pour un appel de 15 000 jetons en entrée et 1 500 en sortie, hors jetons de raisonnement et hors mise en cache (tarifs relevés le 3 novembre 2026, à revérifier) :
 
@@ -320,7 +325,7 @@ Un tour compte souvent deux ou trois appels. Démarrer avec le modèle le plus c
 
 ### D5 — Quel fournisseur de vecteurs ?
 
-Décision reportée au lot L11 : la recherche par mots permet de livrer les réponses sourcées sans elle. Critères : qualité en français technique mesurée sur le jeu d'évaluation, lieu de traitement, coût, taille des vecteurs. Candidats : une API (Mistral, OpenAI, Cohere, Voyage…) ou un modèle ouvert multilingue hébergé par nos soins, qui demande un service de calcul. **Recommandation : une API derrière le port, choisie sur mesure au lot L11.** Changer de modèle impose de recalculer tous les vecteurs ; la trace d'ingestion garde le modèle utilisé.
+Décision reportée au lot L12 : la recherche par mots permet de livrer les réponses sourcées sans elle. Critères : qualité en français technique mesurée sur le jeu d'évaluation, lieu de traitement, coût, taille des vecteurs. Candidats : une API (Mistral, OpenAI, Cohere, Voyage…) ou un modèle ouvert multilingue hébergé par nos soins, qui demande un service de calcul. **Recommandation : une API derrière le port, choisie sur mesure au lot L12.** Changer de modèle impose de recalculer tous les vecteurs ; la trace d'ingestion garde le modèle utilisé.
 
 ### D6 — Qui conduit le diagnostic ?
 
@@ -350,11 +355,11 @@ Décision reportée au lot L11 : la recherche par mots permet de livrer les rép
 | B. Asynchrone : le serveur répond tout de suite, un processus de fond exécute le tour, le mobile interroge | L'API reste disponible, le tour survit à une coupure | Un processus de fond à exploiter et à surveiller |
 | C. Diffusion en continu de la réponse | Meilleur confort d'attente | Difficile à concilier avec le contrôle du brouillon avant affichage ; plus complexe des deux côtés |
 
-**Recommandation : un contrat asynchrone dès le départ, une exécution synchrone au début.** L'envoi d'un message renvoie un tour avec un statut, et le mobile sait suivre un tour en cours. Au lot L4, le serveur exécute le tour dans la requête et renvoie un tour déjà terminé, avec des délais relevés pour cette route. Au lot L18, on passe à B sans changer le contrat, sur la base des durées et de la charge mesurées. C vient après, s'il manque. Compromis assumé : jusqu'au lot L18, l'API ne tient qu'un petit nombre de tours simultanés, ce qui convient au développement et à une bêta restreinte, pas à une ouverture.
+**Recommandation : un contrat asynchrone dès le départ, une exécution synchrone au début.** L'envoi d'un message renvoie un tour avec un statut, et le mobile sait suivre un tour en cours. Au lot L5, le serveur exécute le tour dans la requête et renvoie un tour déjà terminé, avec des délais relevés pour cette route. Au lot L19, on passe à B sans changer le contrat, sur la base des durées et de la charge mesurées. C vient après, s'il manque. Compromis assumé : jusqu'au lot L19, l'API ne tient qu'un petit nombre de tours simultanés, ce qui convient au développement et à une bêta restreinte, pas à une ouverture.
 
 ### D9 — Comment exécuter les traitements longs ?
 
-L'ingestion d'un document commence comme une commande console lancée à la main (lot L8). Quand un traitement de fond devient nécessaire (D8, option B), **recommandation : Messenger avec son transport Doctrine**, qui s'appuie sur PostgreSQL et n'ajoute aucun service. Une file dédiée (RabbitMQ, Redis) n'est justifiée que par un volume qu'on n'a pas.
+L'ingestion d'un document commence comme une commande console lancée à la main (lot L9). Quand un traitement de fond devient nécessaire (D8, option B), **recommandation : Messenger avec son transport Doctrine**, qui s'appuie sur PostgreSQL et n'ajoute aucun service. Une file dédiée (RabbitMQ, Redis) n'est justifiée que par un volume qu'on n'a pas.
 
 ### D10 — Où stocker les fichiers sources ?
 
@@ -391,23 +396,43 @@ Consignes, catalogue de vérifications, messages de sécurité, registre normati
 
 ### D14 — Comment extraire le texte des documents ?
 
-À décider au lot L8, par un essai sur les vrais documents du corpus, en particulier ceux qui contiennent des tableaux. Options : bibliothèque PHP, outil en ligne de commande dans l'image Docker, script Python hors ligne (D1, option C), ou lecture des pages par un modèle multimodal. Critère : fidélité des tableaux et des numéros de sections, contrôlée par l'expert sur un échantillon. Une extraction fausse produit des citations fausses avec toutes les apparences du vrai (SECURITY.md, risque T2) ; c'est pourquoi une version de document n'est publiée qu'après relecture humaine.
+À décider au lot L9, par un essai sur les vrais documents du corpus, en particulier ceux qui contiennent des tableaux. Options : bibliothèque PHP, outil en ligne de commande dans l'image Docker, script Python hors ligne (D1, option C), ou lecture des pages par un modèle multimodal. Critère : fidélité des tableaux et des numéros de sections, contrôlée par l'expert sur un échantillon. Une extraction fausse produit des citations fausses avec toutes les apparences du vrai (SECURITY.md, risque T2) ; c'est pourquoi une version de document n'est publiée qu'après relecture humaine.
 
 ### D15 — Hébergement, intégration continue, supervision
 
-L'intégration continue arrive au lot L2. L'hébergement et la supervision sont à décider avant le lot L18. Contraintes déjà connues : hébergement dans l'Union européenne, secrets hors du dépôt, sauvegardes de la base et des fichiers sources, suivi des erreurs, des durées et des coûts par tour.
+L'intégration continue arrive au lot L2. L'hébergement et la supervision sont à décider avant le lot L19. Contraintes déjà connues : hébergement dans l'Union européenne, secrets hors du dépôt, sauvegardes de la base et des fichiers sources, suivi des erreurs, des durées et des coûts par tour.
 
 ### D16 — Comment séparer les connaissances normatives et les données produits ?
 
 | Option | Pour | Contre |
 |---|---|---|
 | A. Un seul corpus, des étiquettes | Le plus simple | Mélange des sources dont la fiabilité, les droits et le rythme diffèrent ; un passage de notice peut être pris pour une règle |
-| B. Une mécanique documentaire commune, des corpus distincts ; un contexte Catalogue séparé pour les données structurées | Gestion séparée, interrogation conjointe, aucune duplication de l'extraction et de la recherche | La notion de corpus à porter dès le lot L8 |
+| B. Une mécanique documentaire commune, des corpus distincts ; un contexte Catalogue séparé pour les données structurées | Gestion séparée, interrogation conjointe, aucune duplication de l'extraction et de la recherche | La notion de corpus à porter dès le lot L9 |
 | C. Deux chaînes entièrement séparées | Isolation maximale | Extraction, recherche et outillage en double, sans besoin constaté |
 
-**Recommandation : B.** Le corpus est introduit dès le lot L8, pour ne pas avoir à migrer les sources ensuite. Chaque résultat de recherche et chaque citation garde son corpus jusqu'à l'affichage. Les données structurées des produits ne passent pas par la recherche documentaire : elles sont interrogées par critères dans Catalogue, et une valeur n'y entre qu'avec sa source et sa date.
+**Recommandation : B.** Le corpus est introduit dès le lot L9, pour ne pas avoir à migrer les sources ensuite. Chaque résultat de recherche et chaque citation garde son corpus jusqu'à l'affichage. Les données structurées des produits ne passent pas par la recherche documentaire : elles sont interrogées par critères dans Catalogue, et une valeur n'y entre qu'avec sa source et sa date.
 
 Pistes à étudier pour alimenter Catalogue, à vérifier avant de s'y engager (droits d'usage, accès, couverture) : la classification ETIM, qui décrit les critères par classe de produits électrotechniques ; le format FAB-DIS, utilisé en France pour les échanges de données entre fabricants et distributeurs ; la base européenne EPREL pour les appareils soumis à l'étiquette énergie.
+
+### D17 — Comment laisser essayer Hector sans compte ?
+
+Demande du 16 novembre 2026 : utiliser l'application sans être connecté, comme les assistants grand public, puis demander la connexion une fois la limite gratuite atteinte. Le paiement viendra plus tard.
+
+| Option | Pour | Contre |
+|---|---|---|
+| A. Compte invité : un vrai `User`, sans identifiants, ouvert par l'API au premier lancement | Tout l'existant s'applique tel quel : JWT, jeton de rafraîchissement, propriété des ressources (CV1), quotas, traces, suppression. Les jetons portant l'uuid et non l'e-mail, la conversion en compte complet garde le même uuid, les mêmes données et la même session. | Des comptes sans valeur s'accumulent (purge à prévoir) ; réinstaller l'application redonne un essai |
+| B. Identifiant d'appareil, sans compte | Aucune ligne en base avant l'inscription | Un second modèle de propriété dans chaque contexte, une migration des données à l'inscription, un identifiant facile à falsifier |
+| C. Essai entièrement local jusqu'à l'inscription | Rien côté serveur | Impossible : chaque réponse passe par l'API et le modèle de langage |
+
+**Recommandation : A**, avec ces règles :
+
+- un invité a la qualification la plus restrictive, celle d'un particulier (SF2) ; un électricien s'inscrit et déclare sa qualification pour accéder aux vérifications qui lui sont réservées ;
+- l'allocation gratuite se compte par compte et dépend de son type. Épuisée, elle est refusée avant tout appel au modèle, avec un code qui dit ce qui débloque la suite : `signup_required` pour un invité ; plus tard un code d'abonnement pour un compte complet. Le mobile traduit le code en écran d'inscription, puis de paiement ;
+- la création de comptes invités est limitée par adresse IP, et l'ensemble des invités a un budget global : c'est la parade à la réinstallation. Les attestations d'appareil d'Apple et de Google (App Attest, Play Integrity) sont une piste à étudier au lot L19, à vérifier avant de s'y engager ;
+- un invité inactif est supprimé après une durée annoncée (P7) ;
+- un message de sécurité n'est jamais bloqué par la limite : il est fixe et ne coûte aucun appel au modèle.
+
+Le paiement n'est pas conçu ici ; seul le contrat d'API lui réserve sa place.
 
 ## 14. Risques techniques
 

@@ -1,5 +1,5 @@
 gesdinet_jwt_refresh_token:
-    refresh_token_class: App\Domain\User\RefreshToken
+    refresh_token_class: App\Infrastructure\Security\RefreshToken
     ttl: 2592000 # 30 jours
     single_use: true # rotation : chaque refresh invalide l'ancien token
     # Seule l'empreinte du token est stockée : une copie de la base ne permet pas de se connecter

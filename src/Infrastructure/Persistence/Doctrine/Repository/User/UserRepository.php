@@ -43,4 +43,25 @@ final class UserRepository extends ServiceEntityRepository implements UserReposi
     {
         return $this->findOneBy(['email' => $this->stringUtils->normalizeEmail($email)]);
     }
+
+    public function findGuestsWithoutSession(\DateTimeImmutable $now, \DateTimeImmutable $registeredBefore): array
+    {
+        // En SQL : `refresh_tokens.username` (texte) porte l'uuid de l'utilisateur (colonne uuid)
+        $uuids = $this->getEntityManager()->getConnection()->fetchFirstColumn(
+            'SELECT u.uuid FROM "user" u
+             WHERE u.email IS NULL
+               AND u.registration_date < :registeredBefore
+               AND NOT EXISTS (
+                   SELECT 1 FROM refresh_tokens rt
+                   WHERE rt.username = u.uuid::text AND rt.valid > :now
+               )',
+            [
+                'registeredBefore' => $registeredBefore->format(\DATE_ATOM),
+                // `valid` est sans fuseau : gesdinet l'écrit dans le fuseau par défaut de PHP
+                'now' => $now->setTimezone(new \DateTimeZone(date_default_timezone_get()))->format('Y-m-d H:i:s'),
+            ],
+        );
+
+        return $uuids === [] ? [] : $this->findBy(['uuid' => $uuids]);
+    }
 }

@@ -15,7 +15,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInterface
 {
     private string $uuid;
-    private string $email;
+    private ?string $email;
     /** @var string[] */
     private array $roles;
     private ?string $password;
@@ -33,7 +33,8 @@ final class SecurityUser implements UserInterface, PasswordAuthenticatedUserInte
         return $this->uuid;
     }
 
-    public function getEmail(): string
+    /** Null pour un invité, qui ne peut donc pas se connecter par identifiants. */
+    public function getEmail(): ?string
     {
         return $this->email;
     }

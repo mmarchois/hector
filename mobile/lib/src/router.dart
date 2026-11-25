@@ -2,15 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'presentation/chat_screen.dart';
 import 'presentation/home_screen.dart';
 import 'presentation/login_screen.dart';
 import 'presentation/profile_screen.dart';
 import 'presentation/register_screen.dart';
+import 'presentation/welcome_screen.dart';
 import 'state/auth_controller.dart';
 import 'theme.dart';
 
-/// Routes accessibles sans session.
-const _publicPaths = {'/connexion', '/inscription'};
+const _welcomePath = '/bienvenue';
+
+/// Écrans de compte : accessibles sans session une fois les conditions
+/// acceptées, et à un invité qui crée son compte ou rejoint le sien.
+const _accountPaths = {'/connexion', '/inscription'};
 
 const _splashPath = '/demarrage';
 
@@ -20,14 +25,35 @@ String? redirectFor(AuthState auth, String location) {
     case AuthUnknown():
       // Session en cours de restauration : écran d'attente
       return location == _splashPath ? null : _splashPath;
-    case AuthSignedOut():
-      return _publicPaths.contains(location) ? null : '/connexion';
-    case AuthSignedIn():
-      final awayFromApp =
-          _publicPaths.contains(location) || location == _splashPath;
+    case AuthSignedOut(:final acceptedTermsOfUseVersion):
+      if (location == _welcomePath) {
+        return null;
+      }
+      // Conditions d'utilisation d'abord, quel que soit le chemin choisi ensuite
+      final accepted = acceptedTermsOfUseVersion != null;
 
-      return awayFromApp ? '/' : null;
+      return accepted && _accountPaths.contains(location) ? null : _welcomePath;
+    case AuthSignedIn(:final user):
+      if (location == _splashPath || location == _welcomePath) {
+        return '/';
+      }
+      if (_accountPaths.contains(location)) {
+        return user.guest ? null : '/';
+      }
+
+      return null;
   }
+}
+
+/// Écran où revenir après une connexion ou une inscription (`?retour=`) :
+/// seulement une conversation, sinon l'accueil.
+String returnPathFrom(Uri uri) {
+  final back = uri.queryParameters['retour'];
+
+  return back != null &&
+          RegExp(r'^/conversations/[0-9a-f-]{36}$').hasMatch(back)
+      ? back
+      : '/';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -48,12 +74,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const _SplashScreen(),
       ),
       GoRoute(
+        path: _welcomePath,
+        builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
         path: '/connexion',
-        builder: (context, state) => const LoginScreen(),
+        builder: (context, state) =>
+            LoginScreen(returnTo: returnPathFrom(state.uri)),
       ),
       GoRoute(
         path: '/inscription',
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) =>
+            RegisterScreen(returnTo: returnPathFrom(state.uri)),
+      ),
+      GoRoute(
+        path: '/conversations/:uuid',
+        builder: (context, state) =>
+            ChatScreen(conversationUuid: state.pathParameters['uuid']!),
       ),
       GoRoute(
         path: '/profil',

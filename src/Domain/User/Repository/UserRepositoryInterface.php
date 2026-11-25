@@ -15,4 +15,12 @@ interface UserRepositoryInterface
     public function findOneByUuid(string $uuid): ?User;
 
     public function findOneByEmail(string $email): ?User;
+
+    /**
+     * Invités ouverts avant $registeredBefore qui n'ont plus aucune session valide à $now :
+     * sans session ni identifiants, leurs données ne sont plus accessibles à personne (ID4).
+     *
+     * @return list<User>
+     */
+    public function findGuestsWithoutSession(\DateTimeImmutable $now, \DateTimeImmutable $registeredBefore): array;
 }

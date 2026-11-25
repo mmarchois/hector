@@ -10,7 +10,7 @@ Le dépôt contient deux applications :
 ## Environnement technique
 
 - [Docker](https://www.docker.com/) / [Compose](https://docs.docker.com/compose/)
-- [PHP 8.4](https://www.php.net/), [Symfony 7.4](https://symfony.com/), [Doctrine ORM 3](https://www.doctrine-project.org/)
+- [PHP 8.4](https://www.php.net/), [Symfony 8.1](https://symfony.com/), [Doctrine ORM 3](https://www.doctrine-project.org/)
 - [PostgreSQL 17](https://www.postgresql.org/)
 - [Flutter](https://flutter.dev/) (Riverpod, go_router, Dio)
 

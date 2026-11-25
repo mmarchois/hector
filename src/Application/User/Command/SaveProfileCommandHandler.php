@@ -8,6 +8,7 @@ use App\Application\Company\Service\CompanyProvider;
 use App\Application\StringUtilsInterface;
 use App\Domain\Port\PasswordHasherInterface;
 use App\Domain\User\Exception\EmailAlreadyExistsException;
+use App\Domain\User\Exception\GuestAccountException;
 use App\Domain\User\Exception\InvalidCurrentPasswordException;
 use App\Domain\User\Exception\UserNotFoundException;
 use App\Domain\User\Repository\RefreshTokenRepositoryInterface;
@@ -32,6 +33,11 @@ final readonly class SaveProfileCommandHandler
         $user = $this->userRepository->findOneByUuid($command->userUuid);
         if (!$user instanceof User) {
             throw new UserNotFoundException();
+        }
+
+        // Un invité n'a pas de profil à modifier : il crée un compte (ID1, ID2)
+        if ($user->isGuest()) {
+            throw new GuestAccountException();
         }
 
         $email = $this->stringUtils->normalizeEmail($command->email);

@@ -11,7 +11,10 @@ import '../theme.dart';
 import 'widgets/account_fields.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({super.key, this.returnTo = '/'});
+
+  /// Écran où revenir une fois la session ouverte (une conversation, ou l'accueil).
+  final String returnTo;
 
   @override
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
@@ -50,7 +53,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
-      // La redirection vers l'accueil est gérée par le router (session ouverte).
+      // Session ouverte. L'écran a pu être empilé (push) par-dessus la
+      // bienvenue ou le profil d'un invité : le router ne redirige pas une
+      // route empilée, on revient donc à l'accueil explicitement.
+      if (mounted) {
+        GoRouter.maybeOf(context)?.go(widget.returnTo);
+      }
     } on InvalidCredentialsException {
       setState(() => _error = l10n.loginInvalidCredentials);
     } on DioException {
@@ -68,6 +76,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      // Ouvert depuis l'accueil ou le profil (invité) : retour possible
+      appBar: Navigator.of(context).canPop() ? AppBar() : null,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

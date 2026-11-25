@@ -16,6 +16,7 @@ final class RegisterTest extends AbstractApiTestCase
             'fullName' => 'Marie OHM',
             'email' => 'Marie.Ohm@exemple.fr',
             'password' => 'motdepasse123',
+            'acceptedTermsOfUseVersion' => $this->termsOfUseVersion(),
             'professional' => true,
             'companyName' => 'Ohm Élec',
             'siret' => '98765432109876',
@@ -47,6 +48,7 @@ final class RegisterTest extends AbstractApiTestCase
             'fullName' => 'Paul VOLT',
             'email' => 'paul.volt@exemple.fr',
             'password' => 'motdepasse123',
+            'acceptedTermsOfUseVersion' => $this->termsOfUseVersion(),
         ]);
 
         self::assertResponseStatusCodeSame(201);
@@ -63,6 +65,7 @@ final class RegisterTest extends AbstractApiTestCase
             'fullName' => 'Collègue AMPÈRE',
             'email' => 'collegue@exemple.fr',
             'password' => 'motdepasse123',
+            'acceptedTermsOfUseVersion' => $this->termsOfUseVersion(),
             'professional' => true,
             'companyName' => 'Nom saisi différemment',
             'siret' => UserFixture::COMPANY_SIRET,
@@ -81,6 +84,7 @@ final class RegisterTest extends AbstractApiTestCase
             'fullName' => 'Paul VOLT',
             'email' => 'paul.volt@exemple.fr',
             'password' => 'motdepasse123',
+            'acceptedTermsOfUseVersion' => $this->termsOfUseVersion(),
             'professional' => true,
         ]);
 
@@ -95,6 +99,7 @@ final class RegisterTest extends AbstractApiTestCase
             'fullName' => '   ',
             'email' => 'pas-un-email',
             'password' => 'court',
+            'acceptedTermsOfUseVersion' => $this->termsOfUseVersion(),
             'professional' => true,
             'companyName' => 'Ohm Élec',
             'siret' => '123',
@@ -127,6 +132,7 @@ final class RegisterTest extends AbstractApiTestCase
             'fullName' => 'Paul VOLT',
             'email' => 'paul.volt@exemple.fr',
             'password' => 'motdepasse123',
+            'acceptedTermsOfUseVersion' => $this->termsOfUseVersion(),
             'professional' => 'oui',
         ]);
 
@@ -151,6 +157,7 @@ final class RegisterTest extends AbstractApiTestCase
             // Même email à la casse près
             'email' => strtoupper(UserFixture::USER_EMAIL),
             'password' => 'motdepasse123',
+            'acceptedTermsOfUseVersion' => $this->termsOfUseVersion(),
         ]);
 
         self::assertResponseStatusCodeSame(409);

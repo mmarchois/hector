@@ -1,0 +1,411 @@
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hector_mobile/src/data/api.dart';
+import 'package:hector_mobile/src/data/api_errors.dart';
+import 'package:hector_mobile/src/data/auth/token_storage.dart';
+import 'package:hector_mobile/src/data/conversation/conversation_repository.dart';
+import 'package:hector_mobile/src/domain/conversation.dart';
+import 'package:hector_mobile/src/presentation/chat_screen.dart';
+import 'package:hector_mobile/src/state/chat_controller.dart';
+
+import 'support/fakes.dart';
+
+/// Lot L6 : écran de conversation.
+void main() {
+  const conversation = '0b507871-8b5e-4575-b297-a630310fc06e';
+  const tokens = AuthTokens(accessToken: 'access-1', refreshToken: 'r-1');
+
+  Map<String, dynamic> message(
+    String uuid,
+    String role,
+    String text, {
+    String type = 'text',
+  }) {
+    return {
+      'uuid': uuid,
+      'role': role,
+      'blocks': [
+        {'type': type, 'version': 1, 'text': text, 'fallbackText': text},
+      ],
+      'citations': [],
+      'createdAt': '2026-11-24T10:00:00+00:00',
+    };
+  }
+
+  Map<String, dynamic> turn(
+    String status, {
+    Map<String, dynamic>? answer,
+    String question = 'Mon différentiel saute',
+    Map<String, dynamic>? failure,
+  }) {
+    return {
+      'uuid': 't1',
+      'conversationUuid': conversation,
+      'status': status,
+      'userMessage': message('m1', 'user', question),
+      'assistantMessage': answer,
+      'createdAt': '2026-11-24T10:00:00+00:00',
+      'finishedAt': status == 'in_progress'
+          ? null
+          : '2026-11-24T10:00:05+00:00',
+      'failure': failure,
+    };
+  }
+
+  Map<String, dynamic> page(List<Map<String, dynamic>> items) {
+    return {'items': items, 'hasMore': false};
+  }
+
+  ProviderContainer container(ScriptedAdapter adapter) {
+    final c = buildContainer(InMemoryTokenStorage()..tokens = tokens, adapter);
+    addTearDown(c.dispose);
+
+    return c;
+  }
+
+  group('client des conversations', () {
+    test('envoi : délai de réception propre au tour', () async {
+      final adapter = ScriptedAdapter(
+        (options) async => jsonResponse(
+          201,
+          turn('completed', answer: message('m2', 'assistant', 'Réponse')),
+        ),
+      );
+      final c = container(adapter);
+
+      final result = await c
+          .read(conversationRepositoryProvider)
+          .send(conversation, 'Mon différentiel saute');
+
+      expect(result.status, TurnStatus.completed);
+      expect(result.assistantMessage?.text, 'Réponse');
+      expect(
+        adapter.requests.single.receiveTimeout,
+        ConversationRepository.sendTimeout,
+      );
+    });
+
+    test('429 : le motif dit ce qui débloque la suite', () async {
+      for (final (reason, matcher) in [
+        ('signup_required', isA<SignupRequiredException>()),
+        ('free_allowance_exhausted', isA<FreeAllowanceExhaustedException>()),
+        (null, isA<TooManyMessagesException>()),
+      ]) {
+        final c = container(
+          ScriptedAdapter(
+            (options) async => jsonResponse(429, {
+              'code': 429,
+              'reason': ?reason,
+              'message': 'Limite atteinte.',
+            }),
+          ),
+        );
+
+        await expectLater(
+          c.read(conversationRepositoryProvider).send(conversation, 'Bonjour'),
+          throwsA(matcher),
+        );
+      }
+    });
+  });
+
+  group('conversation', () {
+    Future<ProviderContainer> opened(ScriptedAdapter adapter) async {
+      final c = container(adapter);
+      // Le contrôleur charge les messages à sa création
+      c.listen(chatControllerProvider(conversation), (_, _) {});
+      await c.read(chatControllerProvider(conversation).notifier).load();
+
+      return c;
+    }
+
+    test('un message envoyé reçoit sa réponse', () async {
+      final adapter = ScriptedAdapter((options) async {
+        return options.method == 'POST'
+            ? jsonResponse(
+                201,
+                turn(
+                  'completed',
+                  answer: message(
+                    'm2',
+                    'assistant',
+                    'Notez quand il déclenche.',
+                  ),
+                ),
+              )
+            : jsonResponse(200, page([]));
+      });
+      final c = await opened(adapter);
+
+      await c
+          .read(chatControllerProvider(conversation).notifier)
+          .send('  Mon différentiel saute  ');
+
+      final state = c.read(chatControllerProvider(conversation));
+      expect(state.pending, isNull);
+      expect(state.messages.map((m) => m.text), [
+        'Mon différentiel saute',
+        'Notez quand il déclenche.',
+      ]);
+      expect(adapter.requests.last.data, {'text': 'Mon différentiel saute'});
+    });
+
+    test(
+      'tour échoué : le message de l\'API, et une relance possible',
+      () async {
+        final adapter = ScriptedAdapter((options) async {
+          return options.method == 'POST'
+              ? jsonResponse(
+                  201,
+                  turn(
+                    'failed',
+                    failure: {
+                      'reason': 'unavailable',
+                      'message': 'Service momentanément indisponible.',
+                    },
+                  ),
+                )
+              : jsonResponse(200, page([]));
+        });
+        final c = await opened(adapter);
+
+        await c
+            .read(chatControllerProvider(conversation).notifier)
+            .send('Bonjour');
+
+        final state = c.read(chatControllerProvider(conversation));
+        expect(state.messages.single.role, MessageRole.user);
+        expect(state.failures['m1'], 'Service momentanément indisponible.');
+      },
+    );
+
+    test(
+      'essai épuisé : rien n\'est envoyé, le message revient dans la saisie',
+      () async {
+        final adapter = ScriptedAdapter((options) async {
+          return options.method == 'POST'
+              ? jsonResponse(429, {
+                  'code': 429,
+                  'reason': 'signup_required',
+                  'message': 'Créez un compte gratuit pour continuer.',
+                })
+              : jsonResponse(200, page([]));
+        });
+        final c = await opened(adapter);
+
+        await c
+            .read(chatControllerProvider(conversation).notifier)
+            .send('Ma quatrième question');
+
+        final state = c.read(chatControllerProvider(conversation));
+        expect(state.pending, isNull);
+        expect(state.limit, LimitNotice.signupRequired);
+        expect(state.limitMessage, 'Créez un compte gratuit pour continuer.');
+        expect(
+          c.read(chatDraftsProvider)[conversation],
+          'Ma quatrième question',
+        );
+      },
+    );
+
+    test(
+      'coupure pendant l\'attente : on relit au lieu de renvoyer, sans doublon',
+      () async {
+        var serverAnswered = false;
+        final adapter = ScriptedAdapter((options) async {
+          if (options.method == 'POST') {
+            // Le serveur reçoit et répond, mais la réponse se perd en route
+            serverAnswered = true;
+            throw DioException.connectionTimeout(
+              timeout: ConversationRepository.sendTimeout,
+              requestOptions: options,
+            );
+          }
+
+          return jsonResponse(
+            200,
+            page(
+              serverAnswered
+                  ? [
+                      message('m1', 'user', 'Bonjour'),
+                      message('m2', 'assistant', 'Réponse arrivée'),
+                    ]
+                  : [],
+            ),
+          );
+        });
+        final c = await opened(adapter);
+        final controller = c.read(
+          chatControllerProvider(conversation).notifier,
+        );
+
+        await controller.send('Bonjour');
+        expect(
+          c.read(chatControllerProvider(conversation)).pending?.status,
+          PendingStatus.connectionLost,
+        );
+
+        await controller.load();
+
+        final state = c.read(chatControllerProvider(conversation));
+        expect(state.pending, isNull);
+        expect(state.messages.map((m) => m.text), [
+          'Bonjour',
+          'Réponse arrivée',
+        ]);
+        expect(
+          adapter.calls.where((call) => call.startsWith('POST')),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('tour encore en cours : suivi jusqu\'à sa réponse', () async {
+      final adapter = ScriptedAdapter((options) async {
+        if (options.method == 'POST') {
+          return jsonResponse(201, turn('in_progress'));
+        }
+        if (options.path.endsWith('/turns/t1')) {
+          return jsonResponse(
+            200,
+            turn('completed', answer: message('m2', 'assistant', 'Plus tard')),
+          );
+        }
+
+        return jsonResponse(200, page([]));
+      });
+      final c = await opened(adapter);
+
+      await c
+          .read(chatControllerProvider(conversation).notifier)
+          .send('Bonjour');
+
+      expect(
+        c.read(chatControllerProvider(conversation)).messages.last.text,
+        'Plus tard',
+      );
+      expect(adapter.calls, contains('GET /api/v1/turns/t1'));
+    });
+  });
+
+  group('écran de conversation', () {
+    testWidgets('mention IA permanente et bloc inconnu affiché par son repli', (
+      tester,
+    ) async {
+      final adapter = ScriptedAdapter(
+        (options) async => jsonResponse(
+          200,
+          page([
+            message('m1', 'user', 'Bonjour'),
+            {
+              ...message('m2', 'assistant', ''),
+              'blocks': [
+                {
+                  'type': 'diagnostic_step',
+                  'version': 3,
+                  'fallbackText': 'Étape 2 : coupez le circuit de la cuisine.',
+                },
+              ],
+            },
+          ]),
+        ),
+      );
+      final c = container(adapter);
+      await tester.pumpWidget(
+        testApp(c, const ChatScreen(conversationUuid: conversation)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('aiNotice')), findsOneWidget);
+      expect(find.textContaining('assistant IA'), findsOneWidget);
+      expect(
+        find.text('Étape 2 : coupez le circuit de la cuisine.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('envoyer un message affiche la réponse', (tester) async {
+      final adapter = ScriptedAdapter((options) async {
+        return options.method == 'POST'
+            ? jsonResponse(
+                201,
+                turn(
+                  'completed',
+                  question: 'Mon différentiel saute',
+                  answer: message(
+                    'm2',
+                    'assistant',
+                    'Notez quand il déclenche.',
+                  ),
+                ),
+              )
+            : jsonResponse(200, page([]));
+      });
+      final c = container(adapter);
+      await tester.pumpWidget(
+        testApp(c, const ChatScreen(conversationUuid: conversation)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<IconButton>(find.byKey(const Key('send'))).onPressed,
+        isNull,
+      );
+      await tester.enterText(
+        find.byKey(const Key('composer')),
+        'Mon différentiel saute',
+      );
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('send')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Mon différentiel saute'), findsOneWidget);
+      expect(find.text('Notez quand il déclenche.'), findsOneWidget);
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('composer')))
+            .controller
+            ?.text,
+        '',
+      );
+    });
+
+    testWidgets('essai épuisé : créer un compte ou se connecter', (
+      tester,
+    ) async {
+      final adapter = ScriptedAdapter((options) async {
+        return options.method == 'POST'
+            ? jsonResponse(429, {
+                'code': 429,
+                'reason': 'signup_required',
+                'message': 'Créez un compte gratuit pour continuer.',
+              })
+            : jsonResponse(200, page([]));
+      });
+      final c = container(adapter);
+      await tester.pumpWidget(
+        testApp(c, const ChatScreen(conversationUuid: conversation)),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byKey(const Key('composer')), 'Ma question');
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('send')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('limitCard')), findsOneWidget);
+      expect(find.byKey(const Key('limitCreateAccount')), findsOneWidget);
+      expect(find.byKey(const Key('limitLogIn')), findsOneWidget);
+      // Le message attend dans la zone de saisie
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('composer')))
+            .controller
+            ?.text,
+        'Ma question',
+      );
+    });
+  });
+}

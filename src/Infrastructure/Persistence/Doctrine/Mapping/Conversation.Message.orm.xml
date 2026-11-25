@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <!-- Ordre des messages : uuid v7, croissant dans le temps -->
+  <entity name="App\Domain\Conversation\Message" table="conversation_message">
+    <indexes>
+        <index columns="conversation_uuid,uuid" name="idx_conversation_message_order"/>
+    </indexes>
+    <id name="uuid" type="guid" column="uuid"/>
+    <field name="role" type="string" column="role" length="16" enum-type="App\Domain\Conversation\MessageRole" nullable="false"/>
+    <field name="blocks" type="json" column="blocks" nullable="false"/>
+    <field name="createdAt" type="datetimetz_immutable" column="created_at" nullable="false"/>
+    <many-to-one field="conversation" target-entity="App\Domain\Conversation\Conversation">
+        <join-column name="conversation_uuid" referenced-column-name="uuid" nullable="false" on-delete="CASCADE"/>
+    </many-to-one>
+  </entity>
+</doctrine-mapping>

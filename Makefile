@@ -126,6 +126,14 @@ test_unit: ## Run unit tests only
 test_integration: ## Run integration tests only
 	${BIN_PHP} ./bin/phpunit --testsuite=Integration ${ARGS}
 
+# Vrai appel au fournisseur du modèle (payant) : clé dans .env.local, jamais lancé par make test
+test_live: ## Run live tests against the LLM provider (paid, needs ANTHROPIC_API_KEY in .env.local)
+	${BIN_PHP} ./bin/phpunit tests/Live ${ARGS}
+
+# Suite vide jusqu'aux premiers calculateurs (lot L13) : retirer alors --do-not-fail-on-empty-test-suite
+test_critical: ## Run critical tests only (calculations and safety rules, no LLM)
+	${BIN_PHP} ./bin/phpunit --testsuite=Critical --do-not-fail-on-empty-test-suite ${ARGS}
+
 ##
 ## ----------------
 ## Mobile (Flutter)

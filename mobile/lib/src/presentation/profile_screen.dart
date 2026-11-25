@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../data/api_errors.dart';
@@ -92,13 +93,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  Future<void> _confirmDelete() async {
+  Future<void> _confirmDelete({bool guest = false}) async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text(l10n.profileDeleteConfirmTitle),
-        content: Text(l10n.profileDeleteConfirmBody),
+        content: Text(
+          guest
+              ? l10n.profileGuestDeleteConfirmBody
+              : l10n.profileDeleteConfirmBody,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -128,10 +133,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  /// Un invité n'a pas de profil à modifier : il crée son compte, rejoint un
+  /// compte existant ou supprime les données de son essai.
+  Widget _buildGuest(AppLocalizations l10n, ThemeData theme) {
+    return Scaffold(
+      appBar: AppBar(title: Text(l10n.profileTitle)),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    l10n.profileGuestIntro,
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    key: const Key('guestCreateAccount'),
+                    onPressed: () => context.push('/inscription'),
+                    child: Text(l10n.homeCreateAccount),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton(
+                    key: const Key('guestLogIn'),
+                    onPressed: () => context.push('/connexion'),
+                    child: Text(l10n.welcomeHaveAccount),
+                  ),
+                  if (_error != null) FormErrorText(_error!),
+                  const SizedBox(height: 24),
+                  TextButton(
+                    onPressed: () => _confirmDelete(guest: true),
+                    style: TextButton.styleFrom(
+                      foregroundColor: theme.colorScheme.error,
+                    ),
+                    child: Text(l10n.profileGuestDelete),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final auth = ref.watch(authControllerProvider);
+    if (auth is AuthSignedIn && auth.user.guest) {
+      return _buildGuest(l10n, theme);
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.profileTitle)),

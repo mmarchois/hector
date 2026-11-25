@@ -20,36 +20,37 @@
 | L1 | Passage à Symfony 8 | — | — |
 | L2 | Garde-fous d'architecture et intégration continue | L1 | — |
 | **Phase 1 — Socle conversationnel** | | | |
-| L3 | Conversations et messages, sans IA | L2 | 1 |
-| L4 | Port du modèle de langage et premier tour réel | L3 | 1, 2 |
-| L5 | Écran de conversation (mobile) | L3 | 1 |
-| L6 | Réponse structurée et contrôle des réponses | L4 | 2 |
-| L7 | Jeu d'évaluation et outil de mesure | L6 | — |
+| L3 | Essai sans compte | L2 | — |
+| L4 | Conversations et messages, sans IA | L3 | 1 |
+| L5 | Port du modèle de langage et premier tour réel | L4 | 1, 2 |
+| L6 | Écran de conversation (mobile) | L4 | 1 |
+| L7 | Réponse structurée et contrôle des réponses | L5 | 2 |
+| L8 | Jeu d'évaluation et outil de mesure | L7 | — |
 | **Phase 2 — Base documentaire** | | | |
-| L8 | Modèle documentaire et ingestion | L2 | 3 |
-| L9 | Recherche par mots et réponses sourcées | L6, L8 | 3, 4 |
-| L10 | Registre normatif | L8 | 4 |
-| L11 | Recherche par vecteurs et fusion | L7, L9 | 3 |
+| L9 | Modèle documentaire et ingestion | L2 | 3 |
+| L10 | Recherche par mots et réponses sourcées | L7, L9 | 3, 4 |
+| L11 | Registre normatif | L9 | 4 |
+| L12 | Recherche par vecteurs et fusion | L8, L10 | 3 |
 | **Phase 3 — Calculs** | | | |
-| L12 | Noyau de calcul et premiers calculateurs | L2 | — |
-| L13 | Calculs dans la conversation | L6, L12 | 2 |
+| L13 | Noyau de calcul et premiers calculateurs | L2 | — |
+| L14 | Calculs dans la conversation | L7, L13 | 2 |
 | **Phase 4 — Diagnostic** | | | |
-| L14 | Prévention : niveaux de risque, qualification, catalogue | L2 | 7 |
-| L15 | Domaine du diagnostic, sans modèle de langage | L14 | 7 |
-| L16 | Diagnostic guidé dans la conversation | L6, L15 | 5, 6, 7 |
-| L17 | Conclusion argumentée et retour du terrain | L16 | 8 |
+| L15 | Prévention : niveaux de risque, qualification, catalogue | L2 | 7 |
+| L16 | Domaine du diagnostic, sans modèle de langage | L15 | 7 |
+| L17 | Diagnostic guidé dans la conversation | L7, L16 | 5, 6, 7 |
+| L18 | Conclusion argumentée et retour du terrain | L17 | 8 |
 | **Phase 5 — Ouverture** | | | |
-| L18 | Durcissement | L17 | — |
-| L19 | Bêta fermée | L18 | — |
+| L19 | Durcissement | L18 | — |
+| L20 | Bêta fermée | L19 | — |
 | **Phase 6 — Conseil en équipements (après le MVP)** | | | |
-| L20 | Catalogue : modèle et import | L8 | — |
-| L21 | Corpus produits et recherche de références | L9, L20 | — |
-| L22 | Comparaison structurée | L21 | — |
-| L23 | Compatibilité avec l'installation | L12, L20 | — |
-| L24 | Recommandations et alternatives | L22, L23 | — |
-| L25 | Prix, disponibilités et sélection présentable au client | L24 | — |
+| L21 | Catalogue : modèle et import | L9 | — |
+| L22 | Corpus produits et recherche de références | L10, L21 | — |
+| L23 | Comparaison structurée | L22 | — |
+| L24 | Compatibilité avec l'installation | L13, L21 | — |
+| L25 | Recommandations et alternatives | L23, L24 | — |
+| L26 | Prix, disponibilités et sélection présentable au client | L25 | — |
 
-Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avancer indépendamment : le socle (L3 à L7), la base documentaire (L8), le calcul (L12), la prévention et le domaine du diagnostic (L14, L15). Ils se rejoignent aux lots L9, L13 et L16.
+Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avancer indépendamment : le socle (L3 à L8), la base documentaire (L9), le calcul (L13), la prévention et le domaine du diagnostic (L15, L16). Ils se rejoignent aux lots L10, L14 et L17.
 
 ---
 
@@ -58,7 +59,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 ### L0 — Validation du cadrage
 
 **Objectif.** Partir de décisions écrites.
-**Contenu.** Relecture des cinq documents. Réponse à chaque décision D1 à D16 et à chaque question P1 à P9. Désignation de l'expert. Liste du corpus de départ, avec le droit d'usage de chaque document.
+**Contenu.** Relecture des cinq documents. Réponse à chaque décision D1 à D17 et à chaque question P1 à P11. Désignation de l'expert. Liste du corpus de départ, avec le droit d'usage de chaque document.
 **Critères d'acceptation.**
 - Chaque décision et chaque question porte une réponse datée dans son document.
 - L'expert est nommé et a accepté de relire catalogue, cas de référence et jeu d'évaluation.
@@ -96,7 +97,28 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 ## Phase 1 — Socle conversationnel
 
-### L3 — Conversations et messages, sans IA
+### L3 — Essai sans compte
+
+**Objectif.** Utiliser Hector dès l'ouverture de l'application, sans inscription, puis créer un compte sans rien perdre (décision D17).
+**Contenu.** Compte invité : route qui crée un `User` sans nom, sans e-mail et sans mot de passe, et renvoie ses jetons. Inscription depuis un compte invité : le même compte reçoit ses identifiants. Acceptation des conditions d'utilisation enregistrée avec sa version (texte provisoire jusqu'au lot L19). Limite de création par adresse IP. Commande de purge des invités inactifs. Côté mobile : compte invité ouvert au premier lancement, accueil sans passer par la connexion, invitation à créer un compte depuis le profil.
+**Critères d'acceptation.**
+- Au premier lancement, l'application arrive sur l'accueil sans écran de connexion, une fois les conditions acceptées.
+- Un compte invité ne peut pas se connecter par e-mail et mot de passe ; il n'a ni l'un ni l'autre (ID1).
+- S'inscrire depuis un compte invité garde son uuid et tout ce qui lui est rattaché ; la session en cours reste valide (ID2).
+- `/auth/me` indique qu'il s'agit d'un invité. La modification du profil lui est refusée avec un code que le mobile traduit en invitation à créer un compte.
+- Un invité a la qualification la plus restrictive (ID3).
+- Au-delà de la limite de création par adresse IP, l'API renvoie une 429 avec un message clair.
+- La commande de purge supprime les invités inactifs depuis la durée fixée (P7), avec leurs données (ID4).
+- Un premier lancement sans réseau affiche un message clair et réessaie au retour du réseau.
+
+**Tests.** Unitaires des handlers : création, conversion, purge. Intégration : création, limite par IP, refus de la connexion par identifiants, conversion avec conservation des données et de la session, purge. Mobile : premier lancement, conversion, démarrage hors ligne.
+**Réalisé (24 novembre 2026).** Écarts et précisions :
+- Les conditions d'utilisation s'acceptent sur l'écran de bienvenue, avant l'essai sans compte comme avant la connexion ou l'inscription. Elles sont servies par l'API (`GET /api/v1/terms-of-use`) et versionnées dans `resources/legal/` ; le texte est provisoire jusqu'au lot L19.
+- Un invité est purgé quand il n'a plus de session valide, c'est-à-dire après 30 jours sans activité (DOMAIN.md, ID4).
+- Le refus de modifier le profil d'un invité est une 403 avec `reason: guest_account`. Des conditions acceptées mais périmées donnent une 409 avec `reason: terms_of_use_outdated`.
+- Sans réseau au premier lancement, l'écran de bienvenue réessaie seul toutes les 10 secondes.
+
+### L4 — Conversations et messages, sans IA
 
 **Objectif.** Poser le contexte Conversation et son contrat d'API.
 **Contenu.** `Conversation`, `Message`, `Turn`, migrations. Routes : créer une conversation, lister les siennes, lire les messages par pages, envoyer un message, suivre un tour. L'assistant est un bouchon qui renvoie une réponse fixe, derrière le contrat définitif.
@@ -105,15 +127,23 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - L'envoi d'un message renvoie le tour avec son statut et, s'il est terminé, la réponse.
 - Un message vide ou trop long renvoie une 422 avec `violations`.
 - La suppression d'un compte supprime ses conversations.
+- Un invité qui se connecte à un compte existant retrouve ses conversations d'invité dans ce compte, puis le compte invité est supprimé (selon la réponse à P11).
 - La spécification OpenAPI décrit les nouvelles routes.
 
-**Tests.** Unitaires des handlers. Intégration : propriété, pagination, validation, suppression en cascade.
+**Tests.** Unitaires des handlers. Intégration : propriété, pagination, validation, suppression en cascade, rattachement des conversations d'un invité.
+**Réalisé (24 novembre 2026).** Précisions :
+- Messages lus par pages en remontant le temps : `?before=<uuid>&limit=`, et `hasMore`. L'ordre des messages est celui de leurs uuid v7, croissants dans le temps.
+- Suppression du compte et rattachement passent par le port `UserOwnedDataInterface` du contexte User, implémenté dans l'infrastructure pour chaque contexte qui rattache des données à un utilisateur. Ni User ni Conversation ne dépendent l'un de l'autre.
+- Rattachement d'un invité : `POST /api/v1/auth/merge-guest`, avec le jeton de rafraîchissement de l'invité comme preuve. L'application l'appelle après la connexion. S'il échoue, la connexion reste valable et l'essai est purgé avec le compte invité.
+- Le tour s'exécute en deux transactions courtes (`TurnRunner`). La réponse fixe occupe déjà la place de l'appel au modèle du lot L5.
 
-### L4 — Port du modèle de langage et premier tour réel
+### L5 — Port du modèle de langage et premier tour réel
 
 **Objectif.** Obtenir une vraie réponse sans lier le code à un fournisseur.
-**Contenu.** `ChatModelInterface` et ses objets neutres. Adaptateur du fournisseur retenu pour démarrer (D3). `FakeChatModel` scriptable. Exécution du tour hors transaction. Consignes versionnées dans `resources/prompts`. Trace du tour. Échecs traités : délai dépassé, refus du fournisseur, quota, panne de réseau. Limite de débit par utilisateur.
+**Contenu.** `ChatModelInterface` et ses objets neutres. Adaptateur du fournisseur retenu pour démarrer (D3). `FakeChatModel` scriptable. Exécution du tour hors transaction. Consignes versionnées dans `resources/prompts`. Trace du tour. Échecs traités : délai dépassé, refus du fournisseur, quota, panne de réseau. Limite de débit par utilisateur. Allocation gratuite selon le type de compte (P10).
 **Critères d'acceptation.**
+- Un invité qui a épuisé son allocation reçoit, avant tout appel au modèle, une erreur au code `signup_required` et un message en français (CV8). Un compte complet a sa propre allocation ; le code qui annoncera le paiement est réservé, pas développé.
+- Allocation épuisée ou non, un signal de danger repéré par les règles fixes reçoit le message de sécurité prévu (SECURITY.md, § 3).
 - Aucune classe de `Domain` ou d'`Application` ne référence le SDK du fournisseur (vérifié par L2).
 - Aucune transaction n'est ouverte en base pendant l'appel au modèle.
 - Chaque tour terminé a une trace : modèle, version des consignes, jetons, durée, issue.
@@ -122,8 +152,17 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - Le tour se termine et s'enregistre même si le client se déconnecte.
 
 **Tests.** Unitaires de l'exécution du tour avec le faux modèle : succès, délai, refus, boucle bornée. Contrat de l'adaptateur sur des réponses enregistrées. Intégration du parcours complet avec le faux modèle. Test vivant à la main, hors `make test`.
+**Réalisé (24 novembre 2026).** Précisions et écarts :
+- Fournisseur de départ : Anthropic, modèle `claude-opus-5-5`, effort `medium`, via le SDK officiel `anthropic-ai/sdk` (D3 reste à trancher par la mesure du lot L8). Réglages dans `.env` (`CHAT_*`), clé dans `.env.local`.
+- Les replis côté serveur en cas de refus sont activés (`fallbacks: default`, bêta `server-side-fallback-2026-07-01`) : le fournisseur réessaie sur un autre modèle, et la trace garde le modèle qui a réellement répondu. Un refus qui persiste donne une réponse dégradée fixe.
+- Pas encore d'appel d'outils ni de sortie structurée : ils arrivent avec les capacités et le contrôle des réponses (lots L7, L10). Le port est fait pour les accueillir sans changer d'appelant.
+- Allocation gratuite **provisoire** : 10 messages pour un invité, 30 par 24 heures pour un compte (`config/services.yaml`). Refus en 429, `reason: signup_required` ou `free_allowance_exhausted`.
+- Limite de débit : 10 messages par minute et par utilisateur.
+- **Reporté au lot L15 :** le critère « un signal de danger reçoit le message de sécurité même allocation épuisée ». Il suppose les règles fixes de Prévention, qui n'existent pas encore. D'ici là, les consignes demandent au modèle de traiter le danger en premier, ce qui n'est pas un mécanisme vérifiable.
+- Réponses du test de contrat : construites d'après le format documenté de l'API, à remplacer par des réponses réellement enregistrées au premier `make test_live`.
+- Délais : 90 secondes par appel, une seule nouvelle tentative, `fastcgi_read_timeout` de nginx à 240 secondes. Le mobile reste à 30 secondes jusqu'au lot L6.
 
-### L5 — Écran de conversation (mobile)
+### L6 — Écran de conversation (mobile)
 
 **Objectif.** Dialoguer depuis l'application.
 **Contenu.** Liste des conversations, écran de discussion, saisie, états d'envoi, d'attente, d'échec et de relance, rendu des blocs, repli pour un type inconnu, mention « assistant IA ».
@@ -132,11 +171,19 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - Après une coupure de réseau pendant l'attente, l'application retrouve la réponse en rouvrant la conversation, sans message en double.
 - Un bloc de type inconnu s'affiche par son texte de repli (CV5).
 - L'écran indique en permanence qu'on parle à une IA.
+- Quand l'allocation d'un invité est épuisée, l'application propose de créer un compte ou de se connecter, puis revient dans la conversation, message en attente compris.
 - Tous les textes sont dans `app_fr.arb`.
 
-**Tests.** Tests d'écrans avec l'adaptateur scripté : états, repli, relance, reprise. Parcours de bout en bout.
+**Tests.** Tests d'écrans avec l'adaptateur scripté : états, repli, relance, reprise, allocation épuisée. Parcours de bout en bout.
+**Réalisé (24 novembre 2026).** Précisions :
+- L'accueil liste les conversations et en ouvre une nouvelle ; l'écran de conversation porte en permanence la mention « assistant IA ».
+- Réseau coupé pendant l'attente : l'application ne renvoie pas le message. Elle propose de recharger la conversation, et retire le message en attente s'il y figure déjà (pas de doublon). Rouvrir la conversation donne le même résultat.
+- Tour échoué : le message de l'API s'affiche sous la question, avec « Réessayer », qui ouvre un nouveau tour.
+- Essai épuisé : le message refusé revient dans la zone de saisie. « Créer un compte » et « J'ai déjà un compte » ramènent ensuite dans la conversation (`?retour=`).
+- Délai de réception de 4 minutes pour l'envoi d'un message seulement. Un tour encore « en cours » est suivi toutes les 2 secondes.
+- Les consignes demandent du texte simple, sans Markdown : l'application affiche le texte tel quel.
 
-### L6 — Réponse structurée et contrôle des réponses
+### L7 — Réponse structurée et contrôle des réponses
 
 **Objectif.** Faire de la nature de chaque énoncé une donnée contrôlée.
 **Contenu.** Format de blocs versionné (D12) : énoncés typés, question, avertissement. Sortie structurée demandée au modèle. Contrôle déterministe du brouillon. Une reprise, puis réponse dégradée. Détection, dans le texte libre, des renvois à une disposition précise.
@@ -149,7 +196,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Suite critique : pour chaque règle du contrôle, au moins un cas accepté et un cas rejeté. Intégration avec le faux modèle : brouillon invalide puis valide, brouillon invalide deux fois. Tests d'écrans.
 
-### L7 — Jeu d'évaluation et outil de mesure
+### L8 — Jeu d'évaluation et outil de mesure
 
 **Objectif.** Mesurer la qualité avant de choisir un modèle et avant chaque changement de consignes.
 **Contenu.** Format des cas : question, éléments attendus, sources attendues, interdits. Premiers cas rédigés avec l'expert, en trois familles : questions techniques, pièges normatifs (article ou édition qui n'existe pas), demandes dangereuses. Commande `make eval`. Rapport daté : modèle, version des consignes, résultats par famille, coût. Comparaison de deux exécutions.
@@ -166,7 +213,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 ## Phase 2 — Base documentaire
 
-### L8 — Modèle documentaire et ingestion
+### L9 — Modèle documentaire et ingestion
 
 **Objectif.** Gérer des documents en versions, avec leurs droits.
 **Contenu.** Contexte `Knowledge` : `Corpus`, `Source`, `License`, `DocumentVersion`, `Passage`, `IngestionRun`. Stockage du fichier d'origine avec son empreinte. Extraction et découpage derrière leurs ports (D14). Commandes d'ingestion, de publication, de retrait et de consultation.
@@ -181,7 +228,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Unitaires du cycle de vie et des licences. Intégration des commandes sur des fichiers d'exemple, dont un document à tableaux. Test de reproductibilité.
 
-### L9 — Recherche par mots et réponses sourcées
+### L10 — Recherche par mots et réponses sourcées
 
 **Objectif.** Répondre en citant des passages réels.
 **Contenu.** `PassageSearchInterface` et son adaptateur plein texte français. Outil `rechercher_documentation`. Citations par identifiant, contrôlées par le serveur (D7). Route de consultation d'une source citée. Affichage des sources sur mobile.
@@ -192,11 +239,11 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - La recherche d'un identifiant exact présent dans le corpus fait remonter son passage en tête.
 - L'extrait affiché respecte la licence de la source : extrait, ou simple renvoi (KN5).
 - Une recherche nomme ses corpus, et chaque résultat indique le sien (KN7).
-- La part des cas d'évaluation où la source attendue est retrouvée est mesurée et notée : c'est la référence du lot L11.
+- La part des cas d'évaluation où la source attendue est retrouvée est mesurée et notée : c'est la référence du lot L12.
 
 **Tests.** Suite critique : contrôle des citations. Intégration de la recherche sur un corpus de test. Évaluation. Tests d'écrans.
 
-### L10 — Registre normatif
+### L11 — Registre normatif
 
 **Objectif.** Ne citer que des textes et des éditions qui existent, avec leurs dates.
 **Contenu.** Contexte `Regulation`. Registre chargé depuis `resources/regulation`, relu par l'expert. Contrôle des références normatives. Signalement d'une édition remplacée.
@@ -209,12 +256,12 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Suite critique : contrôle des références. Évaluation, famille « pièges normatifs », tolérance nulle.
 
-### L11 — Recherche par vecteurs et fusion
+### L12 — Recherche par vecteurs et fusion
 
 **Objectif.** Retrouver aussi les passages formulés autrement que la question.
 **Contenu.** `EmbeddingModelInterface` et son adaptateur (D5). Extension vectorielle de PostgreSQL. Calcul des vecteurs à l'ingestion. Fusion des deux recherches.
 **Critères d'acceptation.**
-- La part des sources attendues retrouvées est supérieure ou égale à la référence du lot L9. La recherche hybride n'est conservée que sur ce chiffre.
+- La part des sources attendues retrouvées est supérieure ou égale à la référence du lot L10. La recherche hybride n'est conservée que sur ce chiffre.
 - Changer de modèle de vecteurs impose un recalcul complet, explicite et tracé ; une recherche ne mélange jamais des vecteurs de modèles différents.
 - Si le service de vecteurs est indisponible, la recherche par mots continue de fonctionner.
 - `make check` passe, contrôle du schéma compris.
@@ -225,7 +272,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 ## Phase 3 — Calculs
 
-### L12 — Noyau de calcul et premiers calculateurs
+### L13 — Noyau de calcul et premiers calculateurs
 
 **Objectif.** Calculer de façon déterministe, traçable et testée à part.
 **Contenu.** Contexte `Calculation` : grandeurs typées, définition versionnée d'un calculateur, trace d'exécution. Premiers calculateurs fondés sur les seules lois physiques : loi d'Ohm, puissance en monophasé et en triphasé, courant d'emploi, chute de tension. Routes pour lister les calculateurs et calculer.
@@ -239,7 +286,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Suite critique : cas de référence dans des fichiers de données indépendants du code ; propriétés (monotonie, cohérence des unités, aller-retour des conversions) ; tests de mutation. Intégration des routes.
 
-### L13 — Calculs dans la conversation
+### L14 — Calculs dans la conversation
 
 **Objectif.** Calculer depuis la discussion, sans que le modèle touche aux nombres.
 **Contenu.** Outils de calcul offerts au modèle. Bloc de calcul composé à partir de la trace.
@@ -255,7 +302,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 ## Phase 4 — Diagnostic
 
-### L14 — Prévention : niveaux de risque, qualification, catalogue
+### L15 — Prévention : niveaux de risque, qualification, catalogue
 
 **Objectif.** Décider par du code, et non par le modèle, quel geste peut être proposé à qui.
 **Contenu.** Contexte `Safety`. Niveaux de risque. Qualification déclarée dans le profil, côté API et mobile, particulier compris. Politique qualification × niveau. Format du catalogue de vérifications et premières procédures relues par l'expert, dont celles qui sont permises à un particulier. Messages de sécurité fixes. Signaux de danger. Consignes interdites.
@@ -268,7 +315,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Suite critique : matrice exhaustive, chargement du catalogue, détection des consignes interdites sur un jeu de textes positifs et négatifs. Intégration du profil. Tests d'écrans.
 
-### L15 — Domaine du diagnostic, sans modèle de langage
+### L16 — Domaine du diagnostic, sans modèle de langage
 
 **Objectif.** Disposer d'un diagnostic entièrement pilotable et testable par des commandes.
 **Contenu.** Contexte `Diagnosis` : session, contexte d'installation, symptômes, observations, mesures, hypothèses, vérifications, conclusion, journal. Une commande par transition. Route de lecture d'une session.
@@ -280,7 +327,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Unitaires de l'agrégat. Scénarios complets rejoués. Intégration de la route de lecture.
 
-### L16 — Diagnostic guidé dans la conversation
+### L17 — Diagnostic guidé dans la conversation
 
 **Objectif.** Guider l'utilisateur par des questions adaptatives, sous le contrôle du domaine.
 **Contenu.** Capacité « diagnostic » : outils de transition, état de la session ajouté au contexte de chaque tour, questions une à une, blocs d'étape et de tableau des hypothèses, rendu mobile.
@@ -294,7 +341,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Unitaires des outils. Intégration avec le faux modèle : transition valide, transition refusée, signal de danger, profil particulier. Évaluation avec un utilisateur simulé. Tests d'écrans.
 
-### L17 — Conclusion argumentée et retour du terrain
+### L18 — Conclusion argumentée et retour du terrain
 
 **Objectif.** Conclure sans jamais présenter l'incertain comme certain.
 **Contenu.** Règles du niveau de confiance. Bloc de conclusion. Résumé du diagnostic, consultable et transmissible à un professionnel. Retour de l'utilisateur : cause confirmée, infirmée, inconnue.
@@ -312,12 +359,13 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 ## Phase 5 — Ouverture
 
-### L18 — Durcissement
+### L19 — Durcissement
 
 **Objectif.** Rendre le produit exploitable par des inconnus.
-**Contenu.** Quota par utilisateur et budget par tour. Tour exécuté en tâche de fond si les mesures le demandent (D8). Supervision des erreurs, des durées et des coûts. Durée de conservation et suppression des données. Conditions d'utilisation et mentions. Signalement d'une réponse depuis l'application. Commande de désactivation d'un contenu. Campagne d'attaque par consignes cachées, dans des messages et dans des documents.
+**Contenu.** Quota par utilisateur et budget par tour. Budget global de l'essai sans compte ; étude des attestations d'appareil (D17). Tour exécuté en tâche de fond si les mesures le demandent (D8). Supervision des erreurs, des durées et des coûts. Durée de conservation et suppression des données. Conditions d'utilisation et mentions. Signalement d'une réponse depuis l'application. Commande de désactivation d'un contenu. Campagne d'attaque par consignes cachées, dans des messages et dans des documents.
 **Critères d'acceptation.**
 - Un quota dépassé renvoie une 429 avec un message clair.
+- Une fois le budget global des invités atteint, un nouvel invité est invité à créer un compte ; les comptes complets ne sont pas touchés.
 - Un tour ne peut dépasser son budget en itérations, en jetons ni en durée.
 - L'API reste disponible, connexion comprise, pendant un nombre de tours simultanés fixé au lancement du lot.
 - Un document piégé du jeu d'attaque ne change pas le comportement de l'assistant : aucune consigne suivie, aucun outil appelé à sa demande.
@@ -327,7 +375,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Intégration des quotas et de la suppression. Test de charge. Jeu d'attaque dans l'évaluation.
 
-### L19 — Bêta fermée
+### L20 — Bêta fermée
 
 **Objectif.** Confronter le produit au terrain avec un petit groupe, professionnels et particuliers.
 **Contenu.** Ouverture à un groupe restreint. Revue hebdomadaire des signalements, des tours rejetés ou dégradés et des retours du terrain. Décision de suite.
@@ -344,7 +392,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 Ces lots sont décrits à gros grain. Ils seront redécoupés quand les réponses aux questions P8 et P9 seront connues.
 
-### L20 — Catalogue : modèle et import
+### L21 — Catalogue : modèle et import
 
 **Objectif.** Disposer de données produits sourcées, pour une ou deux catégories.
 **Contenu.** Contexte `Catalog` : marques, gammes, références, catégories et critères, caractéristiques avec provenance, sources produits. `ProductDataImporterInterface` et un premier import depuis des fichiers de fabricants.
@@ -356,7 +404,7 @@ Ces lots sont décrits à gros grain. Ils seront redécoupés quand les réponse
 
 **Tests.** Unitaires des règles CT1 à CT6. Intégration de l'import sur des fichiers d'exemple, dont un fichier incomplet.
 
-### L21 — Corpus produits et recherche de références
+### L22 — Corpus produits et recherche de références
 
 **Objectif.** Interroger notices, fiches techniques et références sans les mêler aux textes normatifs.
 **Contenu.** Corpus « produits » dans `Knowledge`, avec ses règles de publication. `ProductSearchInterface`. Outil `rechercher_produits`. Bloc « fiche produit ».
@@ -368,7 +416,7 @@ Ces lots sont décrits à gros grain. Ils seront redécoupés quand les réponse
 
 **Tests.** Suite critique : séparation des corpus. Intégration de la recherche. Cas d'évaluation « produit inconnu », tolérance nulle sur les caractéristiques inventées.
 
-### L22 — Comparaison structurée
+### L23 — Comparaison structurée
 
 **Objectif.** Comparer plusieurs références selon les critères de leur catégorie.
 **Contenu.** `Comparison`, outil `comparer_produits`, bloc « tableau comparatif ».
@@ -380,7 +428,7 @@ Ces lots sont décrits à gros grain. Ils seront redécoupés quand les réponse
 
 **Tests.** Unitaires de la comparaison. Intégration avec le faux modèle. Tests d'écrans.
 
-### L23 — Compatibilité avec l'installation
+### L24 — Compatibilité avec l'installation
 
 **Objectif.** Dire si un équipement convient à une installation, ou ce qu'il manque pour le dire.
 **Contenu.** `InstallationConstraints`, règles de compatibilité déterministes appuyées sur les calculateurs, outil `verifier_compatibilite`.
@@ -392,7 +440,7 @@ Ces lots sont décrits à gros grain. Ils seront redécoupés quand les réponse
 
 **Tests.** Suite critique : table de décision par règle, cas de référence de l'expert.
 
-### L24 — Recommandations et alternatives
+### L25 — Recommandations et alternatives
 
 **Objectif.** Recommander de façon argumentée et neutre.
 **Contenu.** `CustomerNeed`, `RecommendationSession`, classement reproductible, outil `recommander`, bloc « recommandation ». Le modèle aide à recueillir le besoin et à l'expliquer ; il ne classe pas.
@@ -405,7 +453,7 @@ Ces lots sont décrits à gros grain. Ils seront redécoupés quand les réponse
 
 **Tests.** Suite critique : classement, test d'échange des marques. Évaluation : famille « neutralité ».
 
-### L25 — Prix, disponibilités et sélection présentable au client
+### L26 — Prix, disponibilités et sélection présentable au client
 
 **Objectif.** Compléter le conseil par des données de distributeurs, et produire un document à remettre.
 **Contenu.** `Offer`, `OfferFeedInterface`, délai de fraîcheur par catégorie, export d'une sélection.

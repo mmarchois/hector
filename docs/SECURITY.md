@@ -17,17 +17,17 @@ Le principe est toujours le même : ne pas compter sur les consignes données au
 
 | Règle | Mécanisme | Où | Comment c'est testé |
 |---|---|---|---|
-| Distinguer faits, hypothèses et recommandations | Chaque énoncé porte une nature. Un fait exige une preuve : citation, observation ou calcul. Le mobile rend chaque nature différemment. | Format des réponses (CV4), lot L6 | Suite critique sur le contrôle des brouillons |
-| Ne jamais inventer une référence normative | Une référence ne se construit qu'à partir du registre. Une citation doit viser un passage lu pendant le tour. Un renvoi à une disposition précise sans citation fait rejeter le brouillon. | RG1, lots L6, L9, L10 | Suite critique ; pièges normatifs de l'évaluation, tolérance nulle |
-| Identifier versions et dates d'application | Une version de document ne se publie pas sans dates ni licence. Chaque citation affiche édition et dates. Une édition remplacée est signalée. | KN1, RG2, RG3, lots L8 à L10 | Unitaires des règles ; intégration sur le contenu d'une citation |
-| Signaler les informations manquantes | « Information manquante » est une nature d'énoncé. Chaque champ du contexte d'installation peut valoir « inconnu ». Un calculateur refuse une entrée absente au lieu de la supposer. | CA4, lots L6, L12, L15 | Unitaires ; cas d'évaluation à données incomplètes |
-| Ne jamais présenter un diagnostic incertain comme certain | Le niveau de confiance est calculé par le domaine à partir des observations, pas choisi par le modèle. Chaque niveau a son gabarit de formulation. | DG6, lot L17 | Suite critique : table de décision |
+| Distinguer faits, hypothèses et recommandations | Chaque énoncé porte une nature. Un fait exige une preuve : citation, observation ou calcul. Le mobile rend chaque nature différemment. | Format des réponses (CV4), lot L7 | Suite critique sur le contrôle des brouillons |
+| Ne jamais inventer une référence normative | Une référence ne se construit qu'à partir du registre. Une citation doit viser un passage lu pendant le tour. Un renvoi à une disposition précise sans citation fait rejeter le brouillon. | RG1, lots L7, L10, L11 | Suite critique ; pièges normatifs de l'évaluation, tolérance nulle |
+| Identifier versions et dates d'application | Une version de document ne se publie pas sans dates ni licence. Chaque citation affiche édition et dates. Une édition remplacée est signalée. | KN1, RG2, RG3, lots L9 à L11 | Unitaires des règles ; intégration sur le contenu d'une citation |
+| Signaler les informations manquantes | « Information manquante » est une nature d'énoncé. Chaque champ du contexte d'installation peut valoir « inconnu ». Un calculateur refuse une entrée absente au lieu de la supposer. | CA4, lots L7, L13, L16 | Unitaires ; cas d'évaluation à données incomplètes |
+| Ne jamais présenter un diagnostic incertain comme certain | Le niveau de confiance est calculé par le domaine à partir des observations, pas choisi par le modèle. Chaque niveau a son gabarit de formulation. | DG6, lot L18 | Suite critique : table de décision |
 | Ne pas déduire l'absence de tension d'une image | Le modèle ne contient aucun état « hors tension ». Une image ne produit qu'un indice visuel, jamais une observation. La procédure de consignation est toujours affichée. | DG8, § 6 | Unitaires ; détection de formulations interdites |
-| Ne pas demander de manipulation dangereuse | Catalogue fermé de vérifications relues, chacune avec son niveau de risque. Politique selon la qualification. Liste de consignes interdites, détectées dans tout texte produit. Messages de sécurité fixes. Suspension sur signal de danger. | SF1 à SF5, DG4, DG7, lots L14 à L16 | Suite critique : matrice exhaustive ; demandes dangereuses de l'évaluation, tolérance nulle |
-| Tester à part les calculs et les règles critiques | Suite `Critical` : cas de référence de l'expert dans des fichiers indépendants du code, tests de mutation, aucun modèle de langage, bloquante en intégration continue. | Lots L2, L12, L14, L17 | — |
-| Ne jamais inventer caractéristique, prix, disponibilité ou compatibilité | Les valeurs affichées viennent du catalogue, avec source et date ; le modèle n'en écrit aucune. Un prix est un relevé daté. La compatibilité est une règle déterministe qui sait répondre « indéterminé ». | CT1, CT3, PR2, PR3, lots L20 à L25 | Suite critique ; cas « produit inconnu » de l'évaluation, tolérance nulle |
+| Ne pas demander de manipulation dangereuse | Catalogue fermé de vérifications relues, chacune avec son niveau de risque. Politique selon la qualification. Liste de consignes interdites, détectées dans tout texte produit. Messages de sécurité fixes. Suspension sur signal de danger. | SF1 à SF5, DG4, DG7, lots L15 à L17 | Suite critique : matrice exhaustive ; demandes dangereuses de l'évaluation, tolérance nulle |
+| Tester à part les calculs et les règles critiques | Suite `Critical` : cas de référence de l'expert dans des fichiers indépendants du code, tests de mutation, aucun modèle de langage, bloquante en intégration continue. | Lots L2, L13, L15, L18 | — |
+| Ne jamais inventer caractéristique, prix, disponibilité ou compatibilité | Les valeurs affichées viennent du catalogue, avec source et date ; le modèle n'en écrit aucune. Un prix est un relevé daté. La compatibilité est une règle déterministe qui sait répondre « indéterminé ». | CT1, CT3, PR2, PR3, lots L21 à L26 | Suite critique ; cas « produit inconnu » de l'évaluation, tolérance nulle |
 | Distinguer caractéristiques, avis et recommandations | Trois natures distinctes. Un avis rapporté nomme sa source et ne peut pas être enregistré comme caractéristique. | CV4, CT2 | Unitaires |
-| Rester neutre entre les marques | Le classement est un calcul reproductible à partir du besoin et des critères. La marque n'y entre que sur préférence exprimée. L'étendue de la comparaison et tout lien commercial sont affichés. | PR4, PR7, PR8, lot L24 | Test d'échange des marques ; famille « neutralité » de l'évaluation |
+| Rester neutre entre les marques | Le classement est un calcul reproductible à partir du besoin et des critères. La marque n'y entre que sur préférence exprimée. L'étendue de la comparaison et tout lien commercial sont affichés. | PR4, PR7, PR8, lot L25 | Test d'échange des marques ; famille « neutralité » de l'évaluation |
 
 ## 3. Niveaux de risque et qualification
 
@@ -43,7 +43,8 @@ Proposition à faire valider par l'expert et, pour le lien avec l'habilitation, 
 
 Règles qui s'ajoutent à la table :
 
-- Une qualification non renseignée vaut « particulier ».
+- Une qualification non renseignée vaut « particulier ». Un compte invité aussi (D17).
+- La limite gratuite ne bloque jamais un message de sécurité : un signal de danger repéré par les règles fixes reçoit le message prévu, même allocation épuisée.
 - L'habilitation est déclarée, pas vérifiée. Avant un geste N2 ou N3, l'application la rappelle et affiche les prérequis de la procédure.
 - Hector ne dit jamais qu'une installation est hors tension. Il affiche la procédure et enregistre ce que l'utilisateur déclare avoir vérifié.
 
@@ -101,9 +102,9 @@ Ces fonctions ne font pas partie du MVP, mais leurs règles orientent le modèle
 
 ## 7. Sécurité de l'application et des données
 
-**Accès.** L'authentification existe (JWT, jeton de rafraîchissement à usage unique, limitation des tentatives). Chaque nouvelle ressource est liée à son propriétaire et testée sur ce point : conversation, session de diagnostic, exécution de calcul, session de recommandation.
+**Accès.** L'authentification existe (JWT, jeton de rafraîchissement à usage unique, limitation des tentatives). Chaque nouvelle ressource est liée à son propriétaire et testée sur ce point : conversation, session de diagnostic, exécution de calcul, session de recommandation. Un compte invité (D17) passe par les mêmes jetons et les mêmes contrôles qu'un compte complet ; sa création est limitée par adresse IP, et les invités inactifs sont supprimés.
 
-**Consignes cachées.** Un message d'utilisateur ou un document ingéré peut contenir du texte rédigé pour détourner le modèle. Parades : les passages sont transmis comme des données, jamais comme des consignes ; les outils offerts au modèle ne peuvent que lire, calculer ou proposer une transition que le domaine valide ; aucun outil ne supprime, n'envoie ni ne publie quoi que ce soit ; un jeu d'attaque fait partie de l'évaluation (lot L18).
+**Consignes cachées.** Un message d'utilisateur ou un document ingéré peut contenir du texte rédigé pour détourner le modèle. Parades : les passages sont transmis comme des données, jamais comme des consignes ; les outils offerts au modèle ne peuvent que lire, calculer ou proposer une transition que le domaine valide ; aucun outil ne supprime, n'envoie ni ne publie quoi que ce soit ; un jeu d'attaque fait partie de l'évaluation (lot L19).
 
 **Fournisseurs.** Le fournisseur du modèle de langage et celui des vecteurs sont des sous-traitants. Ils ne reçoivent aucune donnée d'identité. Leurs conditions de conservation et le lieu de traitement font partie du choix (D3, D5). Une source dont la licence interdit la transmission à un tiers n'est jamais envoyée (KN5).
 
@@ -117,8 +118,8 @@ Ces fonctions ne font pas partie du MVP, mais leurs règles orientent le modèle
 
 - **Droits sur les normes.** Les normes AFNOR sont protégées. L'AFNOR soumet toute extraction à son accord écrit et s'oppose à la fouille de textes et à l'entraînement d'algorithmes sans accord exprès ([mentions légales](https://source.afnor.org/vars/Mention_legales_FR.pdf), [conditions générales](https://www.afnor.org/wp-content/uploads/2022/02/conditions_generales_vente_adhesion.pdf)). Les normes d'application obligatoire sont consultables gratuitement sur son site ([FFB](https://www.ffbatiment.fr/techniques-batiment/normalisation-regles-de-lart/nf-dtu-normes/dossier/comment-se-procurer-une-norme-du-batiment)), ce qui n'autorise pas à les indexer. C'est la raison d'être de `License` dans le modèle et de la question P3.
 - **Textes publics.** Les données de Légifrance sont réutilisables sous licence ouverte, aux conditions de la plateforme ([data.gouv.fr](https://www.data.gouv.fr/dataservices/legifrance/)). À vérifier jeu de données par jeu de données.
-- **Transparence sur l'IA.** L'obligation d'informer une personne qu'elle échange avec une IA (règlement européen sur l'IA, article 50) est applicable depuis le 2 août 2026 ([Goodwin](https://www.goodwinlaw.com/en/insights/publications/2026/08/alerts-technology-dpc-eu-ai-act-transparency-obligations-now-in-force)). La mention est prévue dès le lot L5. Le classement d'Hector au regard des systèmes à haut risque est à faire confirmer.
-- **Consommateurs.** Avec des particuliers, le droit de la consommation s'applique : information préalable, conditions d'utilisation, limites du service dites clairement.
+- **Transparence sur l'IA.** L'obligation d'informer une personne qu'elle échange avec une IA (règlement européen sur l'IA, article 50) est applicable depuis le 2 août 2026 ([Goodwin](https://www.goodwinlaw.com/en/insights/publications/2026/08/alerts-technology-dpc-eu-ai-act-transparency-obligations-now-in-force)). La mention est prévue dès le lot L6. Le classement d'Hector au regard des systèmes à haut risque est à faire confirmer.
+- **Consommateurs.** Avec des particuliers, le droit de la consommation s'applique : information préalable, conditions d'utilisation, limites du service dites clairement. Sans compte aussi : les conditions sont acceptées avant le premier message, et la version acceptée est enregistrée.
 - **Comparaison de produits.** Un service qui classe ou compare des produits a des obligations de loyauté et de transparence sur ses critères de classement et sur ses liens commerciaux (Code de la consommation, article L. 111-7 notamment, à faire vérifier). Les règles PR4, PR7 et PR8 vont dans ce sens.
 - **Données produits.** Catalogues de fabricants et données de distributeurs sont protégés. Aucune collecte automatique sur un site sans accord ; chaque source produit a ses droits renseignés (CT5).
 - **Responsabilité.** Un avertissement ne suffit pas à dégager la responsabilité de l'éditeur si un conseil cause un dommage. Les mécanismes de ce document, la trace de chaque tour et une assurance adaptée en sont les vraies réponses.
@@ -131,45 +132,47 @@ Gravité et probabilité sont des estimations de départ, à réviser à chaque 
 
 | # | Risque | Gravité | Probabilité | Parade | Lot |
 |---|---|---|---|---|---|
-| T1 | Une citation valide accompagne un énoncé que la source ne soutient pas | Forte | Moyenne | Affichage de l'extrait, mesure dans l'évaluation, signalement par l'utilisateur | L7, L9 |
-| T2 | L'extraction déforme un tableau ou un numéro de section | Forte | Forte | Choix de la méthode sur essai, relecture avant publication | L8 |
-| T3 | Un changement de modèle ou de consignes dégrade le comportement | Forte | Forte | Version du modèle fixée, consignes versionnées, évaluation avant tout changement | L7 |
-| T4 | Durée et coût d'un tour trop élevés | Moyenne | Moyenne | Budget par tour, mise en cache des consignes, mesure dès le lot L4 | L4, L18 |
-| T5 | Les tours simultanés saturent l'API | Moyenne | Forte dès l'ouverture | Contrat asynchrone dès le départ, tâche de fond au lot L18 | L3, L18 |
-| T6 | Une transaction reste ouverte pendant un appel au modèle | Moyenne | Forte si on n'y prend pas garde | Tour exécuté hors transaction, critère d'acceptation dédié | L4 |
-| T7 | Des consignes cachées dans un document ou un message détournent l'assistant | Forte | Moyenne | Outils sans effet destructeur, passages traités comme des données, jeu d'attaque | L18 |
-| T8 | Une ancienne version de l'application ne sait pas afficher un nouveau bloc | Faible | Forte | Texte de repli obligatoire sur chaque bloc | L5, L6 |
-| T9 | Le réseau coupe pendant un tour | Faible | Forte sur chantier | Le tour se termine côté serveur, le client relit la conversation | L4, L5 |
-| T10 | Les colonnes hors ORM font échouer le contrôle du schéma | Faible | Forte | Type personnalisé ou exclusion déclarée | L9, L11 |
-| T11 | L'outillage IA de l'écosystème PHP manque de maturité | Moyenne | Moyenne | Port à nous, adaptateurs minces, repli hors ligne pour l'ingestion | L4, L8 |
+| T1 | Une citation valide accompagne un énoncé que la source ne soutient pas | Forte | Moyenne | Affichage de l'extrait, mesure dans l'évaluation, signalement par l'utilisateur | L8, L10 |
+| T2 | L'extraction déforme un tableau ou un numéro de section | Forte | Forte | Choix de la méthode sur essai, relecture avant publication | L9 |
+| T3 | Un changement de modèle ou de consignes dégrade le comportement | Forte | Forte | Version du modèle fixée, consignes versionnées, évaluation avant tout changement | L8 |
+| T4 | Durée et coût d'un tour trop élevés | Moyenne | Moyenne | Budget par tour, mise en cache des consignes, mesure dès le lot L5 | L5, L19 |
+| T5 | Les tours simultanés saturent l'API | Moyenne | Forte dès l'ouverture | Contrat asynchrone dès le départ, tâche de fond au lot L19 | L4, L19 |
+| T6 | Une transaction reste ouverte pendant un appel au modèle | Moyenne | Forte si on n'y prend pas garde | Tour exécuté hors transaction, critère d'acceptation dédié | L5 |
+| T7 | Des consignes cachées dans un document ou un message détournent l'assistant | Forte | Moyenne | Outils sans effet destructeur, passages traités comme des données, jeu d'attaque | L19 |
+| T8 | Une ancienne version de l'application ne sait pas afficher un nouveau bloc | Faible | Forte | Texte de repli obligatoire sur chaque bloc | L6, L7 |
+| T9 | Le réseau coupe pendant un tour | Faible | Forte sur chantier | Le tour se termine côté serveur, le client relit la conversation | L5, L6 |
+| T10 | Les colonnes hors ORM font échouer le contrôle du schéma | Faible | Forte | Type personnalisé ou exclusion déclarée | L10, L12 |
+| T11 | L'outillage IA de l'écosystème PHP manque de maturité | Moyenne | Moyenne | Port à nous, adaptateurs minces, repli hors ligne pour l'ingestion | L5, L9 |
+| T12 | Des comptes invités ouverts en masse contournent la limite gratuite et font monter les coûts | Moyenne | Forte dès l'ouverture | Limite de création par IP, budget global des invités, attestation d'appareil à étudier | L3, L19 |
 
 ### Réglementaires
 
 | # | Risque | Gravité | Probabilité | Parade | Lot |
 |---|---|---|---|---|---|
-| R1 | Indexer des normes sans droit | Forte | Forte si rien n'est fait | Licence par source, corpus de départ sans contenu de norme, démarche auprès de l'AFNOR | L0, L8 |
+| R1 | Indexer des normes sans droit | Forte | Forte si rien n'est fait | Licence par source, corpus de départ sans contenu de norme, démarche auprès de l'AFNOR | L0, L9 |
 | R2 | Un conseil cause un accident ou un dégât | Très forte | Faible | Tous les mécanismes des § 2 à 4, trace de chaque tour, conditions d'utilisation, assurance | Tous |
-| R3 | Un geste réservé est guidé auprès d'une personne non habilitée, ou d'un particulier | Très forte | Moyenne | Politique par qualification, défaut restrictif, catalogue fermé | L14, L16 |
-| R4 | Des données personnelles partent chez un fournisseur sans cadre | Moyenne | Moyenne | Aucune identité transmise, conditions du fournisseur vérifiées, durée de conservation | L4, L18 |
-| R5 | Les obligations du règlement européen sur l'IA sont mal évaluées | Moyenne | Moyenne | Mention IA dès le lot L5, avis d'un juriste sur le classement | L5, L18 |
-| R6 | Une réponse s'appuie sur une édition qui ne s'applique pas au projet | Forte | Forte | Registre daté, question sur la date de référence, signalement des éditions remplacées | L10 |
-| R7 | Des données produits sont utilisées sans droit | Moyenne | Moyenne | Droits renseignés par source, pas de collecte automatique sans accord | L20 |
-| R8 | Le conseil en produits manque de transparence ou de neutralité | Moyenne | Moyenne | Classement reproductible, étendue et liens commerciaux affichés, test d'échange des marques | L24 |
+| R3 | Un geste réservé est guidé auprès d'une personne non habilitée, ou d'un particulier | Très forte | Moyenne | Politique par qualification, défaut restrictif, catalogue fermé | L15, L17 |
+| R4 | Des données personnelles partent chez un fournisseur sans cadre | Moyenne | Moyenne | Aucune identité transmise, conditions du fournisseur vérifiées, durée de conservation | L5, L19 |
+| R5 | Les obligations du règlement européen sur l'IA sont mal évaluées | Moyenne | Moyenne | Mention IA dès le lot L6, avis d'un juriste sur le classement | L6, L19 |
+| R6 | Une réponse s'appuie sur une édition qui ne s'applique pas au projet | Forte | Forte | Registre daté, question sur la date de référence, signalement des éditions remplacées | L11 |
+| R7 | Des données produits sont utilisées sans droit | Moyenne | Moyenne | Droits renseignés par source, pas de collecte automatique sans accord | L21 |
+| R8 | Le conseil en produits manque de transparence ou de neutralité | Moyenne | Moyenne | Classement reproductible, étendue et liens commerciaux affichés, test d'échange des marques | L25 |
 
 ### Fonctionnels
 
 | # | Risque | Gravité | Probabilité | Parade | Lot |
 |---|---|---|---|---|---|
-| F1 | L'utilisateur fait trop confiance à l'assistant | Forte | Forte | Natures d'énoncés visibles, niveau de confiance affiché, incertitudes listées | L6, L17 |
-| F2 | L'assistant refuse trop et devient inutile | Moyenne | Forte | Mesure des refus dans l'évaluation, catalogue enrichi au fil des retours | L7, L19 |
-| F3 | Le catalogue de vérifications couvre trop peu de cas | Moyenne | Forte au départ | Périmètre de pannes restreint et annoncé, familles ouvertes une à une | L14 |
+| F1 | L'utilisateur fait trop confiance à l'assistant | Forte | Forte | Natures d'énoncés visibles, niveau de confiance affiché, incertitudes listées | L7, L18 |
+| F2 | L'assistant refuse trop et devient inutile | Moyenne | Forte | Mesure des refus dans l'évaluation, catalogue enrichi au fil des retours | L8, L20 |
+| F3 | Le catalogue de vérifications couvre trop peu de cas | Moyenne | Forte au départ | Périmètre de pannes restreint et annoncé, familles ouvertes une à une | L15 |
 | F4 | Tout dépend d'un seul expert | Forte | Forte | Expert nommé dès le lot L0, relectures tracées, second relecteur à prévoir | L0 |
-| F5 | L'utilisateur décrit ou mesure mal | Forte | Moyenne | Mesures structurées, reformulation, conclusion qui cite ses appuis | L15, L17 |
-| F6 | Un particulier va au-delà de ce qui lui est proposé | Très forte | Moyenne | Guidage qui s'arrête tôt, orientation claire, messages de sécurité fixes, aucune information de procédure N2 ou N3 dans ses réponses | L14, L16 |
-| F7 | La saisie au clavier freine l'usage sur chantier | Moyenne | Forte | Questions à choix, voix en première suite du MVP | L16 |
+| F5 | L'utilisateur décrit ou mesure mal | Forte | Moyenne | Mesures structurées, reformulation, conclusion qui cite ses appuis | L16, L18 |
+| F6 | Un particulier va au-delà de ce qui lui est proposé | Très forte | Moyenne | Guidage qui s'arrête tôt, orientation claire, messages de sécurité fixes, aucune information de procédure N2 ou N3 dans ses réponses | L15, L17 |
+| F7 | La saisie au clavier freine l'usage sur chantier | Moyenne | Forte | Questions à choix, voix en première suite du MVP | L17 |
 | F8 | Le périmètre s'élargit avant que le cœur soit solide | Forte | Forte | Conseil en équipements après le MVP, un domaine à la fois | Phase 6 |
-| F9 | Le coût par utilisateur dépasse ce que le modèle économique supporte | Moyenne | Moyenne | Mesure dès le lot L4, quota, choix du modèle sur mesure | L4, L7, L18 |
-| F10 | Des données produits périmées ou partielles biaisent une recommandation | Moyenne | Forte | Date par valeur, délai de fraîcheur, étendue de la comparaison affichée | L20, L24, L25 |
+| F9 | Le coût par utilisateur dépasse ce que le modèle économique supporte | Moyenne | Moyenne | Mesure dès le lot L5, quota, choix du modèle sur mesure | L5, L8, L19 |
+| F10 | Des données produits périmées ou partielles biaisent une recommandation | Moyenne | Forte | Date par valeur, délai de fraîcheur, étendue de la comparaison affichée | L21, L25, L26 |
+| F11 | La limite gratuite tombe au milieu d'une panne | Moyenne | Moyenne | Messages de sécurité jamais bloqués ; après l'inscription, retour dans la conversation, message en attente compris | L5, L6 |
 
 ## 10. Incidents
 

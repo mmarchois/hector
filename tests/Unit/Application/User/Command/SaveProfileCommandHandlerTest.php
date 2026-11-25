@@ -13,6 +13,7 @@ use App\Domain\Company\Repository\CompanyRepositoryInterface;
 use App\Domain\Port\IdFactoryInterface;
 use App\Domain\Port\PasswordHasherInterface;
 use App\Domain\User\Exception\EmailAlreadyExistsException;
+use App\Domain\User\Exception\GuestAccountException;
 use App\Domain\User\Exception\InvalidCurrentPasswordException;
 use App\Domain\User\Exception\UserNotFoundException;
 use App\Domain\User\Repository\RefreshTokenRepositoryInterface;
@@ -82,6 +83,20 @@ final class SaveProfileCommandHandlerTest extends TestCase
         self::assertSame('Ohm & Volt Élec', $this->company->getName());
         self::assertSame('FR98765432109', $this->company->getVatNumber());
         self::assertSame('hashed:ancien-mot-de-passe', $user->getPassword());
+    }
+
+    public function testAGuestHasNoProfileToSave(): void
+    {
+        // ID1 : un invité n'a ni email ni mot de passe, il doit d'abord créer un compte
+        $this->user->setEmail(null)->setFullName(null)->setPassword(null);
+        $this->refreshTokenRepository->expects(self::never())->method('removeAllByUser');
+
+        try {
+            $this->handler()($this->command(email: 'invite@exemple.fr'));
+            self::fail('Une GuestAccountException était attendue.');
+        } catch (GuestAccountException) {
+            self::assertTrue($this->user->isGuest());
+        }
     }
 
     public function testRejectsTheEmailOfAnotherAccount(): void

@@ -6,6 +6,20 @@ framework:
             limit: 5
             interval: '15 minutes'
 
+        # Ouverture de comptes invités : limite par adresse IP, parade à la réinstallation
+        # de l'application pour retrouver un essai gratuit (risque T12). Assez haute pour
+        # les adresses partagées (réseau mobile, entreprise) ; à ajuster sur mesure (lot L19).
+        guest_creation:
+            policy: 'sliding_window'
+            limit: 20
+            interval: '1 hour'
+
+        # Messages envoyés : limite par utilisateur, contre les abus et l'emballement des coûts
+        conversation_turn:
+            policy: 'sliding_window'
+            limit: 10
+            interval: '1 minute'
+
 when@test:
     framework:
         cache:
@@ -18,3 +32,14 @@ when@test:
                 policy: 'fixed_window'
                 limit: 1000
                 interval: '1 minute'
+            # Stockage en mémoire, non remis à zéro entre deux requêtes d'un même kernel (le pool
+            # de cache l'est) : la limite se vérifie dans un test, et repart à zéro au suivant
+            guest_creation:
+                policy: 'fixed_window'
+                limit: 3
+                interval: '1 minute'
+                storage_service: 'test.rate_limiter.guest_creation_storage'
+
+    services:
+        test.rate_limiter.guest_creation_storage:
+            class: Symfony\Component\RateLimiter\Storage\InMemoryStorage

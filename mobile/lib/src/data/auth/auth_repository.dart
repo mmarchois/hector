@@ -49,7 +49,32 @@ class AuthRepository {
     );
   }
 
-  /// Création de compte. Lève [EmailAlreadyExistsException] (409) ou
+  /// Ouvre un compte invité (essai sans compte) et renvoie ses tokens.
+  /// Lève [TermsOfUseOutdatedException] (409), [TooManyGuestAccountsException]
+  /// (429) ou DioException (réseau).
+  Future<AuthTokens> createGuest({
+    required String acceptedTermsOfUseVersion,
+  }) async {
+    try {
+      final response = await _dio.post<Map<String, dynamic>>(
+        '/api/v1/auth/guest',
+        data: {'acceptedTermsOfUseVersion': acceptedTermsOfUseVersion},
+      );
+
+      return _tokensFrom(response.data!);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        throw TermsOfUseOutdatedException();
+      }
+      if (e.response?.statusCode == 429) {
+        throw TooManyGuestAccountsException();
+      }
+      rethrow;
+    }
+  }
+
+  /// Création de compte. Lève [EmailAlreadyExistsException] (409),
+  /// [TermsOfUseOutdatedException] (409, conditions périmées) ou
   /// [ApiValidationException] (422, erreurs par champ).
   Future<void> register({
     required String fullName,
@@ -59,6 +84,7 @@ class AuthRepository {
     String? companyName,
     String? siret,
     String? vatNumber,
+    String? acceptedTermsOfUseVersion,
   }) async {
     try {
       await _dio.post<Map<String, dynamic>>(
@@ -71,14 +97,26 @@ class AuthRepository {
           'companyName': ?companyName,
           'siret': ?siret,
           'vatNumber': ?vatNumber,
+          'acceptedTermsOfUseVersion': ?acceptedTermsOfUseVersion,
         },
       );
     } on DioException catch (e) {
-      if (e.response?.statusCode == 409) {
-        throw EmailAlreadyExistsException();
-      }
-      throw ApiValidationException.fromDio(e) ?? e;
+      throw registrationErrorFrom(e);
     }
+  }
+
+  /// Rattache au compte connecté les données d'un compte invité, qui est
+  /// ensuite supprimé. Lève DioException (réseau, 422 si la session d'invité
+  /// est expirée).
+  Future<void> mergeGuest({
+    required String accessToken,
+    required String guestRefreshToken,
+  }) async {
+    await _dio.post<void>(
+      '/api/v1/auth/merge-guest',
+      data: {'guestRefreshToken': guestRefreshToken},
+      options: Options(headers: {'Authorization': 'Bearer $accessToken'}),
+    );
   }
 
   Future<UserProfile> me(String accessToken) async {
@@ -96,4 +134,16 @@ class AuthRepository {
       refreshToken: json['refresh_token'] as String,
     );
   }
+}
+
+/// Traduction des erreurs de /auth/register, partagée avec la conversion
+/// d'un compte invité.
+Exception registrationErrorFrom(DioException e) {
+  if (e.response?.statusCode == 409) {
+    return apiErrorReason(e) == 'terms_of_use_outdated'
+        ? TermsOfUseOutdatedException()
+        : EmailAlreadyExistsException();
+  }
+
+  return ApiValidationException.fromDio(e) ?? e;
 }

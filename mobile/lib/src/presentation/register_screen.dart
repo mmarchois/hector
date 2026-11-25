@@ -10,7 +10,10 @@ import '../state/auth_controller.dart';
 import 'widgets/account_fields.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.returnTo = '/'});
+
+  /// Écran où revenir une fois la session ouverte (une conversation, ou l'accueil).
+  final String returnTo;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -61,9 +64,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             siret: _professional ? _controllers.siret.text.trim() : null,
             vatNumber: _professional ? _controllers.vatNumberValue : null,
           );
-      // La redirection vers l'accueil est gérée par le router (session ouverte).
+      // Session ouverte (ou compte invité converti). L'écran est empilé (push) :
+      // le router ne redirige pas une route empilée, retour explicite à l'accueil.
+      if (mounted) {
+        GoRouter.maybeOf(context)?.go(widget.returnTo);
+      }
     } on EmailAlreadyExistsException {
       setState(() => _error = l10n.registerEmailTaken);
+    } on TermsOfUseOutdatedException {
+      // Conditions modifiées depuis leur acceptation : retour à l'écran de bienvenue
+      ref.read(authControllerProvider.notifier).withdrawTermsOfUse();
     } on ApiValidationException catch (e) {
       setState(() => _apiErrors = e.fieldErrors);
       _formKey.currentState!.validate();
@@ -82,6 +92,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final auth = ref.watch(authControllerProvider);
+    final guest = auth is AuthSignedIn && auth.user.guest;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.registerTitle)),
@@ -97,7 +109,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
-                      l10n.registerSubtitle,
+                      guest
+                          ? l10n.registerGuestSubtitle
+                          : l10n.registerSubtitle,
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
