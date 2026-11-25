@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hector_mobile/l10n/app_localizations.dart';
 import 'package:hector_mobile/src/data/api.dart';
 import 'package:hector_mobile/src/data/auth/token_storage.dart';
+import 'package:hector_mobile/src/locale.dart';
 import 'package:hector_mobile/src/theme.dart';
 
 /// Stockage en mémoire pour les tests (pas de Keychain en environnement de test).
@@ -115,10 +116,13 @@ const termsOfUseJson = <String, dynamic>{
 /// tout le câblage réel (Dio « nu », Dio authentifié, interceptor) est exercé.
 ProviderContainer buildContainer(
   InMemoryTokenStorage storage,
-  ScriptedAdapter adapter,
-) {
+  ScriptedAdapter adapter, {
+  Locale locale = const Locale('fr'),
+}) {
   return ProviderContainer(
     overrides: [
+      // Les tests parlent français, quel que soit le réglage de la machine
+      appLocaleProvider.overrideWithValue(locale),
       tokenStorageProvider.overrideWithValue(storage),
       httpClientAdapterProvider.overrideWithValue(adapter),
     ],
@@ -126,13 +130,17 @@ ProviderContainer buildContainer(
 }
 
 /// Enveloppe un écran dans l'application de test (thème + traductions).
-Widget testApp(ProviderContainer container, Widget screen) {
+Widget testApp(
+  ProviderContainer container,
+  Widget screen, {
+  Locale locale = const Locale('fr'),
+}) {
   return UncontrolledProviderScope(
     container: container,
     child: MaterialApp(
       theme: HectorTheme.light(),
-      locale: const Locale('fr'),
-      supportedLocales: const [Locale('fr')],
+      locale: locale,
+      supportedLocales: AppLocales.supported,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

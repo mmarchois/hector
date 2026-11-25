@@ -453,6 +453,25 @@ Demande du 25 novembre 2026 : qu'Hector apprenne de ce que les utilisateurs lui 
 
 Un cas du terrain reste une donnée, jamais une consigne : son texte passe par les mêmes parades que les documents contre les consignes cachées (SECURITY.md, § 7, risque T13).
 
+### D19 — Comment rendre l'application multilingue ?
+
+Demande du 25 novembre 2026 : l'application doit être multilingue.
+
+| Option | Pour | Contre |
+|---|---|---|
+| A. Hector répond dans la langue du message, quelle qu'elle soit | Aucun réglage, toutes les langues d'un coup | Le contrôle des réponses repère des mots (article, tableau, annexe…) : dans une langue qu'il ne couvre pas, une référence inventée passerait. Les réponses fixes, les messages d'erreur et les conditions d'utilisation n'existeraient pas dans cette langue |
+| B. Une liste de langues ouvertes ; la langue d'un échange est celle de l'application (celle du téléphone si elle est ouverte, sinon le français), annoncée à l'API | Tout ce que voit l'utilisateur est dans la même langue ; le contrôle couvre chaque langue ouverte ; ouvrir une langue est une liste finie de fichiers | Une langue non ouverte retombe sur le français ; chaque langue est un petit chantier, à faire relire |
+| C. Traduire automatiquement les réponses françaises | Une seule langue à contrôler | Coût et délai d'un second appel ; des consignes de sécurité traduites sans relecture |
+
+**Recommandation : B**, réalisée le 25 novembre 2026 avec le français et l'anglais.
+
+- L'application envoie sa langue dans `Accept-Language`. L'API retient la première langue ouverte (`enabled_locales`), sinon le français, et la renvoie dans `Content-Language`.
+- Le texte français écrit dans le code sert de clé de traduction (`translations/messages.<langue>.yaml`, `validators.<langue>.yaml`) : rien à tenir en français, et un message non traduit s'affiche en français plutôt que sous forme de clé.
+- Hector répond dans la langue de l'application, pas dans celle du message : la consigne de langue est versionnée (`resources/prompts/language-<langue>.md`) et entre dans l'empreinte des consignes. Ses réponses fixes et les intitulés de repli des blocs suivent (`AnswerTextsInterface`).
+- Ouvrir une langue, c'est fournir : les traductions de l'API ; les textes de l'application (`mobile/lib/l10n/app_<langue>.arb`, `AppLocales`, `CFBundleLocalizations`) ; la consigne de langue ; les mots du contrôle des réponses (`ProvisionReference`) avec leurs cas critiques ; les conditions d'utilisation ; des cas d'évaluation dans cette langue. **Une langue n'est ouverte que si le contrôle des réponses la couvre.**
+- Multilingue ne veut pas dire multi-pays : le cadre normatif reste celui de la France, quelle que soit la langue. Un autre pays demanderait son registre normatif et ses sources : c'est un autre projet (question P16).
+- À prévoir : les messages de sécurité fixes du lot L15 devront être traduits et relus dans chaque langue avant d'y être servis (SF4). La langue n'est pas enregistrée sur le compte : elle le sera quand des notifications ou des e-mails en auront besoin.
+
 ## 14. Risques techniques
 
 Ils sont tenus dans le registre commun de [SECURITY.md](SECURITY.md), § 9, avec les risques réglementaires et fonctionnels.

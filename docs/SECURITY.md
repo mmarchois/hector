@@ -175,6 +175,7 @@ Gravité et probabilité sont des estimations de départ, à réviser à chaque 
 | F9 | Le coût par utilisateur dépasse ce que le modèle économique supporte | Moyenne | Moyenne | Mesure dès le lot L5, quota, choix du modèle sur mesure | L5, L8, L19 |
 | F10 | Des données produits périmées ou partielles biaisent une recommandation | Moyenne | Forte | Date par valeur, délai de fraîcheur, étendue de la comparaison affichée | L21, L25, L26 |
 | F11 | La limite gratuite tombe au milieu d'une panne | Moyenne | Moyenne | Messages de sécurité jamais bloqués ; après l'inscription, retour dans la conversation, message en attente compris | L5, L6 |
+| F12 | Une réponse sort dans une langue que le contrôle des réponses ou les messages de sécurité ne couvrent pas | Forte | Moyenne | Liste fermée de langues ouvertes, Hector répond dans la langue de l'application et non dans celle du message, cas critiques et cas d'évaluation par langue | D19, L15 |
 
 ## 10. Incidents
 

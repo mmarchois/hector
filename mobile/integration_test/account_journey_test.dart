@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hector_mobile/main.dart';
+import 'package:hector_mobile/src/locale.dart';
 import 'package:integration_test/integration_test.dart';
 
 void main() {
@@ -59,7 +60,13 @@ void main() {
 
       // Aucune session héritée d'un lancement précédent
       await const FlutterSecureStorage().deleteAll();
-      await tester.pumpWidget(const ProviderScope(child: HectorApp()));
+      // Le parcours est écrit en français, quelle que soit la langue du simulateur
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [appLocaleProvider.overrideWithValue(const Locale('fr'))],
+          child: const HectorApp(),
+        ),
+      );
 
       // Premier lancement : conditions d'utilisation, puis essai sans compte
       await waitFor(tester, field('acceptTermsOfUse'));

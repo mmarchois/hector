@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'l10n/app_localizations.dart';
+import 'src/locale.dart';
 import 'src/router.dart';
 import 'src/state/auth_controller.dart';
 import 'src/theme.dart';
@@ -45,8 +46,9 @@ class _HectorAppState extends ConsumerState<HectorApp> {
       theme: HectorTheme.light(),
       darkTheme: HectorTheme.dark(),
       routerConfig: ref.watch(routerProvider),
-      locale: const Locale('fr'),
-      supportedLocales: const [Locale('fr')],
+      // La langue du téléphone si elle est ouverte, sinon le français
+      locale: ref.watch(appLocaleProvider),
+      supportedLocales: AppLocales.supported,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

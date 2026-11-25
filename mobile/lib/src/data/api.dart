@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config.dart';
+import '../locale.dart';
 import '../domain/terms_of_use.dart';
 import '../state/auth_controller.dart';
 import 'auth/auth_interceptor.dart';
@@ -22,7 +23,11 @@ Dio _newDio(Ref ref) {
       baseUrl: AppConfig.apiBaseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 30),
-      headers: {'Accept': 'application/json'},
+      headers: {
+        'Accept': 'application/json',
+        // La langue de l'application : messages de l'API et réponses d'Hector
+        'Accept-Language': ref.watch(appLocaleProvider).languageCode,
+      },
     ),
   );
   final adapter = ref.watch(httpClientAdapterProvider);

@@ -113,71 +113,79 @@ class _WelcomeScreenState extends ConsumerState<WelcomeScreen> {
     final tokens = HectorTokens.of(context);
     final terms = ref.watch(termsOfUseProvider);
 
-    // La présentation en haut, les actions en bas, à portée de pouce. Sur un
-    // petit écran ou avec un texte agrandi, l'ensemble défile.
+    // Les actions sont épinglées en bas, à portée de pouce ; la présentation
+    // défile au-dessus sur un petit écran ou avec un texte agrandi.
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) => SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 28, 24, 16),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: 480,
-                  minHeight: constraints.maxHeight - 44,
-                ),
-                child: IntrinsicHeight(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: HectorMark(size: 64),
-                      ),
-                      const SizedBox(height: 28),
-                      Text(l10n.appTitle, style: theme.textTheme.displaySmall),
-                      const SizedBox(height: 10),
-                      Text(
-                        l10n.appTagline,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: tokens.muted,
-                          fontSize: 17,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(24, 28, 24, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: HectorMark(size: 64),
                         ),
-                      ),
-                      const SizedBox(height: 32),
-                      _Feature(
-                        icon: Icons.bolt_rounded,
-                        title: l10n.welcomeFeature1Title,
-                        body: l10n.welcomeFeature1Body,
-                      ),
-                      _Feature(
-                        icon: Icons.fact_check_outlined,
-                        title: l10n.welcomeFeature2Title,
-                        body: l10n.welcomeFeature2Body,
-                      ),
-                      _Feature(
-                        icon: Icons.health_and_safety_outlined,
-                        title: l10n.welcomeFeature3Title,
-                        body: l10n.welcomeFeature3Body,
-                      ),
-                      const Spacer(),
-                      const SizedBox(height: 24),
-                      ...switch (terms) {
-                        AsyncData(:final value) => _actions(l10n, value),
-                        AsyncError() => [
-                          FormErrorText(l10n.welcomeTermsUnavailable),
-                          const SizedBox(height: 16),
-                          OutlinedButton(
-                            onPressed: () => ref.invalidate(termsOfUseProvider),
-                            child: Text(l10n.retry),
+                        const SizedBox(height: 28),
+                        Text(
+                          l10n.appTitle,
+                          style: theme.textTheme.displaySmall,
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          l10n.appTagline,
+                          style: theme.textTheme.bodyLarge?.copyWith(
+                            color: tokens.muted,
+                            fontSize: 17,
                           ),
-                        ],
-                        _ => [const Center(child: CircularProgressIndicator())],
-                      },
-                    ],
+                        ),
+                        const SizedBox(height: 32),
+                        _Feature(
+                          icon: Icons.bolt_rounded,
+                          title: l10n.welcomeFeature1Title,
+                          body: l10n.welcomeFeature1Body,
+                        ),
+                        _Feature(
+                          icon: Icons.fact_check_outlined,
+                          title: l10n.welcomeFeature2Title,
+                          body: l10n.welcomeFeature2Body,
+                        ),
+                        _Feature(
+                          icon: Icons.health_and_safety_outlined,
+                          title: l10n.welcomeFeature3Title,
+                          body: l10n.welcomeFeature3Body,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: switch (terms) {
+                      AsyncData(:final value) => _actions(l10n, value),
+                      AsyncError() => [
+                        FormErrorText(l10n.welcomeTermsUnavailable),
+                        const SizedBox(height: 16),
+                        OutlinedButton(
+                          onPressed: () => ref.invalidate(termsOfUseProvider),
+                          child: Text(l10n.retry),
+                        ),
+                      ],
+                      _ => [const Center(child: CircularProgressIndicator())],
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ),

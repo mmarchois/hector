@@ -233,6 +233,10 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - Écart : les modèles candidats n'ont pas été mesurés et la décision D3 n'est pas prise. Il faut un accord sur la dépense (de l'ordre de 1 USD par modèle sur ce jeu) et des cas relus.
 - Limite : le juge est lui-même un modèle. Son verdict n'est pas une preuve : les cas en défaut, et un échantillon de cas réussis, sont à relire par un humain. Les réponses observées sont longues pour un téléphone : à régler dans les consignes, puis à remesurer.
 
+### Hors lot — Application multilingue
+
+**Réalisé (25 novembre 2026)**, à la demande, selon la décision D19 : français et anglais. Messages de l'API, réponses d'Hector, contrôle des réponses, conditions d'utilisation et application mobile. Reste à faire : relecture des textes anglais par un locuteur du métier, mesure des cas d'évaluation en anglais, choix des langues suivantes (question P16).
+
 ---
 
 ## Phase 2 — Base documentaire
