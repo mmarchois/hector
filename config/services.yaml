@@ -58,6 +58,25 @@ services:
         arguments:
             $tokensPerDay: '%env(int:CHAT_DAILY_TOKEN_BUDGET)%'
 
+    # ----------------------
+    # Évaluation (make eval)
+    # ----------------------
+    # Le juge a son propre modèle, fixe d'une mesure à l'autre : on compare des modèles
+    # candidats (CHAT_MODEL) avec le même juge
+    app.evaluation.judge_model:
+        class: App\Infrastructure\Adapter\Llm\Anthropic\AnthropicChatModel
+        arguments:
+            $model: '%env(EVAL_JUDGE_MODEL)%'
+            $effort: '%env(EVAL_JUDGE_EFFORT)%'
+
+    App\Infrastructure\Evaluation\Judge:
+        arguments:
+            $judgeModel: '@app.evaluation.judge_model'
+
+    App\Infrastructure\Evaluation\Pricing:
+        factory: ['App\Infrastructure\Evaluation\Pricing', 'fromFile']
+        arguments: ['%kernel.project_dir%/resources/evaluation/pricing.json']
+
     # -------------------
     # Command & Query bus
     # -------------------
@@ -101,6 +120,7 @@ when@test:
         App\Tests\Support\FakeChatModel:
             public: true
         App\Application\Conversation\Port\ChatModelInterface: '@App\Tests\Support\FakeChatModel'
+        app.evaluation.judge_model: '@App\Tests\Support\FakeChatModel'
 
         App\Infrastructure\Persistence\Doctrine\Fixtures\:
             resource: '../src/Infrastructure/Persistence/Doctrine/Fixtures/'

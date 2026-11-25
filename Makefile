@@ -130,6 +130,12 @@ test_integration: ## Run integration tests only
 test_live: ## Run live tests against the LLM provider (paid, needs ANTHROPIC_API_KEY in .env.local)
 	${BIN_PHP} ./bin/phpunit tests/Live ${ARGS}
 
+eval: ## Evaluate answers on the case set (paid, needs ANTHROPIC_API_KEY; MODEL=claude-sonnet-5-5, ARGS="--family=normative_trap")
+	${BIN_SHELL} env $(if ${MODEL},CHAT_MODEL=${MODEL}) php bin/console app:eval ${ARGS}
+
+eval_compare: ## Compare two evaluation reports (BEFORE=var/evaluation/a.json AFTER=var/evaluation/b.json)
+	${BIN_CONSOLE} app:eval:compare ${BEFORE} ${AFTER}
+
 # Suite vide jusqu'aux premiers calculateurs (lot L13) : retirer alors --do-not-fail-on-empty-test-suite
 test_critical: ## Run critical tests only (calculations and safety rules, no LLM)
 	${BIN_PHP} ./bin/phpunit --testsuite=Critical --do-not-fail-on-empty-test-suite ${ARGS}

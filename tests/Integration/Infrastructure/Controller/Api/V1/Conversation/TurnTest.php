@@ -6,7 +6,7 @@ namespace App\Tests\Integration\Infrastructure\Controller\Api\V1\Conversation;
 
 use App\Application\Conversation\Port\ChatModelUnavailableException;
 use App\Application\Conversation\Port\ChatUsage;
-use App\Application\Conversation\Service\TurnRunner;
+use App\Application\Conversation\Service\AnswerEngine;
 use App\Infrastructure\Persistence\Doctrine\Fixtures\UserFixture;
 use App\Tests\Integration\Infrastructure\Controller\Api\AbstractApiTestCase;
 use App\Tests\Support\FakeChatModel;
@@ -122,7 +122,7 @@ final class TurnTest extends AbstractApiTestCase
         $turn = $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $token, ['text' => 'Quelle section ?']);
 
         self::assertSame('degraded', $turn['status']);
-        self::assertSame(TurnRunner::DEGRADED_REPLY, $turn['assistantMessage']['blocks'][0]['text']);
+        self::assertSame(AnswerEngine::DEGRADED_REPLY, $turn['assistantMessage']['blocks'][0]['text']);
         self::assertCount(2, $this->model->requests);
         self::assertSame([1, 2], array_column($this->rejections($turn['uuid']), 'attempt'));
     }

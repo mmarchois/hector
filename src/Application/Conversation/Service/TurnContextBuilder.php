@@ -7,6 +7,7 @@ namespace App\Application\Conversation\Service;
 use App\Application\Conversation\Port\ChatMessage;
 use App\Application\Conversation\Port\ChatRequest;
 use App\Application\Conversation\Port\ChatRole;
+use App\Application\Conversation\Port\Participant;
 use App\Application\Conversation\Port\ParticipantInterface;
 use App\Application\Conversation\Port\PromptCatalogInterface;
 use App\Domain\Conversation\Block;
@@ -43,15 +44,27 @@ final readonly class TurnContextBuilder
     public function build(Turn $turn): PreparedTurn
     {
         $conversation = $turn->getConversation();
-        $participant = $this->participants->profileOf($conversation->getOwnerUuid());
+        $history = $this->messageRepository->findPage($conversation, $turn->getUserMessage()->getUuid(), self::HISTORY_LENGTH);
+
+        return $this->compose(
+            $this->participants->profileOf($conversation->getOwnerUuid()),
+            $this->normalize([...$history, $turn->getUserMessage()]),
+        );
+    }
+
+    /**
+     * Contexte d'un échange donné, sans base de données : c'est par ici que passe
+     * l'évaluation (lot L8), avec les mêmes consignes et la même borne que l'application.
+     *
+     * @param list<ChatMessage> $messages alternés, le premier et le dernier de l'utilisateur
+     */
+    public function compose(Participant $participant, array $messages): PreparedTurn
+    {
         // ID3 : un invité a la qualification la plus restrictive, celle d'un particulier
         $audience = $this->prompts->get(!$participant->guest && $participant->professional ? 'audience-professional' : 'audience-individual');
         $system = str_replace('{{audience}}', $audience->text, $this->prompts->get('conversation-system')->text);
 
-        $history = $this->messageRepository->findPage($conversation, $turn->getUserMessage()->getUuid(), self::HISTORY_LENGTH);
-        $messages = $this->trim($this->normalize([...$history, $turn->getUserMessage()]));
-
-        return new PreparedTurn(new ChatRequest($system, $messages), substr(hash('sha256', $system), 0, 12));
+        return new PreparedTurn(new ChatRequest($system, $this->trim($messages)), substr(hash('sha256', $system), 0, 12));
     }
 
     /**

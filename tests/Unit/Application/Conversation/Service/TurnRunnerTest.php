@@ -16,6 +16,7 @@ use App\Application\Conversation\Port\Participant;
 use App\Application\Conversation\Port\ParticipantInterface;
 use App\Application\Conversation\Port\Prompt;
 use App\Application\Conversation\Port\PromptCatalogInterface;
+use App\Application\Conversation\Service\AnswerEngine;
 use App\Application\Conversation\Service\TurnContextBuilder;
 use App\Application\Conversation\Service\TurnRunner;
 use App\Domain\Conversation\Block;
@@ -72,7 +73,7 @@ final class TurnRunnerTest extends TestCase
         $turn = $this->runner()->send('c1', 'owner', 'Comment shunter un différentiel ?');
 
         self::assertSame(TurnStatus::Degraded, $turn->getStatus());
-        self::assertSame(TurnRunner::REFUSAL_REPLY, $turn->getAssistantMessage()?->getBlocks()[0]->fallbackText);
+        self::assertSame(AnswerEngine::REFUSAL_REPLY, $turn->getAssistantMessage()?->getBlocks()[0]->fallbackText);
         self::assertSame('refusal', $turn->getTrace()->stopReason);
     }
 
@@ -83,7 +84,7 @@ final class TurnRunnerTest extends TestCase
         $turn = $this->runner()->send('c1', 'owner', 'Bonjour');
 
         self::assertSame(TurnStatus::Degraded, $turn->getStatus());
-        self::assertSame(TurnRunner::EMPTY_REPLY, $turn->getAssistantMessage()?->getBlocks()[0]->fallbackText);
+        self::assertSame(AnswerEngine::EMPTY_REPLY, $turn->getAssistantMessage()?->getBlocks()[0]->fallbackText);
     }
 
     public function testARejectedDraftIsRetriedWithItsReasons(): void
@@ -124,10 +125,10 @@ final class TurnRunnerTest extends TestCase
         $turn = $this->runner()->send('c1', 'owner', 'Bonjour');
 
         self::assertSame(TurnStatus::Degraded, $turn->getStatus());
-        self::assertEquals([Block::text(TurnRunner::DEGRADED_REPLY)], $turn->getAssistantMessage()?->getBlocks());
+        self::assertEquals([Block::text(AnswerEngine::DEGRADED_REPLY)], $turn->getAssistantMessage()?->getBlocks());
         self::assertCount(2, $turn->getTrace()->rejections ?? []);
         // Jamais de troisième appel
-        self::assertCount(TurnRunner::MAX_ATTEMPTS, $this->model->requests);
+        self::assertCount(AnswerEngine::MAX_ATTEMPTS, $this->model->requests);
     }
 
     public function testAProviderFailureDuringTheRetryFailsTheTurn(): void
@@ -195,6 +196,6 @@ final class TurnRunnerTest extends TestCase
         $messages = $this->createStub(MessageRepositoryInterface::class);
         $messages->method('findPage')->willReturn([]);
 
-        return new TurnRunner($bus, new TurnContextBuilder($prompts, $participants, $messages), $this->model);
+        return new TurnRunner($bus, new TurnContextBuilder($prompts, $participants, $messages), new AnswerEngine($this->model));
     }
 }

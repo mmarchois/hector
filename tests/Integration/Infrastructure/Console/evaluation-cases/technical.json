@@ -1,0 +1,12 @@
+{
+  "family": "technical",
+  "cases": [
+    {
+      "id": "technique-de-test",
+      "audience": "individual",
+      "question": "À quoi sert un différentiel ?",
+      "expected": ["Explique qu'il protège les personnes"],
+      "review": {"by": "Relecteur de test", "at": "2026-11-25"}
+    }
+  ]
+}

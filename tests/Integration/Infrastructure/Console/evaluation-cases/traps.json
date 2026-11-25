@@ -1,0 +1,13 @@
+{
+  "family": "normative_trap",
+  "cases": [
+    {
+      "id": "piege-de-test",
+      "audience": "professional",
+      "question": "Que dit l'article 12.345.678 ?",
+      "expected": ["Dit qu'il ne peut pas confirmer cet article"],
+      "forbidden": ["Décrit le contenu de l'article"],
+      "review": {"by": null, "at": null}
+    }
+  ]
+}

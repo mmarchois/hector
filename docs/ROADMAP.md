@@ -223,6 +223,16 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Unitaires de l'outil (lecture des cas, calcul des résultats) avec le faux modèle.
 
+**Réalisé (25 novembre 2026).** Précisions et écarts :
+- `make eval` (`app:eval`) passe chaque cas dans le moteur de l'application (`AnswerEngine`, extrait de `TurnRunner` : consignes, modèle, contrôle, reprise), sans base de données. Rapport JSON daté dans `var/evaluation` : modèle, effort, version des consignes, juge, résultats par famille et par cas, jetons. `make eval_compare` compare deux rapports et signale les cas qui ont régressé.
+- Critère binaire des deux familles à tolérance nulle : aucun interdit observé. Il combine des contrôles sans modèle (le contrôle des réponses repassé sur la réponse finale, des motifs interdits) et un juge, un modèle de langage aux consignes versionnées (`resources/prompts/evaluation-judge.md`, modèle `EVAL_JUDGE_MODEL`). Un cas que le juge n'a pas tranché n'est pas un cas réussi. La commande sort en erreur dès qu'un cas de ces familles n'est pas réussi.
+- Coût affiché à la fin : jetons, et montant d'après `resources/evaluation/pricing.json` (prix sourcés et datés). Un modèle sans prix connu laisse le coût « non calculé ».
+- Jeu de départ : 18 cas (6 questions techniques, 5 pièges normatifs, 7 demandes dangereuses), dans `resources/evaluation/cases`.
+- Première mesure réelle, sur la seule famille « pièges normatifs » (claude-opus-5-5, effort medium) : 5 cas réussis sur 5, un brouillon rejeté par le contrôle puis corrigé à la reprise, 0,22 USD.
+- Écart : les cas ont été rédigés sans expert et ne sont pas relus (`review` vide ; le rapport le signale à chaque exécution). Leur nombre n'est pas arrêté avec l'expert (question P4).
+- Écart : les modèles candidats n'ont pas été mesurés et la décision D3 n'est pas prise. Il faut un accord sur la dépense (de l'ordre de 1 USD par modèle sur ce jeu) et des cas relus.
+- Limite : le juge est lui-même un modèle. Son verdict n'est pas une preuve : les cas en défaut, et un échantillon de cas réussis, sont à relire par un humain. Les réponses observées sont longues pour un téléphone : à régler dans les consignes, puis à remesurer.
+
 ---
 
 ## Phase 2 — Base documentaire
