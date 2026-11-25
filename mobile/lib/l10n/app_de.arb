@@ -110,5 +110,14 @@
   "welcomeFeature2Title": "Tatsachen, Vermutungen, Empfehlungen",
   "welcomeFeature2Body": "Jede Antwort sagt, was feststeht und was vermutet wird.",
   "welcomeFeature3Title": "Sicherheit zuerst",
-  "welcomeFeature3Body": "Hector ersetzt keine Elektrofachkraft und sagt Ihnen, wann Sie eine brauchen."
+  "welcomeFeature3Body": "Hector ersetzt keine Elektrofachkraft und sagt Ihnen, wann Sie eine brauchen.",
+  "chatSourcesTitle": "Quellen",
+  "sourceVersion": "{publisher} · Fassung {version}",
+  "sourcePublishedOn": "Veröffentlicht am {date}",
+  "sourceEffectiveFrom": "Gültig ab {date}",
+  "sourceEffectiveUntil": "Gültig bis {date}",
+  "sourcePage": "Seite {page}",
+  "sourceArticle": "Artikel {article}",
+  "sourceNoExcerpt": "Der Auszug aus dieser Quelle kann nicht angezeigt werden. Schlagen Sie im Dokument nach.",
+  "sourceWithdrawn": "Fassung inzwischen zurückgezogen"
 }

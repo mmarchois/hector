@@ -39,6 +39,12 @@ class MessageBlock {
   /// Source nommée d'un avis rapporté.
   String? get source => data['source'] as String?;
 
+  /// Identifiants des sources citées par ce bloc ([ChatMessage.citations]).
+  List<String> get citations =>
+      (data['citations'] as List<dynamic>? ?? const [])
+          .whereType<String>()
+          .toList();
+
   /// Vrai si cette version de l'application sait afficher ce bloc.
   bool get known {
     if (version != 1) {
@@ -86,12 +92,77 @@ enum StatementKind {
 
 enum MessageRole { user, assistant }
 
+/// Source citée par une réponse. Elle est composée par le serveur à partir de
+/// ce qu'Hector a lu, et figée avec le message : le modèle n'en écrit rien.
+class Citation {
+  const Citation({
+    required this.id,
+    required this.title,
+    required this.publisher,
+    required this.version,
+    this.publishedOn,
+    this.effectiveFrom,
+    this.effectiveUntil,
+    this.page,
+    this.section,
+    this.article,
+    this.excerpt,
+  });
+
+  factory Citation.fromJson(Map<String, dynamic> json) {
+    DateTime? date(String key) =>
+        json[key] is String ? DateTime.tryParse(json[key] as String) : null;
+
+    return Citation(
+      id: json['id'] as String,
+      title: json['title'] as String? ?? '',
+      publisher: json['publisher'] as String? ?? '',
+      version: json['version'] as String? ?? '',
+      publishedOn: date('publishedOn'),
+      effectiveFrom: date('effectiveFrom'),
+      effectiveUntil: date('effectiveUntil'),
+      page: json['page'] as int?,
+      section: json['section'] as String?,
+      article: json['article'] as String?,
+      excerpt: json['excerpt'] as String?,
+    );
+  }
+
+  /// Identifiant du passage, consultable par `GET /api/v1/passages/{id}`.
+  final String id;
+  final String title;
+  final String publisher;
+  final String version;
+  final DateTime? publishedOn;
+  final DateTime? effectiveFrom;
+  final DateTime? effectiveUntil;
+  final int? page;
+  final String? section;
+  final String? article;
+
+  /// Extrait affichable selon la licence de la source ; null : simple renvoi.
+  final String? excerpt;
+}
+
+/// État actuel d'un passage cité.
+class CitedPassage {
+  const CitedPassage({required this.withdrawn});
+
+  factory CitedPassage.fromJson(Map<String, dynamic> json) {
+    return CitedPassage(withdrawn: json['withdrawn'] as bool? ?? false);
+  }
+
+  /// La version citée a été retirée depuis la réponse.
+  final bool withdrawn;
+}
+
 class ChatMessage {
   const ChatMessage({
     required this.uuid,
     required this.role,
     required this.blocks,
     required this.createdAt,
+    this.citations = const [],
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
@@ -104,6 +175,10 @@ class ChatMessage {
           .map((b) => MessageBlock.fromJson(b as Map<String, dynamic>))
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
+      citations: (json['citations'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(Citation.fromJson)
+          .toList(),
     );
   }
 
@@ -111,6 +186,17 @@ class ChatMessage {
   final MessageRole role;
   final List<MessageBlock> blocks;
   final DateTime createdAt;
+
+  /// Sources citées par les blocs, dans l'ordre de leur première citation.
+  final List<Citation> citations;
+
+  /// Numéro (à partir de 1) de chaque source citée par [block].
+  List<int> sourceNumbersOf(MessageBlock block) => [
+    for (final id in block.citations)
+      if (citations.indexWhere((c) => c.id == id) case final index
+          when index >= 0)
+        index + 1,
+  ];
 
   /// Texte du message, blocs mis bout à bout.
   String get text => blocks.map((b) => b.displayText).join('\n\n');

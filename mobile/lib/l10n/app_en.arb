@@ -110,5 +110,14 @@
   "welcomeFeature2Title": "Facts, hypotheses, advice",
   "welcomeFeature2Body": "Every answer says what is established and what is assumed.",
   "welcomeFeature3Title": "Safety first",
-  "welcomeFeature3Body": "Hector does not replace an electrician, and tells you when you need one."
+  "welcomeFeature3Body": "Hector does not replace an electrician, and tells you when you need one.",
+  "chatSourcesTitle": "Sources",
+  "sourceVersion": "{publisher} · version {version}",
+  "sourcePublishedOn": "Published on {date}",
+  "sourceEffectiveFrom": "In force from {date}",
+  "sourceEffectiveUntil": "In force until {date}",
+  "sourcePage": "Page {page}",
+  "sourceArticle": "Article {article}",
+  "sourceNoExcerpt": "The excerpt from this source cannot be displayed. Refer to the document.",
+  "sourceWithdrawn": "Version withdrawn since"
 }

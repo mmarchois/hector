@@ -361,4 +361,44 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get welcomeFeature3Body =>
       'Hector does not replace an electrician, and tells you when you need one.';
+
+  @override
+  String get chatSourcesTitle => 'Sources';
+
+  @override
+  String sourceVersion(String publisher, String version) {
+    return '$publisher · version $version';
+  }
+
+  @override
+  String sourcePublishedOn(String date) {
+    return 'Published on $date';
+  }
+
+  @override
+  String sourceEffectiveFrom(String date) {
+    return 'In force from $date';
+  }
+
+  @override
+  String sourceEffectiveUntil(String date) {
+    return 'In force until $date';
+  }
+
+  @override
+  String sourcePage(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String sourceArticle(String article) {
+    return 'Article $article';
+  }
+
+  @override
+  String get sourceNoExcerpt =>
+      'The excerpt from this source cannot be displayed. Refer to the document.';
+
+  @override
+  String get sourceWithdrawn => 'Version withdrawn since';
 }

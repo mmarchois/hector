@@ -93,37 +93,56 @@ final firstExchange = [
       'Mon différentiel 30 mA saute dès que je branche le lave-linge.',
     ),
   ]),
-  message('m2', 'assistant', [
-    block(
-      'statement',
-      'Le différentiel déclenche au branchement du lave-linge, pas avant.',
-      kind: 'declared_fact',
-    ),
-    block(
-      'statement',
-      'Un défaut d\'isolement du lave-linge est la cause la plus courante dans ce cas.',
-      kind: 'hypothesis',
-    ),
-    block(
-      'statement',
-      'Un différentiel compare le courant qui part et celui qui revient. Un écart signale une fuite vers la terre.',
-      kind: 'general_explanation',
-    ),
-    block(
-      'statement',
-      'Laissez le lave-linge débranché et réarmez le différentiel pour voir s\'il tient.',
-      kind: 'recommendation',
-    ),
-    block(
-      'statement',
-      'Je ne sais pas si d\'autres appareils sont branchés sur le même circuit.',
-      kind: 'missing_information',
-    ),
-    block(
-      'question',
-      'Le différentiel tient-il quand le lave-linge reste débranché ?',
-    ),
-  ]),
+  {
+    ...message('m2', 'assistant', []),
+    'citations': [
+      {
+        'id': 'p1',
+        'corpus': 'regulatory',
+        'title': 'Fiche Hector : le dispositif différentiel',
+        'publisher': 'Hector',
+        'version': 'v1',
+        'publishedOn': '2026-11-01',
+        'section': 'Rôle',
+        'excerpt':
+            'Un dispositif différentiel compare le courant qui part et celui qui revient.',
+      },
+    ],
+    'blocks': [
+      block(
+        'statement',
+        'Le différentiel déclenche au branchement du lave-linge, pas avant.',
+        kind: 'declared_fact',
+      ),
+      {
+        ...block(
+          'statement',
+          'Un différentiel compare le courant qui part et celui qui revient.',
+          kind: 'sourced_fact',
+        ),
+        'citations': ['p1'],
+      },
+      block(
+        'statement',
+        'Un défaut d\'isolement du lave-linge est la cause la plus courante dans ce cas.',
+        kind: 'hypothesis',
+      ),
+      block(
+        'statement',
+        'Laissez le lave-linge débranché et réarmez le différentiel pour voir s\'il tient.',
+        kind: 'recommendation',
+      ),
+      block(
+        'statement',
+        'Je ne sais pas si d\'autres appareils sont branchés sur le même circuit.',
+        kind: 'missing_information',
+      ),
+      block(
+        'question',
+        'Le différentiel tient-il quand le lave-linge reste débranché ?',
+      ),
+    ],
+  },
 ];
 
 final secondExchange = [

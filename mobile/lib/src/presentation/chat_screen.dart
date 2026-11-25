@@ -7,6 +7,7 @@ import '../domain/conversation.dart';
 import '../state/chat_controller.dart';
 import '../theme.dart';
 import 'widgets/kit.dart';
+import 'widgets/sources.dart';
 
 /// Une conversation avec Hector.
 class ChatScreen extends ConsumerStatefulWidget {
@@ -282,6 +283,24 @@ class _AssistantMessage extends StatelessWidget {
           for (final (index, block) in message.blocks.indexed) ...[
             if (index > 0) const SizedBox(height: 18),
             _BlockView(block),
+            // Renvois de l'énoncé à ses sources
+            if (message.sourceNumbersOf(block) case final numbers
+                when numbers.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              SourceMarkers(
+                numbers: numbers,
+                onTap: (number) =>
+                    showSource(context, message.citations[number - 1], number),
+              ),
+            ],
+          ],
+          if (message.citations.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            SourceList(
+              citations: message.citations,
+              onTap: (number) =>
+                  showSource(context, message.citations[number - 1], number),
+            ),
           ],
         ],
       ),

@@ -280,6 +280,17 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Suite critique : contrôle des citations. Intégration de la recherche sur un corpus de test. Évaluation. Tests d'écrans.
 
+**Réalisé (25 novembre 2026).** Précisions et écarts :
+- Recherche : `PassageSearchInterface` et son adaptateur plein texte français de PostgreSQL. Les mots de la question sont cherchés un à un et classés ; un identifiant exact (référence, numéro) fait remonter son passage en tête. Seules les versions publiées sont cherchées. Pas d'index pour l'instant : suffisant pour quelques milliers de passages, à reprendre avec le volume (risque T10).
+- Capacités : le contrat par lequel un contexte métier apporte ses outils et ses consignes vit dans `Application/Conversation/Capability`. Première capacité : la documentation, avec l'outil `rechercher_documentation`. La boucle d'outils du moteur est bornée (quatre échanges) et se termine alors en réponse dégradée.
+- Citations (D7) : chaque passage rendu au modèle reçoit une référence de tour (S1, S2…) ; le contrôle des réponses n'accepte que celles-là. Le message enregistré cite par identifiant de passage, avec la source composée par le serveur (titre, éditeur, version, dates, localisation, extrait selon la licence) et figée avec lui.
+- KN5 : les sources dont la licence interdit la transmission à un sous-traitant ne sont pas cherchées pour le modèle. Elles n'apparaissent donc dans aucune réponse pour l'instant.
+- Sans aucun document publié, l'outil n'est pas offert et les consignes disent au modèle qu'il n'a pas de base : c'est l'état de la base de développement aujourd'hui.
+- `GET /api/v1/passages/{uuid}` : consultation d'un passage cité, y compris d'une version retirée depuis (KN4). Mobile : renvois numérotés sous chaque énoncé sourcé, liste des sources sous la réponse, détail au toucher.
+- Écart : la boucle d'outils n'a pas été exercée avec le vrai modèle (elle demande un appel payant). Le contrat avec l'API est testé sur des réponses construites d'après sa documentation, pas enregistrées.
+- Écart : « une question hors corpus reçoit une réponse qui le dit » repose sur les consignes et sur le message de l'outil, pas sur un contrôle : à mesurer dans l'évaluation.
+- Écart : la part des sources attendues retrouvées est calculée par l'évaluation (`expectedSources`), mais aucune référence n'est notée : il n'y a ni corpus réel ni cas qui en attendent (questions P3 et P4). La référence du lot L12 reste à établir.
+
 ### L11 — Registre normatif
 
 **Objectif.** Ne citer que des textes et des éditions qui existent, avec leurs dates.

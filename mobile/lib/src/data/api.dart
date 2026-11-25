@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../config.dart';
 import '../locale.dart';
+import '../domain/conversation.dart';
 import '../domain/terms_of_use.dart';
 import '../state/auth_controller.dart';
 import 'auth/auth_interceptor.dart';
 import 'auth/auth_repository.dart';
 import 'auth/token_storage.dart';
 import 'conversation/conversation_repository.dart';
+import 'knowledge/knowledge_repository.dart';
 import 'profile/profile_repository.dart';
 import 'terms_of_use_repository.dart';
 
@@ -72,6 +74,18 @@ final profileRepositoryProvider = Provider<ProfileRepository>(
 final conversationRepositoryProvider = Provider<ConversationRepository>(
   (ref) => ConversationRepository(ref.watch(apiDioProvider)),
 );
+
+final knowledgeRepositoryProvider = Provider<KnowledgeRepository>(
+  (ref) => KnowledgeRepository(ref.watch(apiDioProvider)),
+);
+
+/// État actuel d'un passage cité, lu à l'ouverture du détail d'une source. Sans
+/// réseau, le détail montre ce qui a été enregistré avec la réponse.
+final citedPassageProvider = FutureProvider.autoDispose
+    .family<CitedPassage, String>(
+      (ref, id) => ref.watch(knowledgeRepositoryProvider).passage(id),
+      retry: (retryCount, error) => null,
+    );
 
 final termsOfUseRepositoryProvider = Provider<TermsOfUseRepository>(
   (ref) => TermsOfUseRepository(ref.watch(bareDioProvider)),

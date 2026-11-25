@@ -369,4 +369,44 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get welcomeFeature3Body =>
       'Hector ersetzt keine Elektrofachkraft und sagt Ihnen, wann Sie eine brauchen.';
+
+  @override
+  String get chatSourcesTitle => 'Quellen';
+
+  @override
+  String sourceVersion(String publisher, String version) {
+    return '$publisher · Fassung $version';
+  }
+
+  @override
+  String sourcePublishedOn(String date) {
+    return 'Veröffentlicht am $date';
+  }
+
+  @override
+  String sourceEffectiveFrom(String date) {
+    return 'Gültig ab $date';
+  }
+
+  @override
+  String sourceEffectiveUntil(String date) {
+    return 'Gültig bis $date';
+  }
+
+  @override
+  String sourcePage(int page) {
+    return 'Seite $page';
+  }
+
+  @override
+  String sourceArticle(String article) {
+    return 'Artikel $article';
+  }
+
+  @override
+  String get sourceNoExcerpt =>
+      'Der Auszug aus dieser Quelle kann nicht angezeigt werden. Schlagen Sie im Dokument nach.';
+
+  @override
+  String get sourceWithdrawn => 'Fassung inzwischen zurückgezogen';
 }

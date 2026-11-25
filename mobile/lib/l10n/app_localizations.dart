@@ -765,6 +765,60 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Hector ne remplace pas un électricien, et vous le dit quand il en faut un.'**
   String get welcomeFeature3Body;
+
+  /// No description provided for @chatSourcesTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sources'**
+  String get chatSourcesTitle;
+
+  /// No description provided for @sourceVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'{publisher} · version {version}'**
+  String sourceVersion(String publisher, String version);
+
+  /// No description provided for @sourcePublishedOn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Publié le {date}'**
+  String sourcePublishedOn(String date);
+
+  /// No description provided for @sourceEffectiveFrom.
+  ///
+  /// In fr, this message translates to:
+  /// **'En vigueur à partir du {date}'**
+  String sourceEffectiveFrom(String date);
+
+  /// No description provided for @sourceEffectiveUntil.
+  ///
+  /// In fr, this message translates to:
+  /// **'En vigueur jusqu\'au {date}'**
+  String sourceEffectiveUntil(String date);
+
+  /// No description provided for @sourcePage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Page {page}'**
+  String sourcePage(int page);
+
+  /// No description provided for @sourceArticle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Article {article}'**
+  String sourceArticle(String article);
+
+  /// No description provided for @sourceNoExcerpt.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'extrait de cette source ne peut pas être affiché. Reportez-vous au document.'**
+  String get sourceNoExcerpt;
+
+  /// No description provided for @sourceWithdrawn.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version retirée depuis'**
+  String get sourceWithdrawn;
 }
 
 class _AppLocalizationsDelegate

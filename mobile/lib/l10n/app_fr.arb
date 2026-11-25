@@ -117,5 +117,59 @@
   "welcomeFeature2Title": "Faits, hypothèses, conseils",
   "welcomeFeature2Body": "Chaque réponse dit ce qui est établi et ce qui est supposé.",
   "welcomeFeature3Title": "La sécurité d'abord",
-  "welcomeFeature3Body": "Hector ne remplace pas un électricien, et vous le dit quand il en faut un."
+  "welcomeFeature3Body": "Hector ne remplace pas un électricien, et vous le dit quand il en faut un.",
+  "chatSourcesTitle": "Sources",
+  "sourceVersion": "{publisher} · version {version}",
+  "@sourceVersion": {
+    "placeholders": {
+      "publisher": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "sourcePublishedOn": "Publié le {date}",
+  "@sourcePublishedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceEffectiveFrom": "En vigueur à partir du {date}",
+  "@sourceEffectiveFrom": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceEffectiveUntil": "En vigueur jusqu'au {date}",
+  "@sourceEffectiveUntil": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "sourcePage": "Page {page}",
+  "@sourcePage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "sourceArticle": "Article {article}",
+  "@sourceArticle": {
+    "placeholders": {
+      "article": {
+        "type": "String"
+      }
+    }
+  },
+  "sourceNoExcerpt": "L'extrait de cette source ne peut pas être affiché. Reportez-vous au document.",
+  "sourceWithdrawn": "Version retirée depuis"
 }

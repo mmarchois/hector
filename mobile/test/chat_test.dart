@@ -9,6 +9,7 @@ import 'package:hector_mobile/src/data/conversation/conversation_repository.dart
 import 'package:hector_mobile/src/domain/conversation.dart';
 import 'package:hector_mobile/src/presentation/chat_screen.dart';
 import 'package:hector_mobile/src/presentation/widgets/kit.dart';
+import 'package:hector_mobile/src/presentation/widgets/sources.dart';
 import 'package:hector_mobile/src/state/chat_controller.dart';
 import 'package:hector_mobile/src/theme.dart';
 
@@ -440,6 +441,114 @@ void main() {
         false,
         false,
       ]);
+    });
+
+    testWidgets('une réponse sourcée montre ses sources, consultables', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      Map<String, dynamic> statement(
+        String kind,
+        String text,
+        List<String> citations,
+      ) => {
+        'type': 'statement',
+        'version': 1,
+        'kind': kind,
+        'text': text,
+        'citations': citations,
+        'fallbackText': text,
+      };
+      final adapter = ScriptedAdapter((options) async {
+        // État actuel du passage cité : sa version a été retirée depuis
+        if (options.path.contains('/passages/')) {
+          return jsonResponse(200, {
+            'uuid': 'p1',
+            'withdrawn': options.path.endsWith('/p1'),
+          });
+        }
+
+        return jsonResponse(
+          200,
+          page([
+            {
+              ...message('m2', 'assistant', ''),
+              'blocks': [
+                statement(
+                  'sourced_fact',
+                  'Le bouton de test vérifie le mécanisme.',
+                  ['p1', 'p2'],
+                ),
+                statement('recommendation', 'Essayez-le régulièrement.', []),
+              ],
+              'citations': [
+                {
+                  'id': 'p1',
+                  'corpus': 'regulatory',
+                  'title': 'Fiche différentiel',
+                  'publisher': 'Hector',
+                  'version': 'v1',
+                  'publishedOn': '2026-11-01',
+                  'effectiveFrom': '2026-12-01',
+                  'effectiveUntil': null,
+                  'page': 12,
+                  'section': 'Vérifications',
+                  'article': '4',
+                  'excerpt': 'Le bouton de test vérifie le déclenchement.',
+                },
+                {
+                  'id': 'p2',
+                  'corpus': 'regulatory',
+                  'title': 'Norme protégée',
+                  'publisher': 'Éditeur',
+                  'version': 'édition 2024',
+                  'excerpt': null,
+                },
+              ],
+            },
+          ]),
+        );
+      });
+      final c = container(adapter);
+      await tester.pumpWidget(
+        testApp(c, const ChatScreen(conversationUuid: conversation)),
+      );
+      await tester.pumpAndSettle();
+
+      // Renvois sous l'énoncé sourcé seulement, et liste des sources sous la réponse
+      expect(find.text('Fait sourcé'), findsOneWidget);
+      expect(find.byType(SourceMarkers), findsOneWidget);
+      expect(find.byKey(const Key('sourceMarker2')), findsOneWidget);
+      expect(find.text('Sources'), findsOneWidget);
+      expect(find.text('Fiche différentiel'), findsOneWidget);
+      expect(find.text('Hector · version v1'), findsOneWidget);
+      expect(find.text('Éditeur · version édition 2024'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('sourceMarker1')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('sourceDetail')), findsOneWidget);
+      expect(
+        find.text('Le bouton de test vérifie le déclenchement.'),
+        findsOneWidget,
+      );
+      expect(find.text('Publié le 1 nov. 2026'), findsOneWidget);
+      expect(find.text('En vigueur à partir du 1 déc. 2026'), findsOneWidget);
+      expect(find.text('Page 12'), findsOneWidget);
+      expect(find.text('Article 4'), findsOneWidget);
+      expect(find.text('Version retirée depuis'), findsOneWidget);
+      expect(adapter.calls, contains('GET /api/v1/passages/p1'));
+
+      // Une source dont la licence interdit l'extrait : un simple renvoi
+      await tester.tapAt(const Offset(20, 20));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('source2')));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('ne peut pas être affiché'), findsOneWidget);
+      expect(find.text('Version retirée depuis'), findsNothing);
     });
 
     testWidgets('envoyer un message affiche la réponse', (tester) async {
