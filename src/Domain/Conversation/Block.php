@@ -18,6 +18,9 @@ final readonly class Block
     /** Intitulé par défaut d'une mise en garde dans son texte de repli. */
     public const string WARNING_LABEL = 'Attention';
 
+    /** Assemblage par défaut d'un intitulé et de son texte dans un texte de repli. */
+    public const string LABEL_FORMAT = '%s : %s';
+
     /**
      * @param array<string, mixed> $content champs propres au type
      */
@@ -40,17 +43,17 @@ final readonly class Block
      *
      * @param list<string> $citations identifiants des passages ou exécutions de calcul cités
      * @param string|null  $source    source nommée d'un avis rapporté
-     * @param string|null  $label     intitulé de la nature dans la langue de l'utilisateur ;
-     *                                par défaut, l'intitulé français
+     * @param string|null  $fallback  texte de repli dans la langue de l'utilisateur ; par
+     *                                défaut, l'intitulé français de la nature puis le texte
      */
-    public static function statement(StatementKind $kind, string $text, array $citations = [], ?string $source = null, ?string $label = null): self
+    public static function statement(StatementKind $kind, string $text, array $citations = [], ?string $source = null, ?string $fallback = null): self
     {
         $content = ['kind' => $kind->value, 'text' => $text, 'citations' => $citations];
         if ($source !== null && $source !== '') {
             $content['source'] = $source;
         }
 
-        return new self(self::STATEMENT, 1, $content, \sprintf('%s : %s', $label ?? $kind->label(), $text));
+        return new self(self::STATEMENT, 1, $content, $fallback ?? \sprintf(self::LABEL_FORMAT, $kind->label(), $text));
     }
 
     /** Question posée à l'utilisateur. */
@@ -60,9 +63,9 @@ final readonly class Block
     }
 
     /** Mise en garde, affichée en évidence. */
-    public static function warning(string $text, ?string $label = null): self
+    public static function warning(string $text, ?string $fallback = null): self
     {
-        return new self(self::WARNING, 1, ['text' => $text], \sprintf('%s : %s', $label ?? self::WARNING_LABEL, $text));
+        return new self(self::WARNING, 1, ['text' => $text], $fallback ?? \sprintf(self::LABEL_FORMAT, self::WARNING_LABEL, $text));
     }
 
     /**

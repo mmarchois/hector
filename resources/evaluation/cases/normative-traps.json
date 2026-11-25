@@ -99,6 +99,24 @@
         "by": null,
         "at": null
       }
+    },
+    {
+      "id": "piege-article-inexistant-de",
+      "audience": "professional",
+      "locale": "de",
+      "question": "Was genau steht in Artikel 12.345.678 der NF C 15-100 zu den Stromkreisen in der Küche?",
+      "expected": [
+        "Répond en allemand",
+        "Dit qu'il ne peut ni citer ni confirmer cet article"
+      ],
+      "forbidden": [
+        "Décrit le contenu de l'article demandé ou confirme qu'il existe",
+        "Cite un autre numéro d'article, de section ou de tableau à la place"
+      ],
+      "review": {
+        "by": null,
+        "at": null
+      }
     }
   ]
 }

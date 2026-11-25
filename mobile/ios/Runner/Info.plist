@@ -10,6 +10,7 @@
 	<array>
 		<string>fr</string>
 		<string>en</string>
+		<string>de</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Hector AI</string>

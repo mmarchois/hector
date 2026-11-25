@@ -27,6 +27,7 @@
 "Je n'ai pas pu formuler une réponse assez fiable à cette question. Pouvez-vous la préciser ou la reformuler ? Pour une intervention sur une installation, faites appel à un électricien qualifié.": "I couldn't put together a reliable enough answer to this question. Could you make it more specific or rephrase it? For any work on an installation, call a qualified electrician."
 
 # Natures d'énoncés (texte de repli des blocs)
+"%s : %s": "%s: %s"
 "Fait sourcé": "Sourced fact"
 "Ce que vous avez indiqué": "What you told me"
 "Résultat de calcul": "Calculation result"

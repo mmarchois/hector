@@ -8,7 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 abstract final class AppLocales {
   static const fallback = Locale('fr');
 
-  static const supported = [Locale('fr'), Locale('en')];
+  static const supported = [Locale('fr'), Locale('en'), Locale('de')];
 
   /// Langue de l'application pour un téléphone réglé sur [device], par ordre
   /// de préférence : la première langue ouverte, sinon le français.

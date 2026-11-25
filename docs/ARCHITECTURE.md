@@ -463,7 +463,7 @@ Demande du 25 novembre 2026 : l'application doit être multilingue.
 | B. Une liste de langues ouvertes ; la langue d'un échange est celle de l'application (celle du téléphone si elle est ouverte, sinon le français), annoncée à l'API | Tout ce que voit l'utilisateur est dans la même langue ; le contrôle couvre chaque langue ouverte ; ouvrir une langue est une liste finie de fichiers | Une langue non ouverte retombe sur le français ; chaque langue est un petit chantier, à faire relire |
 | C. Traduire automatiquement les réponses françaises | Une seule langue à contrôler | Coût et délai d'un second appel ; des consignes de sécurité traduites sans relecture |
 
-**Recommandation : B**, réalisée le 25 novembre 2026 avec le français et l'anglais.
+**Recommandation : B**, réalisée le 25 novembre 2026 avec le français, l'anglais et l'allemand.
 
 - L'application envoie sa langue dans `Accept-Language`. L'API retient la première langue ouverte (`enabled_locales`), sinon le français, et la renvoie dans `Content-Language`.
 - Le texte français écrit dans le code sert de clé de traduction (`translations/messages.<langue>.yaml`, `validators.<langue>.yaml`) : rien à tenir en français, et un message non traduit s'affiche en français plutôt que sous forme de clé.

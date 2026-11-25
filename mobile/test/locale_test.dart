@@ -24,10 +24,14 @@ void main() {
         const Locale('fr'),
       );
       expect(
-        AppLocales.resolve(const [Locale('de'), Locale('en', 'GB')]),
+        AppLocales.resolve(const [Locale('es'), Locale('en', 'GB')]),
         const Locale('en'),
       );
-      expect(AppLocales.resolve(const [Locale('de')]), const Locale('fr'));
+      expect(
+        AppLocales.resolve(const [Locale('de', 'AT')]),
+        const Locale('de'),
+      );
+      expect(AppLocales.resolve(const [Locale('es')]), const Locale('fr'));
       expect(AppLocales.resolve(const []), const Locale('fr'));
     });
 
@@ -53,6 +57,7 @@ void main() {
     for (final (locale, expected) in [
       (const Locale('fr'), 'fr'),
       (const Locale('en'), 'en'),
+      (const Locale('de'), 'de'),
     ]) {
       test('Accept-Language : $expected, avec ou sans session', () async {
         final adapter = ScriptedAdapter(

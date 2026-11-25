@@ -47,6 +47,7 @@ final readonly class TranslatedAnswerTexts implements AnswerTextsInterface
             degradedReply: $translate(AnswerEngine::DEGRADED_REPLY),
             warningLabel: $translate(Block::WARNING_LABEL),
             kindLabels: $labels,
+            labelFormat: $translate(Block::LABEL_FORMAT),
         );
     }
 }

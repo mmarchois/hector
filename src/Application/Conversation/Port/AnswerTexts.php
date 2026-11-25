@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Conversation\Port;
 
+use App\Domain\Conversation\Block;
 use App\Domain\Conversation\StatementKind;
 
 /**
@@ -22,7 +23,20 @@ final readonly class AnswerTexts
         public string $degradedReply,
         public string $warningLabel,
         public array $kindLabels,
+        /** Assemblage d'un intitulé et de son texte : « %s : %s » en français, « %s: %s » ailleurs */
+        public string $labelFormat = Block::LABEL_FORMAT,
     ) {
+    }
+
+    /** Texte de repli d'un énoncé : sa nature, puis son texte. */
+    public function statementFallback(StatementKind $kind, string $text): string
+    {
+        return \sprintf($this->labelFormat, $this->label($kind), $text);
+    }
+
+    public function warningFallback(string $text): string
+    {
+        return \sprintf($this->labelFormat, $this->warningLabel, $text);
     }
 
     public function label(StatementKind $kind): string

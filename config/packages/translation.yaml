@@ -4,7 +4,7 @@ framework:
     # mots du contrôle des réponses (ProvisionReference) avec leurs cas critiques, cas
     # d'évaluation. Une langue n'est ouverte que si le contrôle des réponses la couvre.
     default_locale: fr
-    enabled_locales: ['fr', 'en']
+    enabled_locales: ['fr', 'en', 'de']
     # La langue d'une requête est celle de l'application, envoyée dans Accept-Language
     set_locale_from_accept_language: true
     set_content_language_from_locale: true

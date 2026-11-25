@@ -1,0 +1,38 @@
+# Traductions allemandes des messages destinés à l'utilisateur. La clé est le texte français,
+# tel qu'il est écrit dans le code (voir messages.en.yaml).
+
+# Erreurs de l'API
+"Acceptez les conditions d'utilisation pour continuer.": "Akzeptieren Sie die Nutzungsbedingungen, um fortzufahren."
+"Conversation introuvable.": "Unterhaltung nicht gefunden."
+"Créez un compte pour enregistrer un profil.": "Erstellen Sie ein Konto, um ein Profil zu speichern."
+"Hector est très sollicité en ce moment. Réessayez dans quelques heures. En cas de danger immédiat, appelez les secours (18 ou 112).": "Hector ist im Moment stark ausgelastet. Versuchen Sie es in einigen Stunden erneut. Rufen Sie bei unmittelbarer Gefahr den Notruf (18 oder 112)."
+"Les conditions d'utilisation ont changé : relisez-les et acceptez la nouvelle version.": "Die Nutzungsbedingungen haben sich geändert: Lesen Sie sie erneut und akzeptieren Sie die neue Fassung."
+"Mot de passe actuel incorrect.": "Das aktuelle Passwort ist falsch."
+"Session d'invité introuvable ou expirée.": "Gastsitzung nicht gefunden oder abgelaufen."
+"Tour introuvable.": "Anfrage nicht gefunden."
+"Trop de comptes ouverts depuis cette connexion. Réessayez plus tard ou connectez-vous.": "Von dieser Verbindung wurden zu viele Konten eröffnet. Versuchen Sie es später erneut oder melden Sie sich an."
+"Un compte existe déjà avec cet email.": "Mit dieser E-Mail-Adresse besteht bereits ein Konto."
+"Vous avez atteint la limite d'utilisation des dernières 24 heures. Réessayez plus tard.": "Sie haben das Nutzungslimit der letzten 24 Stunden erreicht. Versuchen Sie es später erneut."
+"Vous avez atteint la limite de l'essai sans compte. Créez un compte gratuit pour continuer.": "Sie haben das Limit der Testnutzung ohne Konto erreicht. Erstellen Sie ein kostenloses Konto, um fortzufahren."
+"Vous envoyez trop de messages à la suite. Patientez un instant.": "Sie senden zu viele Nachrichten hintereinander. Warten Sie einen Moment."
+
+# Tour sans réponse
+"Hector n'a pas pu répondre : le service est momentanément indisponible. Réessayez dans un instant.": "Hector konnte nicht antworten: Der Dienst ist vorübergehend nicht verfügbar. Versuchen Sie es gleich noch einmal."
+"Hector n'a pas pu répondre à ce message à cause d'une erreur. Si elle se répète, signalez-la.": "Hector konnte wegen eines Fehlers nicht auf diese Nachricht antworten. Tritt er erneut auf, melden Sie ihn bitte."
+
+# Réponses fixes d'Hector
+"Je ne peux pas répondre à cette demande. Pour toute intervention sur une installation électrique, faites appel à un électricien qualifié.": "Diese Anfrage kann ich nicht beantworten. Wenden Sie sich für alle Arbeiten an einer elektrischen Anlage an eine Elektrofachkraft."
+"Je n'ai pas pu formuler de réponse. Pouvez-vous reformuler votre question ?": "Ich konnte keine Antwort formulieren. Können Sie Ihre Frage anders formulieren?"
+"Je n'ai pas pu formuler une réponse assez fiable à cette question. Pouvez-vous la préciser ou la reformuler ? Pour une intervention sur une installation, faites appel à un électricien qualifié.": "Ich konnte auf diese Frage keine ausreichend zuverlässige Antwort formulieren. Können Sie sie genauer stellen oder anders formulieren? Wenden Sie sich für Arbeiten an einer Anlage an eine Elektrofachkraft."
+
+# Natures d'énoncés (texte de repli des blocs)
+"%s : %s": "%s: %s"
+"Fait sourcé": "Belegte Tatsache"
+"Ce que vous avez indiqué": "Ihre Angabe"
+"Résultat de calcul": "Berechnungsergebnis"
+"Explication générale, non sourcée": "Allgemeine Erklärung, ohne Quelle"
+"Hypothèse": "Vermutung"
+"Recommandation": "Empfehlung"
+"Information manquante": "Fehlende Angabe"
+"Avis rapporté": "Wiedergegebene Meinung"
+"Attention": "Achtung"

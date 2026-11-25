@@ -66,7 +66,7 @@ final class AnswerFormat
 
             $blocks[] = match ($type) {
                 Block::QUESTION => Block::question($text),
-                Block::WARNING => Block::warning($text, $texts?->warningLabel),
+                Block::WARNING => Block::warning($text, $texts?->warningFallback($text)),
                 Block::STATEMENT => self::statement($item, $text, $texts),
                 default => Block::fromArray(['type' => $type, 'version' => 1, 'text' => $text, 'fallbackText' => $text]),
             };
@@ -87,6 +87,6 @@ final class AnswerFormat
         $citations = \is_array($item['citations'] ?? null) ? array_values(array_filter($item['citations'], \is_string(...))) : [];
         $source = \is_string($item['source'] ?? null) ? trim($item['source']) : null;
 
-        return Block::statement($kind, $text, $citations, $source, $texts?->label($kind));
+        return Block::statement($kind, $text, $citations, $source, $texts?->statementFallback($kind, $text));
     }
 }

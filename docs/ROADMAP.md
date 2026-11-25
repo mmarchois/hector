@@ -235,7 +235,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 ### Hors lot — Application multilingue
 
-**Réalisé (25 novembre 2026)**, à la demande, selon la décision D19 : français et anglais. Messages de l'API, réponses d'Hector, contrôle des réponses, conditions d'utilisation et application mobile. Reste à faire : relecture des textes anglais par un locuteur du métier, mesure des cas d'évaluation en anglais, choix des langues suivantes (question P16).
+**Réalisé (25 novembre 2026)**, à la demande, selon la décision D19 : français, anglais et allemand. Messages de l'API, réponses d'Hector, contrôle des réponses, conditions d'utilisation et application mobile. Reste à faire : relecture des textes anglais et allemands par un locuteur du métier, mesure des cas d'évaluation dans ces deux langues, choix des langues suivantes (question P16).
 
 ---
 

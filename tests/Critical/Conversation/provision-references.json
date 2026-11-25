@@ -1,5 +1,5 @@
 {
-  "_comment": "Cas de référence de la détection des renvois à une disposition précise (lot L7), en français et en anglais, les langues ouvertes (décision D19). Fichier indépendant du code : à compléter et à faire relire par l'expert. « found » : le renvoi attendu ; « text » : la phrase où il se trouve.",
+  "_comment": "Cas de référence de la détection des renvois à une disposition précise (lot L7), en français, en anglais et en allemand, les langues ouvertes (décision D19). Fichier indépendant du code : à compléter et à faire relire par l'expert. « found » : le renvoi attendu ; « text » : la phrase où il se trouve.",
   "references": [
     {
       "text": "Selon l'article 771.314.2.1, il faut un dispositif 30 mA.",
@@ -116,6 +116,38 @@
     {
       "text": "The standard requires it (411.3.3).",
       "found": "411.3.3"
+    },
+    {
+      "text": "Nach Artikel 771.314.2.1 ist ein 30-mA-Schutz erforderlich.",
+      "found": "Artikel 771.314.2.1"
+    },
+    {
+      "text": "Siehe Tabelle 52H für die Querschnitte.",
+      "found": "Tabelle 52H"
+    },
+    {
+      "text": "Anhang B enthält ein Beispiel.",
+      "found": "Anhang B"
+    },
+    {
+      "text": "Teil 7-701 behandelt Badezimmer.",
+      "found": "Teil 7-701"
+    },
+    {
+      "text": "Das steht in Abschnitt 771.4 der Norm.",
+      "found": "Abschnitt 771.4"
+    },
+    {
+      "text": "Kapitel 41 behandelt den Schutz gegen elektrischen Schlag.",
+      "found": "Kapitel 41"
+    },
+    {
+      "text": "Siehe Absatz 3 der Regelung.",
+      "found": "Absatz 3"
+    },
+    {
+      "text": "Die Norm verlangt es (411.3.3).",
+      "found": "411.3.3"
     }
   ],
   "no_reference": [
@@ -143,6 +175,14 @@
     "Plug the table lamp into another socket.",
     "The annex is unheated.",
     "A section of 2.5 mm² is enough for this circuit.",
-    "The measured voltage is 230.5 V between line and neutral."
+    "The measured voltage is 230.5 V between line and neutral.",
+    "Die Norm NF C 15-100 regelt Niederspannungsanlagen.",
+    "Verwenden Sie ein Kabel mit einem Querschnitt von 2,5 mm².",
+    "Die Anlage ist 30 Jahre alt.",
+    "Die Leitungen sind zum Teil 30 Jahre alt.",
+    "Ein Teil der Anlage ist alt.",
+    "Ein Fehlerstromschutzschalter mit 30 mA schützt Personen.",
+    "Im Anhang finden Sie nichts dazu.",
+    "Die gemessene Spannung beträgt 230,5 V."
   ]
 }

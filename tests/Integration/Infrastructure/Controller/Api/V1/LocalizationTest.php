@@ -40,9 +40,13 @@ final class LocalizationTest extends AbstractApiTestCase
         self::assertSame('Conversation not found.', $english['message']);
         self::assertResponseHeaderSame('Content-Language', 'en');
 
+        $german = $this->apiRequest($this->client, 'GET', $uri, $token, language: 'de-DE,de;q=0.9');
+        self::assertSame('Unterhaltung nicht gefunden.', $german['message']);
+        self::assertResponseHeaderSame('Content-Language', 'de');
+
         // Une langue qui n'est pas ouverte : le français
-        $german = $this->apiRequest($this->client, 'GET', $uri, $token, language: 'de');
-        self::assertSame('Conversation introuvable.', $german['message']);
+        $spanish = $this->apiRequest($this->client, 'GET', $uri, $token, language: 'es');
+        self::assertSame('Conversation introuvable.', $spanish['message']);
         self::assertResponseHeaderSame('Content-Language', 'fr');
     }
 
@@ -71,8 +75,8 @@ final class LocalizationTest extends AbstractApiTestCase
 
         // La consigne de langue part au modèle, et le texte de repli des blocs suit
         self::assertStringContainsString('Réponds en anglais', $this->model->requests[0]->system);
-        self::assertSame('Warning : Move away from the socket.', $english['assistantMessage']['blocks'][0]['fallbackText']);
-        self::assertSame('Hypothesis : A faulty appliance may be the cause.', $english['assistantMessage']['blocks'][1]['fallbackText']);
+        self::assertSame('Warning: Move away from the socket.', $english['assistantMessage']['blocks'][0]['fallbackText']);
+        self::assertSame('Hypothesis: A faulty appliance may be the cause.', $english['assistantMessage']['blocks'][1]['fallbackText']);
 
         $french = $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $token, ['text' => 'Mon différentiel saute']);
 
@@ -81,6 +85,21 @@ final class LocalizationTest extends AbstractApiTestCase
         self::assertStringStartsWith('Hypothèse : ', $french['assistantMessage']['blocks'][1]['fallbackText']);
         // Les consignes n'ont pas la même empreinte d'une langue à l'autre : la trace dit laquelle a servi
         self::assertNotSame($this->model->requests[0]->system, $this->model->requests[1]->system);
+    }
+
+    public function testEveryOpenLanguageHasItsInstructionItsLabelsAndItsTerms(): void
+    {
+        $token = $this->login($this->client)['token'];
+        $uuid = $this->newConversation($token);
+        $this->model->willReply(FakeChatModel::statement('Ein defektes Gerät kann die Ursache sein.', 'hypothesis'));
+
+        $turn = $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $token, ['text' => 'Mein FI-Schalter löst aus'], 'de');
+
+        self::assertStringContainsString('Réponds en allemand', $this->model->requests[0]->system);
+        self::assertSame('Vermutung: Ein defektes Gerät kann die Ursache sein.', $turn['assistantMessage']['blocks'][0]['fallbackText']);
+
+        $this->client->request('GET', '/api/v1/terms-of-use', server: ['HTTP_ACCEPT_LANGUAGE' => 'de']);
+        self::assertStringStartsWith('# Nutzungsbedingungen von Hector', $this->json($this->client)['content']);
     }
 
     public function testFixedRepliesAndFailuresAreTranslated(): void
