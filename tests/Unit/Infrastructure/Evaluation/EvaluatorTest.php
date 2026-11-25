@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Infrastructure\Evaluation;
 
+use App\Application\Calculation\Capability\CalculationBlocks;
+use App\Application\Calculation\Capability\CalculationCapability;
+use App\Application\Calculation\Service\CalculationPresenter;
+use App\Application\CommandBusInterface;
 use App\Application\Conversation\Capability\CapabilityInterface;
 use App\Application\Conversation\Capability\Evidence;
 use App\Application\Conversation\Capability\ToolInterface;
@@ -18,15 +22,18 @@ use App\Application\Conversation\Port\Prompt;
 use App\Application\Conversation\Port\PromptCatalogInterface;
 use App\Application\Conversation\Service\AnswerEngine;
 use App\Application\Conversation\Service\TurnContextBuilder;
+use App\Domain\Calculation\CalculatorCatalog;
 use App\Domain\Conversation\Citation;
 use App\Domain\Conversation\Repository\MessageRepositoryInterface;
 use App\Infrastructure\Evaluation\CaseResult;
 use App\Infrastructure\Evaluation\EvaluationCase;
 use App\Infrastructure\Evaluation\EvaluationFamily;
 use App\Infrastructure\Evaluation\Evaluator;
+use App\Infrastructure\Evaluation\ExpectedCalculation;
 use App\Infrastructure\Evaluation\Judge;
 use App\Tests\Support\FakeChatModel;
 use App\Tests\Support\FrenchAnswerTexts;
+use App\Tests\Support\FrenchCalculationTexts;
 use PHPUnit\Framework\TestCase;
 
 /** Lot L8 : un cas passé dans le moteur de l'application, puis vérifié. */
@@ -188,13 +195,97 @@ final class EvaluatorTest extends TestCase
         self::assertCount(0, $this->judge->requests);
     }
 
+    public function testAnExpectedCalculationIsLookedForInWhatTheServerShowed(): void
+    {
+        $call = ['calculateur' => 'single_phase_current', 'entrees' => [
+            ['nom' => 'power', 'valeur' => 3, 'unite' => 'kW'],
+            ['nom' => 'voltage', 'valeur' => 230, 'unite' => 'V'],
+            ['nom' => 'powerFactor', 'valeur' => 0.9, 'unite' => ''],
+        ]];
+        $answer = FakeChatModel::draft([['statement', 'calculation_result', 'Courant absorbé par le moteur.', ['C1']]]);
+        $evaluate = fn (ExpectedCalculation $expected): CaseResult => $this->evaluator([$this->calculationCapability()])
+            ->evaluate($this->case(forbidden: ['Invente un résultat'], calculation: $expected), withJudge: false);
+
+        // Le bon calcul, montré par le serveur : le nombre se lit dans le bloc, pas dans le texte du modèle
+        $this->model->willCallTool('calculer', $call)->willReply($answer);
+        $shown = $evaluate(new ExpectedCalculation('single_phase_current', 14.5, 'A'));
+        self::assertSame(['D1' => true, 'C1' => true], $this->deterministic($shown));
+        self::assertStringContainsString("Résultat : I = 14,5\u{00A0}A", $shown->answer);
+        self::assertSame('Calcul montré : single_phase_current = 14.5 A', $shown->checks[1]['label']);
+
+        // Une autre valeur que celle attendue : le modèle a transmis d'autres entrées
+        $this->model->willCallTool('calculer', $call)->willReply($answer);
+        $wrong = $evaluate(new ExpectedCalculation('single_phase_current', 16.31, 'A'));
+        self::assertSame(['D1' => true, 'C1' => false], $this->deterministic($wrong));
+        self::assertSame('Montré : single_phase_current = 14.5 A', $wrong->checks[1]['reason']);
+        self::assertFalse($wrong->passed());
+
+        // Le calculateur seul compte quand le cas ne fixe pas la valeur
+        $this->model->willCallTool('calculer', $call)->willReply($answer);
+        self::assertTrue($this->deterministic($evaluate(new ExpectedCalculation('single_phase_current')))['C1']);
+        $this->model->willCallTool('calculer', $call)->willReply($answer);
+        self::assertFalse($this->deterministic($evaluate(new ExpectedCalculation('three_phase_current')))['C1']);
+
+        // Aucun résultat ne devait être montré : il manquait une valeur
+        $this->model->willCallTool('calculer', $call)->willReply($answer);
+        $assumed = $evaluate(new ExpectedCalculation(null));
+        self::assertSame(['D1' => true, 'C1' => false], $this->deterministic($assumed));
+        self::assertSame('Aucun résultat de calcul montré', $assumed->checks[1]['label']);
+    }
+
+    public function testARefusedCalculationIsNotAResult(): void
+    {
+        $this->model
+            ->willCallTool('calculer', ['calculateur' => 'single_phase_current', 'entrees' => [['nom' => 'power', 'valeur' => 3, 'unite' => 'kW']]])
+            ->willReply(FakeChatModel::draft([
+                ['statement', 'missing_information', 'Il me manque la tension et le facteur de puissance.'],
+                ['question', 'none', 'Quelle est la tension d\'alimentation ?'],
+            ]));
+
+        $evaluator = $this->evaluator([$this->calculationCapability()]);
+        $result = $evaluator->evaluate($this->case(forbidden: ['Invente un résultat'], calculation: new ExpectedCalculation(null)), withJudge: false);
+
+        self::assertSame(['D1' => true, 'C1' => true], $this->deterministic($result));
+        // Le juge lira le refus tel que l'utilisateur le reçoit
+        self::assertStringContainsString("Calcul non effectué : Courant absorbé en monophasé\n- Tension (U) : valeur manquante.", $result->answer);
+
+        // Et un calcul attendu qui n'a pas eu lieu est en défaut
+        $this->model->willReply(FakeChatModel::statement('Je ne sais pas faire ce calcul.'));
+        $missing = $evaluator->evaluate($this->case(forbidden: ['Invente un résultat'], calculation: new ExpectedCalculation('ohm_voltage', 230.0, 'V')), withJudge: false);
+        self::assertSame('Aucun calcul n\'a été montré.', $missing->checks[1]['reason']);
+        self::assertFalse($missing->passed());
+    }
+
+    /** @return array<string, bool|null> contrôles sans modèle, par identifiant */
+    private function deterministic(CaseResult $result): array
+    {
+        $checks = [];
+        foreach ($result->checks as $check) {
+            if ($check['kind'] === CaseResult::DETERMINISTIC) {
+                $checks[$check['id']] = $check['ok'];
+            }
+        }
+
+        return $checks;
+    }
+
+    private function calculationCapability(): CalculationCapability
+    {
+        $prompts = $this->createStub(PromptCatalogInterface::class);
+        $prompts->method('get')->willReturn(new Prompt('calculation', 'v', 'Consignes de calcul'));
+        $presenter = new CalculationPresenter(new FrenchCalculationTexts());
+
+        // Hors de l'application, aucun compte : le bus n'est jamais sollicité, rien n'est enregistré
+        return new CalculationCapability(new CalculatorCatalog(), $this->createStub(CommandBusInterface::class), new CalculationBlocks($presenter, new FrenchCalculationTexts()), $presenter, $prompts);
+    }
+
     /**
      * @param list<string> $expected
      * @param list<string> $forbidden
      * @param list<string> $patterns
      * @param list<string> $sources
      */
-    private function case(array $expected = [], array $forbidden = [], array $patterns = [], array $sources = []): EvaluationCase
+    private function case(array $expected = [], array $forbidden = [], array $patterns = [], array $sources = [], ?ExpectedCalculation $calculation = null): EvaluationCase
     {
         return new EvaluationCase(
             id: 'cas-1',
@@ -209,6 +300,7 @@ final class EvaluatorTest extends TestCase
             expectedSources: $sources,
             reviewedBy: null,
             reviewedAt: null,
+            calculation: $calculation,
         );
     }
 

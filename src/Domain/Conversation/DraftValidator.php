@@ -16,12 +16,13 @@ final class DraftValidator
 {
     /**
      * @param list<Block>  $blocks
-     * @param list<string> $evidence identifiants citables pendant ce tour : passages lus,
-     *                               exécutions de calcul (aucun avant les lots L10 et L14)
+     * @param list<string> $evidence     sources citables pendant ce tour : les passages lus
+     * @param list<string> $calculations calculs exécutés pendant ce tour, que seul un énoncé
+     *                                   « résultat de calcul » peut citer
      *
      * @return list<string>
      */
-    public static function check(array $blocks, array $evidence): array
+    public static function check(array $blocks, array $evidence, array $calculations = []): array
     {
         if ($blocks === []) {
             return ['La réponse ne contient aucun bloc.'];
@@ -33,7 +34,9 @@ final class DraftValidator
             $text = trim($block->textContent());
             $citations = $block->citations();
 
-            if (!\in_array($block->type, [Block::STATEMENT, Block::QUESTION, Block::WARNING], true)) {
+            // Le modèle n'écrit que des énoncés, des questions et des mises en garde : un bloc
+            // de calcul est composé par le serveur, jamais par lui
+            if (!\in_array($block->type, Block::WRITABLE, true)) {
                 $reasons[] = \sprintf('%s : type « %s » inconnu.', $position, $block->type);
                 continue;
             }
@@ -42,7 +45,7 @@ final class DraftValidator
                 continue;
             }
 
-            $unknown = array_values(array_diff($citations, $evidence));
+            $unknown = array_values(array_diff($citations, $evidence, $calculations));
             if ($unknown !== []) {
                 $reasons[] = \sprintf('%s : cite %s, qui ne fait pas partie des sources lues pendant ce tour.', $position, implode(', ', $unknown));
             }
@@ -53,7 +56,17 @@ final class DraftValidator
                     $reasons[] = \sprintf('%s : un énoncé doit avoir une nature.', $position);
                     continue;
                 }
-                if ($kind->requiresCitation() && $citations === []) {
+                if ($kind === StatementKind::CalculationResult) {
+                    array_push($reasons, ...self::checkCalculationResult($position, $text, $citations, $calculations));
+                    continue;
+                }
+
+                $cited = array_values(array_intersect($citations, $calculations));
+                if ($cited !== []) {
+                    $reasons[] = \sprintf('%s : seul un énoncé « %s » cite un calcul (%s).', $position, StatementKind::CalculationResult->label(), implode(', ', $cited));
+                }
+                // Un calcul n'est pas une source : un fait sourcé s'appuie sur un passage lu
+                if ($kind->requiresCitation() && array_diff($citations, $calculations) === []) {
                     $reasons[] = \sprintf(
                         '%s : un énoncé « %s » doit citer une source lue pendant ce tour. Sans source, présente-le comme explication générale, hypothèse ou recommandation.',
                         $position,
@@ -74,6 +87,39 @@ final class DraftValidator
                     $reference,
                 );
             }
+        }
+
+        return $reasons;
+    }
+
+    /**
+     * Un résultat de calcul n'existe que par le calcul exécuté qu'il cite, et n'en écrit aucun
+     * chiffre : c'est le serveur qui montre les entrées, les étapes et le résultat. Ainsi aucun
+     * nombre présenté comme un résultat de calcul ne vient du modèle.
+     *
+     * @param list<string> $citations
+     * @param list<string> $calculations
+     *
+     * @return list<string>
+     */
+    private static function checkCalculationResult(string $position, string $text, array $citations, array $calculations): array
+    {
+        $label = StatementKind::CalculationResult->label();
+        $reasons = [];
+
+        if (\count($citations) !== 1 || !\in_array($citations[0], $calculations, true)) {
+            $reasons[] = \sprintf(
+                '%s : un énoncé « %s » cite un calcul exécuté pendant ce tour par sa référence (C1, C2…), et lui seul. Sans calcul exécuté, donne la formule comme explication générale, sans résultat chiffré.',
+                $position,
+                $label,
+            );
+        }
+        if (preg_match('/\d/', $text) === 1) {
+            $reasons[] = \sprintf(
+                '%s : un énoncé « %s » ne contient aucun chiffre. L\'application affiche elle-même les entrées, les étapes et le résultat du calcul cité : dis seulement, en quelques mots, ce qui est calculé.',
+                $position,
+                $label,
+            );
         }
 
         return $reasons;

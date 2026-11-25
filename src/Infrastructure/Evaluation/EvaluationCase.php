@@ -36,6 +36,8 @@ final readonly class EvaluationCase
         /** Relecteur du cas : null tant qu'un expert ne l'a pas validé */
         public ?string $reviewedBy,
         public ?string $reviewedAt,
+        /** Calcul attendu, ou attendu absent ; null : le cas n'en dit rien */
+        public ?ExpectedCalculation $calculation = null,
     ) {
     }
 

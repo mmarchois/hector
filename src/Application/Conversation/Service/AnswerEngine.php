@@ -22,6 +22,7 @@ use App\Application\Conversation\Port\ChatToolResult;
 use App\Domain\Conversation\Block;
 use App\Domain\Conversation\Citation;
 use App\Domain\Conversation\DraftValidator;
+use App\Domain\Conversation\StatementKind;
 use App\Domain\Conversation\TurnFailure;
 
 /**
@@ -174,13 +175,16 @@ final readonly class AnswerEngine
                 : 'La réponse ne respecte pas le format JSON demandé.']];
         }
 
-        // Ne peut être cité que ce que les outils ont donné à lire pendant ce tour (D7)
-        return [$blocks, DraftValidator::check($blocks, $evidence->references())];
+        // Ne peut être cité que ce que les outils ont donné à lire ou calculé pendant ce tour (D7)
+        return [$blocks, DraftValidator::check($blocks, $evidence->references(), $evidence->exhibitReferences())];
     }
 
     /**
      * Le brouillon cite par référence de tour (S1, S2…) ; le message enregistré cite par
-     * identifiant durable, avec les sources composées par le serveur.
+     * identifiant durable, avec les sources composées par le serveur. Un résultat de calcul
+     * laisse sa place à la pièce que le serveur a composée : le modèle dit où la montrer, il
+     * n'en écrit aucun chiffre. Ce que la réponse n'a pas placé (calcul non présenté, calcul
+     * refusé) est montré d'office, avant la question posée à l'utilisateur.
      *
      * @param list<Block> $blocks
      *
@@ -190,9 +194,21 @@ final readonly class AnswerEngine
     {
         $cited = [];
         $resolved = [];
+        $shown = [];
         foreach ($blocks as $block) {
             if ($block->citations() === []) {
                 $resolved[] = $block;
+                continue;
+            }
+
+            if ($block->kind() === StatementKind::CalculationResult) {
+                $reference = $block->citations()[0];
+                $exhibit = $evidence->exhibitOf($reference);
+                // Un même calcul n'est montré qu'une fois
+                if ($exhibit !== null && !\in_array($reference, $shown, true)) {
+                    $resolved[] = $exhibit->withCaption($block->textContent());
+                    $shown[] = $reference;
+                }
                 continue;
             }
 
@@ -205,6 +221,18 @@ final readonly class AnswerEngine
                 }
             }
             $resolved[] = $block->withCitations(array_values(array_unique($ids)));
+        }
+
+        $unshown = $evidence->unshown($shown);
+        if ($unshown !== []) {
+            $position = \count($resolved);
+            foreach ($resolved as $index => $block) {
+                if ($block->type === Block::QUESTION) {
+                    $position = $index;
+                    break;
+                }
+            }
+            array_splice($resolved, $position, 0, $unshown);
         }
 
         return [$resolved, array_values($cited)];

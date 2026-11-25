@@ -15,6 +15,9 @@ final readonly class Block
     public const string QUESTION = 'question';
     public const string WARNING = 'warning';
 
+    /** Types que le modèle peut écrire. Tout autre bloc est composé par le serveur. */
+    public const array WRITABLE = [self::STATEMENT, self::QUESTION, self::WARNING];
+
     /** Intitulé par défaut d'une mise en garde dans son texte de repli. */
     public const string WARNING_LABEL = 'Attention';
 
@@ -69,6 +72,17 @@ final readonly class Block
     }
 
     /**
+     * Bloc composé par le serveur à partir de ce qu'il détient (un calcul exécuté, un calcul
+     * refusé) : le modèle n'en écrit rien, et le contrôle des réponses refuse qu'il en écrive.
+     *
+     * @param array<string, mixed> $content champs propres au type
+     */
+    public static function composed(string $type, array $content, string $fallbackText, int $version = 1): self
+    {
+        return new self($type, $version, $content, $fallbackText);
+    }
+
+    /**
      * @param array{type: string, version: int, fallbackText: string, ...} $data
      */
     public static function fromArray(array $data): self
@@ -88,6 +102,20 @@ final readonly class Block
     public function withCitations(array $citations): self
     {
         return new self($this->type, $this->version, [...$this->content, 'citations' => $citations], $this->fallbackText);
+    }
+
+    /**
+     * Même bloc, précédé de quelques mots qui disent ce qu'il montre : ils ouvrent aussi son
+     * texte de repli.
+     */
+    public function withCaption(string $caption): self
+    {
+        $caption = trim($caption);
+        if ($caption === '') {
+            return $this;
+        }
+
+        return new self($this->type, $this->version, [...$this->content, 'text' => $caption], $caption . "\n" . $this->fallbackText);
     }
 
     /**

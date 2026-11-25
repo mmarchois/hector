@@ -7,6 +7,7 @@ namespace App\Tests\Architecture;
 use App\Application\Conversation\Port\Participant;
 use App\Application\Conversation\Port\Prompt;
 use App\Application\Conversation\Port\PromptCatalogInterface;
+use App\Domain\Conversation\Block;
 use App\Domain\Conversation\Citation;
 use PHPat\Selector\Selector;
 use PHPat\Selector\SelectorInterface;
@@ -43,13 +44,15 @@ final class ArchitectureRules
 
     /**
      * Ce qu'une capacité connaît du socle, en plus de App\Application\Conversation\Capability :
-     * à qui elle parle, où lire ses consignes, et la source qu'elle donne à citer.
+     * à qui elle parle, où lire ses consignes, la source qu'elle donne à citer et le bloc
+     * qu'elle compose pour être montré.
      */
     private const array CAPABILITY_CONTRACT = [
         Participant::class,
         PromptCatalogInterface::class,
         Prompt::class,
         Citation::class,
+        Block::class,
     ];
 
     /** Socle : il n'utilise aucun contexte, et les contextes ne s'y branchent que par ses capacités. */

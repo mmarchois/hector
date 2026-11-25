@@ -89,3 +89,13 @@
 "%input% (%symbol%) : la valeur ne doit pas dépasser %bound%%unit%, limite de ce calcul.": "%input% (%symbol%): the value must not exceed %bound%%unit%, the limit of this calculation."
 "Le résultat dépasse %bound%%unit%, limite de ce calcul : vérifiez les valeurs saisies.": "The result exceeds %bound%%unit%, the limit of this calculation: check the values entered."
 "Le résultat est trop petit pour être exprimé en %unit% : vérifiez les valeurs saisies.": "The result is too small to be expressed in %unit%: check the values entered."
+
+# Calcul dans la conversation (lot L14) : texte de repli du bloc de calcul
+"Calcul : %title% (version %version%)": "Calculation: %title% (version %version%)"
+"%label% (%symbol%) : %value%": "%label% (%symbol%): %value%"
+"%label% : %expression% = %value%": "%label%: %expression% = %value%"
+"Résultat : %symbol% = %value%": "Result: %symbol% = %value%"
+"Valeur exacte : %value%": "Exact value: %value%"
+"Hypothèses :": "Assumptions:"
+"Source : %source%": "Source: %source%"
+"Calcul non effectué : %title%": "Calculation not carried out: %title%"

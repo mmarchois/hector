@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Adapter;
 
+use App\Application\Calculation\Port\CalculationTextsInterface;
 use App\Domain\Calculation\Refusal;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * Textes d'un calcul dans la langue du lecteur : le texte français du domaine est la clé de
- * traduction, et les nombres s'écrivent selon la langue (1 000 en français, 1,000 en anglais).
+ * Textes d'un calcul traduits par le traducteur de Symfony (translations/messages.<langue>.yaml),
+ * nombres écrits selon la langue : 1 000 en français, 1,000 en anglais, 1.000 en allemand.
  */
-final readonly class CalculationTexts
+final readonly class CalculationTexts implements CalculationTextsInterface
 {
     /** Assez de décimales pour ne rien arrondir de plus que le calcul. */
     private const int MAX_DECIMALS = 12;
@@ -21,25 +22,27 @@ final readonly class CalculationTexts
     ) {
     }
 
-    /** Le motif d'un refus ; dans la langue de la requête en cours si aucune n'est précisée. */
+    public function text(string $french, array $parameters = [], ?string $locale = null): string
+    {
+        return $this->translator->trans($french, $parameters, locale: $locale);
+    }
+
     public function refusal(Refusal $refusal, ?string $locale = null): string
     {
-        $locale ??= $this->translator->getLocale();
-
         $parameters = [];
         foreach ($refusal->parameters as $marker => $value) {
             $parameters[$marker] = \is_float($value) ? $this->number($value, $locale) : $value;
         }
         if ($refusal->label !== null) {
-            $parameters['%input%'] = $this->translator->trans($refusal->label, locale: $locale);
+            $parameters['%input%'] = $this->text($refusal->label, [], $locale);
         }
 
-        return $this->translator->trans($refusal->template, $parameters, locale: $locale);
+        return $this->text($refusal->template, $parameters, $locale);
     }
 
-    public function number(float $value, string $locale): string
+    public function number(float $value, ?string $locale = null): string
     {
-        $formatter = new \NumberFormatter($locale, \NumberFormatter::DECIMAL);
+        $formatter = new \NumberFormatter($locale ?? $this->translator->getLocale(), \NumberFormatter::DECIMAL);
         $formatter->setAttribute(\NumberFormatter::MAX_FRACTION_DIGITS, self::MAX_DECIMALS);
 
         return (string) $formatter->format($value);

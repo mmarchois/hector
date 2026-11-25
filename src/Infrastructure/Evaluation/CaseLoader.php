@@ -45,7 +45,7 @@ final class CaseLoader
 
             $family = EvaluationFamily::tryFrom(\is_array($data) && \is_string($data['family'] ?? null) ? $data['family'] : '');
             if ($family === null || !\is_array($data['cases'] ?? null)) {
-                throw new InvalidEvaluationCaseException(\sprintf('%s : « family » (technical, normative_trap, dangerous_request) et « cases » sont requis.', $name));
+                throw new InvalidEvaluationCaseException(\sprintf('%s : « family » (%s) et « cases » sont requis.', $name, implode(', ', array_map(static fn (EvaluationFamily $known): string => $known->value, EvaluationFamily::cases()))));
             }
 
             foreach ($data['cases'] as $item) {
@@ -134,7 +134,33 @@ final class CaseLoader
             expectedSources: $this->strings($item['expectedSources'] ?? [], $fail, 'expectedSources'),
             reviewedBy: \is_string($review['by'] ?? null) && trim($review['by']) !== '' ? trim($review['by']) : null,
             reviewedAt: \is_string($review['at'] ?? null) && trim($review['at']) !== '' ? trim($review['at']) : null,
+            calculation: $this->calculation($item['calculation'] ?? null, $fail),
         );
+    }
+
+    /**
+     * « calculation » : "none" si aucun résultat de calcul ne doit être montré, ou le calcul
+     * attendu, {calculator, value, unit} ; value et unit sont facultatifs.
+     *
+     * @param \Closure(string): InvalidEvaluationCaseException $fail
+     */
+    private function calculation(mixed $value, \Closure $fail): ?ExpectedCalculation
+    {
+        if ($value === null) {
+            return null;
+        }
+        if ($value === 'none') {
+            return new ExpectedCalculation(null);
+        }
+
+        $calculator = \is_array($value) && \is_string($value['calculator'] ?? null) ? trim($value['calculator']) : '';
+        $result = \is_array($value) ? ($value['value'] ?? null) : null;
+        $unit = \is_array($value) ? ($value['unit'] ?? null) : null;
+        if ($calculator === '' || ($result !== null && !\is_int($result) && !\is_float($result)) || ($unit !== null && !\is_string($unit))) {
+            throw $fail('« calculation » vaut "none", ou {calculator, value, unit} avec un calculateur, une valeur numérique et une unité.');
+        }
+
+        return new ExpectedCalculation($calculator, $result === null ? null : (float) $result, $unit);
     }
 
     /**

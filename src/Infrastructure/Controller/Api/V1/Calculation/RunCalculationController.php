@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace App\Infrastructure\Controller\Api\V1\Calculation;
 
 use App\Application\Calculation\Command\RunCalculationCommand;
+use App\Application\Calculation\Port\CalculationTextsInterface;
+use App\Application\Calculation\Service\CalculationPresenter;
 use App\Application\CommandBusInterface;
 use App\Domain\Calculation\CalculationRun;
 use App\Domain\Calculation\Exception\CalculationRefusedException;
 use App\Domain\Calculation\Exception\CalculatorNotFoundException;
 use App\Domain\Calculation\Refusal;
-use App\Infrastructure\Adapter\CalculationTexts;
 use App\Infrastructure\Controller\Api\V1\Calculation\Dto\CalculationResponse;
 use App\Infrastructure\Controller\Api\V1\Calculation\Dto\RunCalculationRequest;
 use App\Infrastructure\Controller\Api\ViolationHttpException;
@@ -24,7 +25,6 @@ use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactoryInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class RunCalculationController
 {
@@ -33,8 +33,8 @@ final readonly class RunCalculationController
         private AuthenticatedUser $authenticatedUser,
         #[Autowire(service: 'limiter.calculation')]
         private RateLimiterFactoryInterface $calculationLimiter,
-        private CalculationTexts $texts,
-        private TranslatorInterface $translator,
+        private CalculationTextsInterface $texts,
+        private CalculationPresenter $presenter,
     ) {
     }
 
@@ -67,6 +67,6 @@ final readonly class RunCalculationController
             throw new ViolationHttpException($violations);
         }
 
-        return new JsonResponse(CalculationResponse::fromRun($run, $this->translator), Response::HTTP_CREATED);
+        return new JsonResponse(CalculationResponse::fromRun($run, $this->presenter), Response::HTTP_CREATED);
     }
 }

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Controller\Api\V1\Calculation\Dto;
 
+use App\Application\Calculation\Service\CalculationPresenter;
 use App\Domain\Calculation\CalculationRun;
-use App\Domain\Calculation\CalculationStep;
-use App\Domain\Calculation\Rounding;
 use OpenApi\Attributes as OA;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /** Un calcul enregistré, tel qu'il a été fait : entrées, hypothèses, étapes, résultat et version. */
 final readonly class CalculationResponse implements \JsonSerializable
@@ -86,47 +84,13 @@ final readonly class CalculationResponse implements \JsonSerializable
     ) {
     }
 
-    public static function fromRun(CalculationRun $run, TranslatorInterface $translator): self
+    public static function fromRun(CalculationRun $run, CalculationPresenter $presenter): self
     {
-        $result = $run->getResult();
-        $definition = $result->definition;
-
-        $inputs = [];
-        foreach ($definition->inputs as $input) {
-            $quantity = $result->given[$input->key];
-            $inputs[] = [
-                'key' => $input->key,
-                'label' => $translator->trans($input->label),
-                'symbol' => $input->symbol,
-                'value' => $quantity->value,
-                'unit' => $quantity->unit->value,
-            ];
-        }
-
-        return new self(
-            uuid: $run->getUuid(),
-            calculator: ['key' => $definition->key, 'version' => $definition->version, 'title' => $translator->trans($definition->title)],
-            formula: $definition->formula,
-            source: $translator->trans($definition->source),
-            assumptions: array_map(static fn (string $assumption): string => $translator->trans($assumption), $definition->assumptions),
-            inputs: $inputs,
-            steps: array_map(static fn (CalculationStep $step): array => [
-                'label' => $translator->trans($step->label),
-                'expression' => $step->expression,
-                'value' => Rounding::Nearest->apply($step->value),
-                'unit' => $step->unit,
-            ], $result->steps),
-            result: [
-                'key' => $definition->output->key,
-                'label' => $translator->trans($definition->output->label),
-                'symbol' => $definition->output->symbol,
-                'value' => $result->result->value,
-                'unit' => $result->result->unit->value,
-                'exact' => $result->exact,
-                'roundingRule' => $translator->trans($definition->output->rounding->rule()),
-            ],
-            createdAt: $run->getCreatedAt()->format(\DATE_ATOM),
-        );
+        return new self(...[
+            'uuid' => $run->getUuid(),
+            ...$presenter->calculation($run->getResult()),
+            'createdAt' => $run->getCreatedAt()->format(\DATE_ATOM),
+        ]);
     }
 
     /**

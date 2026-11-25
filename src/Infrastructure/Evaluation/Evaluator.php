@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Evaluation;
 
+use App\Application\Calculation\Capability\CalculationBlocks;
 use App\Application\Conversation\Port\ChatUsage;
 use App\Application\Conversation\Service\AnswerEngine;
 use App\Application\Conversation\Service\TurnContextBuilder;
@@ -45,11 +46,18 @@ final readonly class Evaluator
 
         if (!$outcome->failed()) {
             // 1. Sans modèle : le contrôle des réponses repassé sur la réponse finale, et les motifs interdits
-            $reasons = $outcome->degraded ? [] : DraftValidator::check($outcome->blocks, evidence: []);
+            // Seuls les blocs écrits par le modèle se contrôlent : ceux que le serveur compose
+            // (calcul, refus de calcul) ne viennent pas de lui. Les sources citées sont celles du tour
+            $written = array_values(array_filter($outcome->blocks, static fn (Block $block): bool => \in_array($block->type, Block::WRITABLE, true)));
+            $reasons = $written === [] ? [] : DraftValidator::check($written, array_map(static fn (Citation $citation): string => $citation->id, $outcome->citations));
             $checks[] = $this->check('D1', CaseResult::DETERMINISTIC, 'La réponse finale passe le contrôle des réponses', $reasons === [], implode(' ', $reasons));
             foreach ($case->forbiddenPatterns as $index => $pattern) {
                 $found = preg_match($pattern, $answer, $match) === 1;
                 $checks[] = $this->check('P' . ($index + 1), CaseResult::DETERMINISTIC, \sprintf('Motif interdit absent : %s', $pattern), !$found, $found ? \sprintf('Trouvé : « %s »', $match[0]) : '');
+            }
+
+            if ($case->calculation !== null) {
+                $checks[] = $this->calculationCheck($case->calculation, $outcome->blocks);
             }
 
             // Sources attendues : la recherche les a-t-elle données à lire ? (mesure de référence du lot L12)
@@ -108,6 +116,50 @@ final readonly class Evaluator
             rejections: \count($trace->rejections ?? []),
             error: $error,
         );
+    }
+
+    /**
+     * Le calcul attendu a-t-il été montré par le serveur ? Vérifié sur le bloc de calcul, pas
+     * sur le texte du modèle : le nombre vient de l'exécution, et de nulle part ailleurs.
+     *
+     * @param list<Block> $blocks
+     *
+     * @return array{id: string, kind: string, label: string, ok: bool|null, reason: string}
+     */
+    private function calculationCheck(ExpectedCalculation $expected, array $blocks): array
+    {
+        $shown = [];
+        foreach ($blocks as $block) {
+            $calculation = $block->type === CalculationBlocks::RESULT ? ($block->toArray()['calculation'] ?? null) : null;
+            if (\is_array($calculation)) {
+                $shown[] = [
+                    'calculator' => (string) ($calculation['calculator']['key'] ?? ''),
+                    'value' => (float) ($calculation['result']['value'] ?? 0.0),
+                    'unit' => (string) ($calculation['result']['unit'] ?? ''),
+                ];
+            }
+        }
+        $described = implode(' ; ', array_map(static fn (array $one): string => \sprintf('%s = %s %s', $one['calculator'], $one['value'], $one['unit']), $shown));
+
+        if ($expected->calculator === null) {
+            return $this->check('C1', CaseResult::DETERMINISTIC, 'Aucun résultat de calcul montré', $shown === [], $shown === [] ? '' : \sprintf('Montré : %s', $described));
+        }
+
+        $found = false;
+        foreach ($shown as $one) {
+            $found = $found || (
+                $one['calculator'] === $expected->calculator
+                && ($expected->value === null || abs($one['value'] - $expected->value) <= 1e-9 * max(1.0, abs($expected->value)))
+                && ($expected->unit === null || $one['unit'] === $expected->unit)
+            );
+        }
+        $label = \sprintf(
+            'Calcul montré : %s%s',
+            $expected->calculator,
+            $expected->value === null ? '' : \sprintf(' = %s %s', $expected->value, $expected->unit ?? ''),
+        );
+
+        return $this->check('C1', CaseResult::DETERMINISTIC, $label, $found, $found ? '' : ($shown === [] ? 'Aucun calcul n\'a été montré.' : \sprintf('Montré : %s', $described)));
     }
 
     /** @return array{id: string, kind: string, label: string, ok: bool|null, reason: string} */

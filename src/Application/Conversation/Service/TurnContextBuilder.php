@@ -75,7 +75,9 @@ final readonly class TurnContextBuilder
             $system = str_replace('{{language}}', trim($this->prompts->get('language-' . $locale)->text), $system);
         }
 
-        // Les capacités : leurs consignes entrent dans celles du tour, leurs outils sont offerts au modèle
+        // Les capacités : leurs consignes entrent dans celles du tour, leurs outils sont offerts au
+        // modèle. Ce qu'elles composent pour l'utilisateur l'est dans la langue de son application
+        $participant = $participant->speaking($locale);
         $tools = [];
         $instructions = [];
         foreach ($this->capabilities as $capability) {

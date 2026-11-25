@@ -28,6 +28,21 @@ final class CalculationTextsTest extends KernelTestCase
         ['single_phase_power', ['voltage' => ['value' => 230, 'unit' => 'V'], 'current' => ['value' => 16, 'unit' => 'A'], 'powerFactor' => ['value' => 90, 'unit' => '%']]],
     ];
 
+    /** Erreurs des routes, et gabarits du texte de repli des blocs de calcul (lot L14). */
+    private const array OTHER_TEXTS = [
+        'Calcul introuvable.',
+        'Calculateur inconnu.',
+        'Vous lancez trop de calculs à la suite. Patientez un instant.',
+        'Calcul : %title% (version %version%)',
+        '%label% (%symbol%) : %value%',
+        '%label% : %expression% = %value%',
+        'Résultat : %symbol% = %value%',
+        'Valeur exacte : %value%',
+        'Hypothèses :',
+        'Source : %source%',
+        'Calcul non effectué : %title%',
+    ];
+
     public function testEveryTextOfACalculationIsTranslatedIntoEveryOpenLanguage(): void
     {
         $texts = [];
@@ -68,7 +83,7 @@ final class CalculationTextsTest extends KernelTestCase
 
         foreach (array_diff($locales, ['fr']) as $locale) {
             $catalogue = $translator->getCatalogue($locale);
-            foreach (array_unique([...$texts, ...$templates, 'Calcul introuvable.', 'Calculateur inconnu.', 'Vous lancez trop de calculs à la suite. Patientez un instant.']) as $text) {
+            foreach (array_unique([...$texts, ...$templates, ...self::OTHER_TEXTS]) as $text) {
                 self::assertTrue($catalogue->defines($text), \sprintf('Traduction manquante en « %s » : %s', $locale, $text));
             }
         }

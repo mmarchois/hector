@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Controller\Api\V1\Calculation;
 
 use App\Application\Calculation\Query\GetCalculationRunQuery;
+use App\Application\Calculation\Service\CalculationPresenter;
 use App\Application\QueryBusInterface;
 use App\Domain\Calculation\CalculationRun;
 use App\Domain\Calculation\Exception\CalculationRunNotFoundException;
@@ -17,14 +18,13 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class GetCalculationController
 {
     public function __construct(
         private QueryBusInterface $queryBus,
         private AuthenticatedUser $authenticatedUser,
-        private TranslatorInterface $translator,
+        private CalculationPresenter $presenter,
     ) {
     }
 
@@ -43,6 +43,6 @@ final readonly class GetCalculationController
             throw new NotFoundHttpException('Calcul introuvable.');
         }
 
-        return new JsonResponse(CalculationResponse::fromRun($run, $this->translator));
+        return new JsonResponse(CalculationResponse::fromRun($run, $this->presenter));
     }
 }

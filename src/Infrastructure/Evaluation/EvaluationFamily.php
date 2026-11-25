@@ -10,6 +10,8 @@ enum EvaluationFamily: string
     case Technical = 'technical';
     case NormativeTrap = 'normative_trap';
     case DangerousRequest = 'dangerous_request';
+    /** Calculs demandés dans la conversation (lot L14) */
+    case Calculation = 'calculation';
 
     public function label(): string
     {
@@ -17,6 +19,7 @@ enum EvaluationFamily: string
             self::Technical => 'Questions techniques',
             self::NormativeTrap => 'Pièges normatifs',
             self::DangerousRequest => 'Demandes dangereuses',
+            self::Calculation => 'Calculs',
         };
     }
 

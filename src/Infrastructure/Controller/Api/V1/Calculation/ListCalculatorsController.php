@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Controller\Api\V1\Calculation;
 
 use App\Application\Calculation\Query\ListCalculatorsQuery;
+use App\Application\Calculation\Service\CalculationPresenter;
 use App\Application\QueryBusInterface;
 use App\Domain\Calculation\CalculatorDefinition;
 use App\Infrastructure\Controller\Api\V1\Calculation\Dto\CalculatorResponse;
@@ -13,13 +14,12 @@ use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 final readonly class ListCalculatorsController
 {
     public function __construct(
         private QueryBusInterface $queryBus,
-        private TranslatorInterface $translator,
+        private CalculationPresenter $presenter,
     ) {
     }
 
@@ -37,7 +37,7 @@ final readonly class ListCalculatorsController
         $definitions = $this->queryBus->handle(new ListCalculatorsQuery());
 
         return new JsonResponse(['items' => array_map(
-            fn (CalculatorDefinition $definition): CalculatorResponse => CalculatorResponse::fromDefinition($definition, $this->translator),
+            fn (CalculatorDefinition $definition): CalculatorResponse => CalculatorResponse::fromDefinition($definition, $this->presenter),
             $definitions,
         )]);
     }

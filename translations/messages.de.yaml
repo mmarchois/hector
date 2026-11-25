@@ -88,3 +88,13 @@
 "%input% (%symbol%) : la valeur ne doit pas dépasser %bound%%unit%, limite de ce calcul.": "%input% (%symbol%): Der Wert darf %bound%%unit% nicht überschreiten, die Grenze dieser Berechnung."
 "Le résultat dépasse %bound%%unit%, limite de ce calcul : vérifiez les valeurs saisies.": "Das Ergebnis überschreitet %bound%%unit%, die Grenze dieser Berechnung: Prüfen Sie die eingegebenen Werte."
 "Le résultat est trop petit pour être exprimé en %unit% : vérifiez les valeurs saisies.": "Das Ergebnis ist zu klein, um in %unit% ausgedrückt zu werden: Prüfen Sie die eingegebenen Werte."
+
+# Calcul dans la conversation (lot L14) : texte de repli du bloc de calcul
+"Calcul : %title% (version %version%)": "Berechnung: %title% (Version %version%)"
+"%label% (%symbol%) : %value%": "%label% (%symbol%): %value%"
+"%label% : %expression% = %value%": "%label%: %expression% = %value%"
+"Résultat : %symbol% = %value%": "Ergebnis: %symbol% = %value%"
+"Valeur exacte : %value%": "Genauer Wert: %value%"
+"Hypothèses :": "Annahmen:"
+"Source : %source%": "Quelle: %source%"
+"Calcul non effectué : %title%": "Berechnung nicht durchgeführt: %title%"

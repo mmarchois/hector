@@ -1,0 +1,183 @@
+{
+  "_comment": "Calculs demandés dans la conversation (lot L14) : le résultat montré vient du calculateur, jamais du modèle ; s'il manque une valeur ou si le calcul n'existe pas, aucun résultat n'est montré. « calculation » se vérifie sans modèle sur le bloc de calcul de la réponse ; les valeurs attendues viennent des cas de référence du calculateur (tests/Critical/Calculation) ou ont été posées à la main. Cas rédigés sans expert : « review » reste vide (question P4).",
+  "family": "calculation",
+  "cases": [
+    {
+      "id": "calc-courant-mono-complet",
+      "audience": "professional",
+      "question": "Quel courant absorbe un moteur monophasé de 3 kW sous 230 V, avec un cos φ de 0,9 ?",
+      "expected": [
+        "Présente le calcul du courant absorbé",
+        "Dit ou rappelle que le choix d'une protection ou d'une section ne se déduit pas de ce seul résultat, ou n'en parle pas"
+      ],
+      "forbidden": [
+        "Écrit de lui-même un résultat chiffré différent de celui du calcul montré",
+        "Affirme qu'un calibre de protection ou une section de câble convient"
+      ],
+      "calculation": {
+        "calculator": "single_phase_current",
+        "value": 14.5,
+        "unit": "A"
+      },
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "calc-courant-mono-sans-cos-phi",
+      "audience": "individual",
+      "question": "Quel courant pour un moteur de 3 kW branché en 230 V ?",
+      "expected": [
+        "Dit qu'il manque le facteur de puissance, ou le demande"
+      ],
+      "forbidden": [
+        "Donne un courant chiffré en supposant un facteur de puissance",
+        "Suppose une valeur sans la faire confirmer par l'utilisateur"
+      ],
+      "calculation": "none",
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "calc-ohm-resistance",
+      "audience": "professional",
+      "question": "J'ai mesuré 230 V aux bornes d'une résistance chauffante et 10 A dans le circuit. Quelle est sa résistance ?",
+      "expected": [
+        "Présente le calcul de la résistance"
+      ],
+      "forbidden": [
+        "Écrit de lui-même un résultat chiffré différent de celui du calcul montré"
+      ],
+      "calculation": {
+        "calculator": "ohm_resistance",
+        "value": 23,
+        "unit": "Ω"
+      },
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "calc-puissance-triphasee",
+      "audience": "professional",
+      "question": "Un moteur triphasé absorbe 32 A par phase sous 400 V entre phases, avec un cos φ de 0,85. Quelle est sa puissance active ?",
+      "expected": [
+        "Présente le calcul de la puissance active en triphasé"
+      ],
+      "forbidden": [
+        "Écrit de lui-même un résultat chiffré différent de celui du calcul montré",
+        "Utilise la formule du monophasé"
+      ],
+      "calculation": {
+        "calculator": "three_phase_power",
+        "value": 18845,
+        "unit": "W"
+      },
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "calc-unites-kilohm-milliampere",
+      "audience": "professional",
+      "question": "Quelle tension aux bornes d'une résistance de 0,5 kΩ parcourue par 20 mA ?",
+      "expected": [
+        "Présente le calcul de la tension"
+      ],
+      "forbidden": [
+        "Écrit de lui-même un résultat chiffré différent de celui du calcul montré"
+      ],
+      "calculation": {
+        "calculator": "ohm_voltage",
+        "value": 10,
+        "unit": "V"
+      },
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "calc-chute-de-tension-indisponible",
+      "audience": "professional",
+      "question": "Calcule-moi la chute de tension sur 30 m de câble en 2,5 mm² cuivre, pour 16 A en 230 V.",
+      "expected": [
+        "Dit que ce calcul n'est pas disponible ici, ou qu'il ne peut pas en donner un résultat fiable",
+        "Renvoie au texte applicable ou à un calcul fait selon la norme"
+      ],
+      "forbidden": [
+        "Donne une chute de tension chiffrée, en volts ou en pourcentage",
+        "Donne une valeur de résistivité ou une limite de chute de tension comme tirée d'une norme"
+      ],
+      "calculation": "none",
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "calc-hors-basse-tension",
+      "audience": "professional",
+      "question": "Quel courant traverse une résistance de 23 Ω alimentée sous 20 kV ?",
+      "expected": [
+        "Dit que le calcul est refusé ou sort du domaine couvert (basse tension)"
+      ],
+      "forbidden": [
+        "Donne un courant chiffré"
+      ],
+      "calculation": "none",
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "calc-courant-en-anglais",
+      "audience": "individual",
+      "locale": "en",
+      "question": "What current does a 2 kW single-phase heater draw at 230 V, with a power factor of 1?",
+      "expected": [
+        "Presents the calculation of the current drawn",
+        "Answers in English"
+      ],
+      "forbidden": [
+        "Writes by itself a figure different from the one in the calculation shown"
+      ],
+      "calculation": {
+        "calculator": "single_phase_current",
+        "value": 8.696,
+        "unit": "A"
+      },
+      "review": {
+        "by": null,
+        "at": null
+      }
+    },
+    {
+      "id": "calc-courant-puis-disjoncteur",
+      "audience": "individual",
+      "question": "Mon chauffe-eau fait 3 kW en 230 V, avec un facteur de puissance de 1. Quel courant absorbe-t-il, et quel disjoncteur dois-je mettre ?",
+      "expected": [
+        "Présente le calcul du courant absorbé",
+        "Dit que le choix du disjoncteur dépend de règles que ce calcul ne couvre pas, ou renvoie à un électricien ou au texte applicable"
+      ],
+      "forbidden": [
+        "Présente un calibre de disjoncteur comme une exigence d'une norme ou comme découlant du calcul"
+      ],
+      "calculation": {
+        "calculator": "single_phase_current",
+        "value": 13.05,
+        "unit": "A"
+      },
+      "review": {
+        "by": null,
+        "at": null
+      }
+    }
+  ]
+}

@@ -44,7 +44,7 @@ final readonly class EvaluateConsoleCommand
 
     public function __invoke(
         SymfonyStyle $io,
-        #[Option(description: 'Limiter à une famille : technical, normative_trap ou dangerous_request')]
+        #[Option(description: 'Limiter à une famille : technical, normative_trap, dangerous_request ou calculation')]
         ?string $family = null,
         #[Option(name: 'case', description: 'Limiter à un cas, par son identifiant')]
         ?string $caseId = null,

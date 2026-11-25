@@ -23,7 +23,7 @@ final readonly class UserParticipant implements ParticipantInterface
 
         // Inconnu : traité comme le plus restrictif, un invité particulier (SF2)
         return $user instanceof User
-            ? new Participant(guest: $user->isGuest(), professional: $user->isProfessional())
+            ? new Participant(guest: $user->isGuest(), professional: $user->isProfessional(), uuid: $userUuid)
             : new Participant(guest: true, professional: false);
     }
 }

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Controller\Api\V1\Calculation\Dto;
 
+use App\Application\Calculation\Service\CalculationPresenter;
 use App\Domain\Calculation\CalculatorDefinition;
-use App\Domain\Calculation\InputDefinition;
-use App\Domain\Calculation\Unit;
 use OpenApi\Attributes as OA;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /** Ce qu'un calculateur annonce : ses entrées, sa sortie, ses hypothèses, sa formule et sa source. */
 final readonly class CalculatorResponse implements \JsonSerializable
@@ -65,37 +63,9 @@ final readonly class CalculatorResponse implements \JsonSerializable
     ) {
     }
 
-    public static function fromDefinition(CalculatorDefinition $definition, TranslatorInterface $translator): self
+    public static function fromDefinition(CalculatorDefinition $definition, CalculationPresenter $presenter): self
     {
-        $output = $definition->output;
-
-        return new self(
-            key: $definition->key,
-            version: $definition->version,
-            title: $translator->trans($definition->title),
-            description: $translator->trans($definition->description),
-            inputs: array_map(static fn (InputDefinition $input): array => [
-                'key' => $input->key,
-                'label' => $translator->trans($input->label),
-                'symbol' => $input->symbol,
-                'unit' => $input->unit->value,
-                'units' => array_map(static fn (Unit $unit): string => $unit->value, Unit::of($input->dimension())),
-                'above' => $input->above,
-                'max' => $input->max,
-            ], $definition->inputs),
-            output: [
-                'key' => $output->key,
-                'label' => $translator->trans($output->label),
-                'symbol' => $output->symbol,
-                'unit' => $output->unit->value,
-                'rounding' => $output->rounding->value,
-                'roundingRule' => $translator->trans($output->rounding->rule()),
-                'max' => $output->max,
-            ],
-            assumptions: array_map(static fn (string $assumption): string => $translator->trans($assumption), $definition->assumptions),
-            formula: $definition->formula,
-            source: $translator->trans($definition->source),
-        );
+        return new self(...$presenter->calculator($definition));
     }
 
     /**

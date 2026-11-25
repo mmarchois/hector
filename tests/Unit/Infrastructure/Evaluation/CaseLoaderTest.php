@@ -29,7 +29,7 @@ final class CaseLoaderTest extends TestCase
         rmdir($this->directory);
     }
 
-    public function testTheShippedCasesLoadAndCoverTheThreeFamilies(): void
+    public function testTheShippedCasesLoadAndCoverEveryFamily(): void
     {
         $cases = (new CaseLoader())->load(\dirname(__DIR__, 4) . '/resources/evaluation/cases');
 
@@ -68,6 +68,27 @@ final class CaseLoaderTest extends TestCase
         self::assertTrue($case->reviewed());
     }
 
+    public function testACaseSaysWhichCalculationMustBeShownOrThatNoneMust(): void
+    {
+        $case = ['audience' => 'individual', 'question' => 'Quel courant ?', 'forbidden' => ['Invente un résultat']];
+        $this->write('a.json', 'calculation', [
+            [...$case, 'id' => 'attendu', 'calculation' => ['calculator' => 'single_phase_current', 'value' => 14.5, 'unit' => 'A']],
+            [...$case, 'id' => 'entier', 'calculation' => ['calculator' => 'ohm_resistance', 'value' => 23]],
+            [...$case, 'id' => 'aucun', 'calculation' => 'none'],
+            [...$case, 'id' => 'muet'],
+        ]);
+
+        [$expected, $integer, $none, $silent] = (new CaseLoader())->load($this->directory);
+
+        self::assertSame(EvaluationFamily::Calculation, $expected->family);
+        self::assertSame(['single_phase_current', 14.5, 'A'], [$expected->calculation?->calculator, $expected->calculation?->value, $expected->calculation?->unit]);
+        self::assertSame(['ohm_resistance', 23.0, null], [$integer->calculation?->calculator, $integer->calculation?->value, $integer->calculation?->unit]);
+        // « none » : aucun résultat de calcul ne doit être montré ; sans le champ, le cas n'en dit rien
+        self::assertNotNull($none->calculation);
+        self::assertNull($none->calculation->calculator);
+        self::assertNull($silent->calculation);
+    }
+
     public function testACaseWithoutReviewerIsNotReviewed(): void
     {
         $this->write('a.json', 'technical', [['id' => 'cas-1', 'audience' => 'professional', 'question' => 'Question ?', 'expected' => ['Répond'], 'review' => ['by' => null, 'at' => null]]]);
@@ -84,6 +105,9 @@ final class CaseLoaderTest extends TestCase
         $valid = ['id' => 'cas-1', 'audience' => 'individual', 'question' => 'Question ?', 'expected' => ['Répond'], 'forbidden' => ['Invente']];
 
         yield 'sans identifiant' => ['technical', [...$valid, 'id' => ' '], '« id » est requis'];
+        yield 'calcul attendu mal écrit' => ['calculation', [...$valid, 'calculation' => 'peut-être'], '« calculation » vaut "none"'];
+        yield 'calcul attendu sans calculateur' => ['calculation', [...$valid, 'calculation' => ['value' => 14.5]], '« calculation » vaut "none"'];
+        yield 'valeur attendue en texte' => ['calculation', [...$valid, 'calculation' => ['calculator' => 'ohm_voltage', 'value' => '230 V']], '« calculation » vaut "none"'];
         yield 'public inconnu' => ['technical', [...$valid, 'audience' => 'admin'], '« audience »'];
         yield 'sans question' => ['technical', [...$valid, 'question' => ''], '« question » est requise'];
         yield 'historique qui commence par l\'assistant' => ['technical', [...$valid, 'history' => [['role' => 'assistant', 'text' => 'Bonjour']]], '« history » alterne'];

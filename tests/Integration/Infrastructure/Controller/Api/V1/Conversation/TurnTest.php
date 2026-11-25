@@ -146,7 +146,7 @@ final class TurnTest extends AbstractApiTestCase
 
         self::assertSame('completed', $turn['status']);
         // L'outil est offert et expliqué au modèle, qui lit ensuite les passages trouvés
-        self::assertSame('rechercher_documentation', $this->model->requests[0]->tools[0]->name);
+        self::assertContains('rechercher_documentation', array_column($this->model->requests[0]->tools, 'name'));
         self::assertStringContainsString('`rechercher_documentation`', $this->model->requests[0]->system);
         $read = $this->model->requests[1]->messages[2]->toolResults[0]->content;
         self::assertStringContainsString('[S1] Fiche différentiel — Hector, version « v1 », publiée le 2026-11-01', $read);
@@ -198,7 +198,8 @@ final class TurnTest extends AbstractApiTestCase
 
         $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $token, ['text' => 'Bonjour']);
 
-        self::assertSame([], $this->model->requests[0]->tools);
+        // Sans base documentaire, pas d'outil de recherche : il ne reste que le calcul
+        self::assertSame(['calculer'], array_column($this->model->requests[0]->tools, 'name'));
         self::assertStringContainsString('Tu n\'as pas encore accès à une base documentaire', $this->model->requests[0]->system);
         self::assertStringNotContainsString('{{', $this->model->requests[0]->system);
     }
