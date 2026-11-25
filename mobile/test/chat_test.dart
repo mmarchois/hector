@@ -109,6 +109,29 @@ void main() {
         );
       }
     });
+
+    test('503 service_saturated : réessayer plus tard', () async {
+      final c = container(
+        ScriptedAdapter(
+          (options) async => jsonResponse(503, {
+            'code': 503,
+            'reason': 'service_saturated',
+            'message': 'Hector est très sollicité en ce moment.',
+          }),
+        ),
+      );
+
+      await expectLater(
+        c.read(conversationRepositoryProvider).send(conversation, 'Bonjour'),
+        throwsA(
+          isA<ServiceSaturatedException>().having(
+            (e) => e.message,
+            'message',
+            'Hector est très sollicité en ce moment.',
+          ),
+        ),
+      );
+    });
   });
 
   group('conversation', () {

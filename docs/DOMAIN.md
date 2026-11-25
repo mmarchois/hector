@@ -5,7 +5,7 @@
 
 ## 1. Carte des contextes
 
-Neuf contextes, dans un seul dépôt et un seul déploiement : sept pour le MVP, deux pour le conseil en équipements qui vient ensuite. Un contexte est un dossier de même nom sous `src/Domain`, `src/Application` et `src/Infrastructure`.
+Dix contextes, dans un seul dépôt et un seul déploiement : sept pour le MVP, deux pour le conseil en équipements qui vient ensuite, un pour les retours du terrain. Un contexte est un dossier de même nom sous `src/Domain`, `src/Application` et `src/Infrastructure`.
 
 | Contexte | Nom dans le code | Nature | Responsabilité | Ce qu'il ne fait pas |
 |---|---|---|---|---|
@@ -18,6 +18,7 @@ Neuf contextes, dans un seul dépôt et un seul déploiement : sept pour le MVP,
 | Prévention | `Safety` | Cœur | Niveaux de risque, catalogue de vérifications, politique selon la qualification, messages de sécurité | Ne conduit pas le diagnostic |
 | Catalogue (après le MVP) | `Catalog` | Support | Marques, gammes, références, catégories et leurs critères, caractéristiques techniques, prix, sources produits | Ne recommande rien et ne juge pas un besoin |
 | Conseil produits (après le MVP) | `ProductRecommendation` | Cœur | Besoin du client, critères de sélection, comparaison, compatibilité avec l'installation, recommandations et alternatives | Ne stocke aucune donnée produit (c'est Catalogue) |
+| Retours du terrain (après le MVP) | `Experience` | Support | Retours de dépannage proposés par les utilisateurs, leur relecture, les fiches publiées et leur recherche | Ne conduit pas le diagnostic et ne décide pas des gestes permis |
 
 La séparation demandée entre connaissances documentaires, réglementation, calculs et diagnostic correspond aux contextes Documentation, Réglementation, Calcul et Diagnostic. Prévention est isolé parce que ses règles servent à la fois au diagnostic et aux réponses libres, et parce qu'elles doivent être testées à part.
 
@@ -41,6 +42,9 @@ Règle générale : un contexte ne manipule jamais les entités d'un autre. Il e
 | Conseil produits | Catalogue | Lit les références, leurs caractéristiques et leur provenance. |
 | Conseil produits | Calcul | S'appuie sur les calculateurs pour vérifier une compatibilité. |
 | Catalogue | Documentation | Une caractéristique peut renvoyer, comme preuve, à un passage d'une fiche technique du corpus produits. |
+| Retours du terrain | Diagnostic | Un retour peut naître d'une session conclue, dont il reprend le symptôme et le contexte d'installation, par identifiant. |
+| Retours du terrain | Prévention | Fait classer le geste décrit par niveau de risque, détecte les consignes interdites, et filtre ce qui est montré selon la qualification de l'utilisateur. |
+| Retours du terrain | Réglementation | Vérifie qu'une référence normative citée dans un retour existe au registre. |
 
 ## 3. Langage commun
 
@@ -53,7 +57,7 @@ Le code existant est en anglais, les messages destinés à l'utilisateur en fran
 | Tour | `Turn` | Un message de l'utilisateur et la réponse qu'il déclenche |
 | Bloc | `Block` | Élément typé d'un message (énoncé, question, calcul, étape…) |
 | Énoncé | `Statement` | Phrase ou paragraphe d'une réponse, porteur d'une nature |
-| Nature d'un énoncé | `StatementKind` | Fait sourcé, fait déclaré, résultat de calcul, explication générale, hypothèse, recommandation, information manquante, avis rapporté |
+| Nature d'un énoncé | `StatementKind` | Fait sourcé, fait déclaré, résultat de calcul, explication générale, hypothèse, recommandation, information manquante, avis rapporté, retour du terrain (après le MVP) |
 | Citation | `Citation` | Lien entre un énoncé et un passage précis |
 | Capacité | `Capability` | Ce qu'un contexte métier apporte à la conversation : outils, contexte, blocs |
 | Source | `Source` | Un document de référence, toutes versions confondues |
@@ -81,6 +85,9 @@ Le code existant est en anglais, les messages destinés à l'utilisateur en fran
 | Indice visuel | `VisualClue` | Ce qu'une image suggère (plus tard) ; ce n'est jamais une observation |
 | Corpus | `Corpus` | Ensemble de sources géré selon ses propres règles : réglementaire et technique d'un côté, produits de l'autre |
 | Avis rapporté | `ReportedOpinion` | Avis ou retour d'expérience issu d'une source nommée ; ni une caractéristique, ni une recommandation de l'assistant |
+| Retour de dépannage | `FieldReport` | Ce qu'un utilisateur dit avoir fait pour résoudre sa panne, avant relecture ; privé tant qu'il n'est pas publié |
+| Cas du terrain | `FieldCase` | Retour relu, anonymisé et publié : symptôme, contexte, cause, résolution, niveau de risque du geste |
+| Retour du terrain (nature) | `StatementKind::FieldExperience` | Énoncé appuyé sur des cas du terrain, avec leur nombre ; une hypothèse, jamais un fait |
 | Marque, gamme, référence | `Brand`, `ProductRange`, `Product` | Les trois niveaux du catalogue |
 | Catégorie | `ProductCategory` | Famille de produits comparables, avec ses critères |
 | Critère | `Criterion` | Caractéristique comparable d'une catégorie : nom, unité, sens de lecture |
@@ -117,7 +124,8 @@ Règles :
 - **CV5.** Tout bloc porte un texte de repli lisible, pour les versions de l'application qui ne connaissent pas son type.
 - **CV6.** Tout message de l'assistant est relié à la trace de son tour.
 - **CV7.** Le socle ne connaît aucune notion électrique. L'activité en cours d'une conversation est un simple couple (capacité, identifiant).
-- **CV8.** Un tour n'est accepté que si l'allocation de son auteur le permet. Le refus a lieu avant tout appel au modèle de langage et dit ce qui débloque la suite (s'inscrire, plus tard s'abonner).
+- **CV8.** Un tour n'est accepté que si l'allocation de son auteur le permet. Le refus a lieu avant tout appel au modèle de langage et dit ce qui débloque la suite (s'inscrire, plus tard s'abonner). L'allocation se compte en messages et en jetons (entrée, sortie, cache) : la première limite atteinte s'applique.
+- **CV9.** Un budget global de jetons sur 24 heures glissantes, tous utilisateurs confondus, borne la dépense chez le fournisseur. Atteint, il fait refuser tout nouveau tour avant l'appel au modèle (503 `service_saturated`). L'historique transmis au modèle est borné en taille : les messages les plus anciens sont écartés d'abord.
 
 ### 4.2 Documentation
 
@@ -282,11 +290,36 @@ Règles :
 - **ID3.** Un invité a la qualification la plus restrictive, celle d'un particulier.
 - **ID4.** Un invité inactif au-delà de la durée de conservation annoncée est supprimé avec ses données. Mise en œuvre (lot L3) : est inactif un invité qui n'a plus aucune session valide. Une session vit 30 jours après son dernier renouvellement, et un invité n'a pas d'identifiants pour en rouvrir une : passé ce délai, ses données ne sont plus accessibles à personne. La durée de conservation vaut donc 30 jours, à confirmer avec la question P7. La commande `app:guests:purge` est à planifier chaque jour en production (D15).
 
+### 4.10 Retours du terrain (après le MVP)
+
+Demande du 25 novembre 2026 : qu'Hector apprenne de la façon dont les utilisateurs ont réussi leur dépannage, si c'est juste (PRODUCT.md, § 8, point 7 ; décision D18).
+
+| Objet | Type | Contenu |
+|---|---|---|
+| `FieldReport` | Agrégat | Auteur, conversation et session de diagnostic d'origine, texte de l'utilisateur, fiche proposée, accord de partage (date, version du texte d'accord), statut (proposé, refusé aux contrôles, en relecture, publié, refusé, retiré), motifs des contrôles |
+| `CaseSheet` | Objet-valeur | Symptôme, contexte d'installation, cause trouvée, résolution, auteur du geste (particulier, professionnel), résultat, ancienneté de la résolution au moment du retour ; chaque champ peut valoir « inconnu » |
+| `CaseReview` | Entité | Relecteur, date, décision (publier, corriger, refuser), fiche corrigée, niveau de risque du geste, motif |
+| `FieldCase` | Agrégat | Fiche relue, niveau de risque, famille de panne, date de publication, relecteur, nombre de confirmations et d'infirmations, statut (publié, retiré). Aucun lien vers l'auteur |
+| `CaseFeedback` | Entité | Usage d'un cas dans un tour, puis issue rapportée (a aidé, n'a pas aidé, inconnue) |
+
+Règles :
+
+- **EX1.** Un retour n'est recueilli qu'avec l'accord explicite de son auteur, donné pour ce retour. L'accord enregistre sa date et la version du texte présenté. Sans accord, rien ne sort de la conversation.
+- **EX2.** Seul un compte complet peut proposer un retour (question P12).
+- **EX3.** La fiche ne contient aucune donnée d'identité, ni de l'auteur ni de tiers (nom, adresse, téléphone, plaque, photo). Le texte d'origine reste privé et n'est jamais publié.
+- **EX4.** Une fiche qui contient une consigne interdite (SF), une référence normative absente du registre (RG1) ou une valeur sans unité est refusée aux contrôles, avec son motif, avant toute relecture.
+- **EX5.** Un cas n'est publié qu'après la relecture d'un humain désigné, qui fixe le niveau de risque du geste. La confirmation de l'utilisateur ne suffit pas : c'est la relecture qui dit si un retour est juste.
+- **EX6.** Un cas publié est une hypothèse, avec son nombre de cas semblables. Il n'appuie jamais un « fait sourcé » ni une référence normative, et ne peut pas faire passer une conclusion à « établi » (DG6).
+- **EX7.** Un cas n'élargit jamais les gestes permis. Si le geste décrit n'est pas permis pour la qualification du lecteur (SF2), la résolution est remplacée par l'orientation vers un professionnel : le lecteur sait qu'un cas semblable s'est réglé ainsi, pas comment le faire.
+- **EX8.** Un cas peut être retiré à tout moment, avec effet immédiat sur la recherche. Il reste lisible par les tours qui l'ont déjà cité, avec la mention « retiré ».
+- **EX9.** Un cas infirmé plus souvent qu'il n'est confirmé, au-delà d'un seuil fixé avec l'expert, revient en relecture.
+- **EX10.** Une fréquence de causes n'est calculée et montrée qu'au-delà d'un nombre minimal de cas publiés, pour éviter qu'elle ne désigne une situation ou une personne.
+
 ## 5. Ce que le modèle initial laisse volontairement de côté
 
 - La structure fine des normes, article par article. Le registre s'arrête à l'édition ; une disposition n'existe que portée par la localisation d'un passage.
 - Le choix automatique de l'édition applicable (règle RG5).
-- Une base de connaissances de pannes sous forme d'arbres de décision. Les hypothèses sont proposées par le modèle et encadrées par les règles du domaine (décision D6).
+- Une base de connaissances de pannes sous forme d'arbres de décision. Les hypothèses sont proposées par le modèle et encadrées par les règles du domaine (décision D6). Les cas du terrain (§ 4.10) éclairent ces hypothèses ; ils ne deviennent pas des arbres de décision.
 - Le partage de conversations ou de diagnostics au sein d'une entreprise.
 - Les images : `VisualClue` figure au glossaire pour fixer dès maintenant qu'une image ne produit jamais une observation, mais rien n'est modélisé au-delà.
 - Un contexte « Installation » commun. La description de l'installation sert au diagnostic (`InstallationContext`) et à la compatibilité des produits (`InstallationConstraints`). Chaque contexte garde la sienne pour l'instant ; un modèle partagé sera extrait quand les deux existeront et que leurs besoins réels seront connus.

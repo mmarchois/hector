@@ -10,7 +10,9 @@ use App\Domain\Conversation\Repository\TurnRepositoryInterface;
 
 /**
  * Allocation gratuite selon le type de compte (règle CV8, question P10, décision D17) :
- * un nombre de messages au total pour un invité, par période de 24 heures pour un compte.
+ * au total pour un invité, par période de 24 heures pour un compte. Elle se compte en
+ * messages, la mesure que l'utilisateur comprend, et en jetons, la mesure du coût : de
+ * longues réponses épuisent l'allocation avant le nombre de messages.
  * Les valeurs sont dans config/services.yaml ; le paiement n'est pas encore conçu.
  */
 final readonly class FreeAllowancePolicy
@@ -20,6 +22,8 @@ final readonly class FreeAllowancePolicy
         private TurnRepositoryInterface $turnRepository,
         private int $guestMessages,
         private int $accountMessagesPerDay,
+        private int $guestTokens,
+        private int $accountTokensPerDay,
     ) {
     }
 
@@ -27,14 +31,17 @@ final readonly class FreeAllowancePolicy
     public function assertAllowed(string $ownerUuid, \DateTimeImmutable $now): void
     {
         if ($this->participants->profileOf($ownerUuid)->guest) {
-            if ($this->turnRepository->countByOwner($ownerUuid) >= $this->guestMessages) {
+            if ($this->turnRepository->countByOwner($ownerUuid) >= $this->guestMessages
+                || $this->turnRepository->sumTokensByOwner($ownerUuid) >= $this->guestTokens) {
                 throw new FreeAllowanceExhaustedException(signupRequired: true);
             }
 
             return;
         }
 
-        if ($this->turnRepository->countByOwner($ownerUuid, $now->modify('-24 hours')) >= $this->accountMessagesPerDay) {
+        $since = $now->modify('-24 hours');
+        if ($this->turnRepository->countByOwner($ownerUuid, $since) >= $this->accountMessagesPerDay
+            || $this->turnRepository->sumTokensByOwner($ownerUuid, $since) >= $this->accountTokensPerDay) {
             throw new FreeAllowanceExhaustedException(signupRequired: false);
         }
     }

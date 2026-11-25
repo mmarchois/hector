@@ -80,3 +80,8 @@ class FreeAllowanceExhaustedException extends MessageLimitException {
 class TooManyMessagesException extends MessageLimitException {
   TooManyMessagesException(super.message);
 }
+
+/// Budget global de l'API atteint (503 `service_saturated`) : réessayer plus tard.
+class ServiceSaturatedException extends MessageLimitException {
+  ServiceSaturatedException(super.message);
+}

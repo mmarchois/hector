@@ -49,6 +49,10 @@
 | L24 | Compatibilité avec l'installation | L13, L21 | — |
 | L25 | Recommandations et alternatives | L23, L24 | — |
 | L26 | Prix, disponibilités et sélection présentable au client | L25 | — |
+| **Phase 7 — Apprendre du terrain (après le MVP)** | | | |
+| L27 | Relecture et publication des cas du terrain | L18 | — |
+| L28 | Cas du terrain dans la conversation | L12, L27 | — |
+| L29 | Fréquences de causes confirmées | L28 | — |
 
 Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avancer indépendamment : le socle (L3 à L8), la base documentaire (L9), le calcul (L13), la prévention et le domaine du diagnostic (L15, L16). Ils se rejoignent aux lots L10, L14 et L17.
 
@@ -344,7 +348,7 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 ### L18 — Conclusion argumentée et retour du terrain
 
 **Objectif.** Conclure sans jamais présenter l'incertain comme certain.
-**Contenu.** Règles du niveau de confiance. Bloc de conclusion. Résumé du diagnostic, consultable et transmissible à un professionnel. Retour de l'utilisateur : cause confirmée, infirmée, inconnue.
+**Contenu.** Règles du niveau de confiance. Bloc de conclusion. Résumé du diagnostic, consultable et transmissible à un professionnel. Retour de l'utilisateur : cause confirmée, infirmée, inconnue. Recueil du retour de dépannage (D18, premier temps) : ce qui a résolu la panne, accord de partage, fiche proposée par le modèle et contrôlée par le domaine ; rien n'est encore montré à d'autres utilisateurs.
 **Critères d'acceptation.**
 - Le niveau de confiance affiché est celui que calcule le domaine. Le modèle ne peut pas l'augmenter (DG6).
 - « Établi » est impossible tant qu'une hypothèse reste ouverte ou qu'aucune mesure ni aucun constat ne soutient la cause.
@@ -352,6 +356,8 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - La formulation suit un gabarit propre à chaque niveau de confiance.
 - Le résumé transmissible reprend symptôme, observations et hypothèses restantes, sans jargon pour un particulier.
 - Le retour du terrain est enregistré et relié à la session.
+- Un retour de dépannage n'est enregistré pour partage qu'avec l'accord explicite de son auteur, daté et lié à la version du texte d'accord (EX1) ; un invité ne peut pas en proposer (EX2).
+- Une fiche contenant une consigne interdite, une référence absente du registre ou une valeur sans unité est refusée aux contrôles, avec son motif (EX4).
 
 **Tests.** Suite critique : table de décision du niveau de confiance. Intégration. Tests d'écrans. Évaluation : scénarios dont la bonne issue est « indéterminé » ou « orientation ».
 
@@ -463,3 +469,47 @@ Ces lots sont décrits à gros grain. Ils seront redécoupés quand les réponse
 - La sélection exportée reprend besoin, références, arguments, sources et dates.
 
 **Tests.** Unitaires de la fraîcheur. Intégration du flux avec une source simulée. Tests d'écrans.
+
+---
+
+## Phase 7 — Apprendre du terrain (après le MVP)
+
+Décision D18 : Hector apprend des dépannages réussis par une base de cas relus, fournie au modèle comme contexte, et non par un réentraînement du modèle. Le recueil commence au lot L18, pour que la bêta produise des cas ; ces lots les rendent utiles. Ils seront redécoupés quand les réponses aux questions P12 et P13 seront connues.
+
+### L27 — Relecture et publication des cas du terrain
+
+**Objectif.** Ne montrer à d'autres utilisateurs que des retours jugés justes par un humain.
+**Contenu.** Contexte `Experience` : `FieldReport`, `CaseReview`, `FieldCase`. File de relecture (commandes, puis écran réservé aux relecteurs), anonymisation contrôlée, niveau de risque fixé par le relecteur, retrait par commande.
+**Critères d'acceptation.**
+- Aucun cas n'est publié sans relecteur, date de relecture et niveau de risque (EX5).
+- Un cas publié ne contient ni le texte d'origine ni aucun lien vers son auteur (EX3).
+- Le jeu de fiches piégées (données personnelles, consignes interdites, références inventées) est entièrement arrêté avant publication.
+- Retirer un cas le sort de la recherche immédiatement ; il reste lisible, avec la mention « retiré », par les tours qui l'ont cité (EX8).
+- Supprimer un compte supprime ses retours non publiés (P12).
+
+**Tests.** Suite critique : contrôles d'une fiche, sur des cas positifs et négatifs. Unitaires du cycle de vie. Intégration de la file de relecture et de la suppression.
+
+### L28 — Cas du terrain dans la conversation
+
+**Objectif.** Faire profiter chaque utilisateur des dépannages réussis par d'autres, sans en faire des certitudes.
+**Contenu.** `FieldCaseSearchInterface` sur les adaptateurs de recherche des lots L10 et L12. Outil `rechercher_cas_terrain`. Nature « retour du terrain » dans le format de blocs. Retour de l'utilisateur sur un cas cité (a aidé, n'a pas aidé). Rendu mobile.
+**Critères d'acceptation.**
+- Toute mention d'un cas désigne un cas renvoyé par la recherche pendant ce tour ; sinon le brouillon est rejeté (D7).
+- Un énoncé appuyé sur un cas est affiché comme retour du terrain, avec son nombre de cas ; un brouillon qui en fait un fait sourcé est rejeté (EX6).
+- Pour un lecteur dont la qualification ne permet pas le geste décrit, la résolution n'apparaît pas : seule l'orientation vers un professionnel est donnée (EX7).
+- Un cas infirmé au-delà du seuil revient en relecture et sort de la recherche (EX9).
+- Un cas piégé du jeu d'attaque ne change pas le comportement de l'assistant (T13).
+- La part des cas d'évaluation mieux traités avec les cas du terrain est mesurée ; l'outil n'est conservé que sur ce chiffre.
+
+**Tests.** Suite critique : filtrage par qualification. Intégration avec le faux modèle. Évaluation avant et après. Tests d'écrans.
+
+### L29 — Fréquences de causes confirmées
+
+**Objectif.** Ordonner les hypothèses d'un diagnostic selon ce que le terrain a confirmé.
+**Contenu.** Fréquences calculées par le domaine, par symptôme et contexte d'installation semblables, fournies au diagnostic comme contexte. Rapport des manques du catalogue de vérifications.
+**Critères d'acceptation.**
+- Aucune fréquence n'est calculée ni montrée en dessous du nombre minimal de cas (EX10).
+- Une fréquence s'affiche comme hypothèse, avec son nombre de cas ; elle ne change ni le niveau de confiance (DG6) ni les gestes permis.
+- Le rapport des manques liste les causes confirmées sans vérification au catalogue.
+
+**Tests.** Suite critique : calcul des fréquences et seuil. Évaluation sur des scénarios simulés.

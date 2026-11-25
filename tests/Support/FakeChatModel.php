@@ -25,9 +25,9 @@ final class FakeChatModel implements ChatModelInterface
     /** @var list<ChatRequest> */
     public array $requests = [];
 
-    public function willReply(string $text, ChatStopReason $stopReason = ChatStopReason::EndTurn): self
+    public function willReply(string $text, ChatStopReason $stopReason = ChatStopReason::EndTurn, ?ChatUsage $usage = null): self
     {
-        $this->script[] = new ChatResponse($text, $stopReason, 'fake-model', new ChatUsage(100, 20));
+        $this->script[] = new ChatResponse($text, $stopReason, 'fake-model', $usage ?? new ChatUsage(100, 20));
 
         return $this;
     }

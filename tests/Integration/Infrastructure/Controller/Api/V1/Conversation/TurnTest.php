@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Integration\Infrastructure\Controller\Api\V1\Conversation;
 
 use App\Application\Conversation\Port\ChatModelUnavailableException;
+use App\Application\Conversation\Port\ChatUsage;
 use App\Infrastructure\Persistence\Doctrine\Fixtures\UserFixture;
 use App\Tests\Integration\Infrastructure\Controller\Api\AbstractApiTestCase;
 use App\Tests\Support\FakeChatModel;
@@ -126,6 +127,40 @@ final class TurnTest extends AbstractApiTestCase
 
         self::assertResponseStatusCodeSame(429);
         self::assertSame('free_allowance_exhausted', $refused['reason']);
+    }
+
+    public function testAGuestWhoseAnswersAreLongRunsOutOfTokens(): void
+    {
+        $guest = $this->openGuestAccount($this->client)['token'];
+        $uuid = $this->newConversation($guest);
+        // Allocation de test : 50 000 jetons pour un invité, atteints dès le premier tour
+        $this->model->willReply('Longue réponse', usage: new ChatUsage(30_000, 15_000, 5_000));
+        $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $guest, ['text' => 'Question 1']);
+        self::assertResponseStatusCodeSame(201);
+
+        $refused = $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $guest, ['text' => 'Question 2']);
+
+        self::assertResponseStatusCodeSame(429);
+        self::assertSame('signup_required', $refused['reason']);
+    }
+
+    public function testEveryoneIsRefusedOnceTheGlobalBudgetIsReached(): void
+    {
+        $token = $this->login($this->client)['token'];
+        $uuid = $this->newConversation($token);
+        // Budget global de test : 1 000 000 de jetons sur 24 heures (.env.test)
+        $this->model->willReply('Réponse', usage: new ChatUsage(1_000_000, 0));
+        $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $token, ['text' => 'Question']);
+        $callsBefore = \count($this->model->requests);
+
+        $other = $this->login($this->client, UserFixture::INDIVIDUAL_EMAIL)['token'];
+        $refused = $this->apiRequest($this->client, 'POST', '/api/v1/conversations/' . $this->newConversation($other) . '/messages', $other, ['text' => 'Bonjour']);
+
+        self::assertResponseStatusCodeSame(503);
+        self::assertSame('service_saturated', $refused['reason']);
+        self::assertStringContainsString('18 ou 112', $refused['message']);
+        // CV9 : refusé avant tout appel au modèle
+        self::assertCount($callsBefore, $this->model->requests);
     }
 
     private function newConversation(string $token): string

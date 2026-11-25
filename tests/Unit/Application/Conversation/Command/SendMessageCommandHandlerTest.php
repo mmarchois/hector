@@ -9,6 +9,7 @@ use App\Application\Conversation\Command\SendMessageCommandHandler;
 use App\Application\Conversation\Port\Participant;
 use App\Application\Conversation\Port\ParticipantInterface;
 use App\Application\Conversation\Service\FreeAllowancePolicy;
+use App\Application\Conversation\Service\GlobalTokenBudget;
 use App\Domain\Conversation\Conversation;
 use App\Domain\Conversation\Exception\ConversationNotFoundException;
 use App\Domain\Conversation\MessageRole;
@@ -76,8 +77,10 @@ final class SendMessageCommandHandlerTest extends TestCase
 
         $participants = $this->createStub(ParticipantInterface::class);
         $participants->method('profileOf')->willReturn(new Participant(guest: false, professional: true));
-        $allowance = new FreeAllowancePolicy($participants, $this->createStub(TurnRepositoryInterface::class), 10, 30);
+        $usage = $this->createStub(TurnRepositoryInterface::class);
+        $allowance = new FreeAllowancePolicy($participants, $usage, 10, 30, 150_000, 500_000);
+        $budget = new GlobalTokenBudget($usage, 5_000_000);
 
-        return new SendMessageCommandHandler($conversationRepository, $messageRepository, $turnRepository, $allowance, $idFactory, $dateUtils);
+        return new SendMessageCommandHandler($conversationRepository, $messageRepository, $turnRepository, $allowance, $budget, $idFactory, $dateUtils);
     }
 }

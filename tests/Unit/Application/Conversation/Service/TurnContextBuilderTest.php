@@ -69,6 +69,35 @@ final class TurnContextBuilderTest extends TestCase
         ], $prepared->request->messages);
     }
 
+    public function testALongHistoryIsTrimmedFromItsOldestMessages(): void
+    {
+        $long = str_repeat('é', 15_000);
+        $history = [
+            $this->message("Ancienne $long", MessageRole::User),
+            $this->message("Réponse ancienne $long", MessageRole::Assistant),
+            $this->message("Récente $long", MessageRole::User),
+            $this->message("Réponse récente $long", MessageRole::Assistant),
+        ];
+
+        $messages = $this->builder(new Participant(false, true), $history)->build($this->turn('Nouvelle question'))->request->messages;
+
+        // Au-delà de la borne, les plus anciens partent, et la fenêtre commence par l'utilisateur
+        self::assertCount(3, $messages);
+        self::assertStringStartsWith('Récente', $messages[0]->text);
+        self::assertSame('Nouvelle question', $messages[2]->text);
+        $total = array_sum(array_map(static fn (ChatMessage $message): int => mb_strlen($message->text), $messages));
+        self::assertLessThanOrEqual(TurnContextBuilder::HISTORY_MAX_CHARACTERS, $total);
+    }
+
+    public function testTheMessageOfTheTurnIsAlwaysSent(): void
+    {
+        $history = [$this->message(str_repeat('a', 45_000), MessageRole::Assistant)];
+
+        $messages = $this->builder(new Participant(false, true), $history)->build($this->turn('Question'))->request->messages;
+
+        self::assertEquals([new ChatMessage(ChatRole::User, 'Question')], $messages);
+    }
+
     /**
      * @param list<Message> $history
      */

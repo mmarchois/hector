@@ -92,6 +92,9 @@ class ConversationRepository {
         _ => TooManyMessagesException(message),
       };
     }
+    if (status == 503 && apiErrorReason(e) == 'service_saturated') {
+      return ServiceSaturatedException(message);
+    }
     if (status == 404) {
       return ConversationNotFoundException();
     }
