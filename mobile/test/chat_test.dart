@@ -8,10 +8,12 @@ import 'package:hector_mobile/src/data/auth/token_storage.dart';
 import 'package:hector_mobile/src/data/conversation/conversation_repository.dart';
 import 'package:hector_mobile/src/domain/conversation.dart';
 import 'package:hector_mobile/src/presentation/chat_screen.dart';
+import 'package:hector_mobile/src/presentation/widgets/calculation.dart';
 import 'package:hector_mobile/src/presentation/widgets/kit.dart';
 import 'package:hector_mobile/src/presentation/widgets/sources.dart';
 import 'package:hector_mobile/src/state/chat_controller.dart';
 import 'package:hector_mobile/src/theme.dart';
+import 'package:intl/intl.dart';
 
 import 'support/fakes.dart';
 
@@ -60,6 +62,67 @@ void main() {
   Map<String, dynamic> page(List<Map<String, dynamic>> items) {
     return {'items': items, 'hasMore': false};
   }
+
+  /// Un calcul tel que l'API le compose dans un bloc de conversation.
+  const calculationJson = <String, dynamic>{
+    'uuid': '01a213b2-b1ab-7791-a4a3-14f205b52ef0',
+    'calculator': {
+      'key': 'single_phase_current',
+      'version': 1,
+      'title': 'Courant absorbé en monophasé',
+    },
+    'formula': 'I = P / (U × cos φ)',
+    'source': 'Loi physique : puissance active en régime sinusoïdal monophasé.',
+    'assumptions': ['Régime sinusoïdal établi ; tension et courant efficaces.'],
+    'inputs': [
+      {
+        'key': 'power',
+        'label': 'Puissance active',
+        'symbol': 'P',
+        'value': 3,
+        'unit': 'kW',
+      },
+      {
+        'key': 'voltage',
+        'label': 'Tension',
+        'symbol': 'U',
+        'value': 230,
+        'unit': 'V',
+      },
+      {
+        'key': 'powerFactor',
+        'label': 'Facteur de puissance',
+        'symbol': 'cos φ',
+        'value': 0.9,
+        'unit': '',
+      },
+    ],
+    'steps': [
+      {
+        'label': 'Puissance apparente',
+        'expression': 'S = P / cos φ',
+        'value': 3333,
+        'unit': 'VA',
+      },
+      {
+        'label': 'Courant absorbé',
+        'expression': 'I = S / U',
+        'value': 14.49,
+        'unit': 'A',
+      },
+    ],
+    'result': {
+      'key': 'current',
+      'label': 'Courant absorbé',
+      'symbol': 'I',
+      'value': 14.5,
+      'unit': 'A',
+      'exact': 14.492753623188406,
+      'roundingRule':
+          'Arrondi par excès, à quatre chiffres significatifs ; la partie entière n\'est jamais arrondie.',
+    },
+    'createdAt': '2026-11-25T10:00:00+00:00',
+  };
 
   ProviderContainer container(ScriptedAdapter adapter) {
     final c = buildContainer(InMemoryTokenStorage()..tokens = tokens, adapter);
@@ -441,6 +504,162 @@ void main() {
         false,
         false,
       ]);
+    });
+
+    testWidgets(
+      'un calcul montre son résultat, ses données, ses étapes, ses hypothèses et sa version',
+      (tester) async {
+        final adapter = ScriptedAdapter(
+          (options) async => jsonResponse(
+            200,
+            page([
+              {
+                ...message('m2', 'assistant', ''),
+                'blocks': [
+                  {
+                    'type': 'calculation',
+                    'version': 1,
+                    'text': 'Courant absorbé par le moteur.',
+                    'calculation': calculationJson,
+                    'fallbackText':
+                        'Courant absorbé par le moteur.\nCalcul : Courant absorbé en monophasé (version 1)',
+                  },
+                ],
+              },
+            ]),
+          ),
+        );
+        final c = container(adapter);
+        await tester.pumpWidget(
+          testApp(c, const ChatScreen(conversationUuid: conversation)),
+        );
+        await tester.pumpAndSettle();
+        final numbers = NumberFormat.decimalPattern('fr');
+
+        // Ce que l'assistant en dit, puis ce que l'API a calculé
+        expect(find.text('Résultat de calcul'), findsOneWidget);
+        expect(find.text('Courant absorbé par le moteur.'), findsOneWidget);
+        expect(
+          tester
+              .widget<SelectableText>(
+                find.byKey(const Key('calculationResult')),
+              )
+              .data,
+          'I = 14,5 A',
+        );
+        expect(find.text('Valeur exacte : 14,4928 A'), findsOneWidget);
+        expect(find.textContaining('Arrondi par excès'), findsOneWidget);
+        // Les valeurs données, dans leur unité
+        expect(find.text('Données'), findsOneWidget);
+        expect(find.text('Puissance active (P)'), findsOneWidget);
+        expect(find.text('3 kW'), findsOneWidget);
+        expect(find.text('Facteur de puissance (cos φ)'), findsOneWidget);
+        expect(find.text('0,9'), findsOneWidget);
+        expect(find.text('Étapes'), findsOneWidget);
+        expect(
+          find.text('S = P / cos φ = ${numbers.format(3333)} VA'),
+          findsOneWidget,
+        );
+        expect(find.text('Hypothèses'), findsOneWidget);
+        expect(
+          find.text('Régime sinusoïdal établi ; tension et courant efficaces.'),
+          findsOneWidget,
+        );
+        expect(find.text('I = P / (U × cos φ)'), findsOneWidget);
+        expect(
+          find.text(
+            'Source : Loi physique : puissance active en régime sinusoïdal monophasé.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          tester.widget<Text>(find.byKey(const Key('calculationVersion'))).data,
+          'Courant absorbé en monophasé · version 1',
+        );
+        // Le texte de repli ne sert qu'aux versions qui ignorent ce bloc
+        expect(find.textContaining('Calcul : Courant absorbé'), findsNothing);
+      },
+    );
+
+    testWidgets('un calcul refusé montre ses motifs tels quels', (
+      tester,
+    ) async {
+      final adapter = ScriptedAdapter(
+        (options) async => jsonResponse(
+          200,
+          page([
+            {
+              ...message('m2', 'assistant', ''),
+              'blocks': [
+                {
+                  'type': 'calculation_refusal',
+                  'version': 1,
+                  'calculator': {
+                    'key': 'single_phase_current',
+                    'title': 'Courant absorbé en monophasé',
+                  },
+                  'reasons': [
+                    'Facteur de puissance (cos φ) : valeur manquante.',
+                    'Tension (U) : indiquez l\'unité (V, mV, kV).',
+                  ],
+                  'fallbackText': 'Calcul non effectué : Courant absorbé',
+                },
+                // Un bloc de calcul que cette version ne sait pas lire : son repli (CV5)
+                {
+                  'type': 'calculation',
+                  'version': 1,
+                  'calculation': {'result': 'illisible'},
+                  'fallbackText': 'Résultat : U = 230 V',
+                },
+                {
+                  'type': 'calculation',
+                  'version': 2,
+                  'calculation': calculationJson,
+                  'fallbackText': 'Calcul d\'une version future',
+                },
+              ],
+            },
+          ]),
+        ),
+      );
+      final c = container(adapter);
+      await tester.pumpWidget(
+        testApp(c, const ChatScreen(conversationUuid: conversation)),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Calcul non effectué'), findsOneWidget);
+      expect(find.text('Courant absorbé en monophasé'), findsOneWidget);
+      expect(
+        find.text('Facteur de puissance (cos φ) : valeur manquante.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Tension (U) : indiquez l\'unité (V, mV, kV).'),
+        findsOneWidget,
+      );
+      expect(find.text('Résultat : U = 230 V'), findsOneWidget);
+      expect(find.text('Calcul d\'une version future'), findsOneWidget);
+      expect(find.byType(CalculationCard), findsNothing);
+      expect(find.byType(CalculationRefusalCard), findsOneWidget);
+    });
+
+    test('un bloc de calcul se lit en entier dans son texte de repli', () {
+      final block = MessageBlock.fromJson({
+        'type': 'calculation',
+        'version': 1,
+        'text': 'Courant absorbé par le moteur.',
+        'calculation': calculationJson,
+        'fallbackText': 'Courant absorbé par le moteur.\nRésultat : I = 14,5 A',
+      });
+
+      expect(block.known, isTrue);
+      expect(block.calculation?.result.value, 14.5);
+      expect(block.calculation?.calculatorVersion, 1);
+      expect(block.caption, 'Courant absorbé par le moteur.');
+      expect(block.calculationRefusal, isNull);
+      // Copié ou relu hors de l'écran, le calcul garde ses nombres
+      expect(block.displayText, contains('Résultat : I = 14,5 A'));
     });
 
     testWidgets('une réponse sourcée montre ses sources, consultables', (

@@ -2,6 +2,8 @@
 /// /api/v1/turns).
 library;
 
+import 'calculation.dart';
+
 /// Élément typé et versionné d'un message. Un type inconnu de cette version de
 /// l'application s'affiche par son texte de repli (règle CV5).
 class MessageBlock {
@@ -25,6 +27,12 @@ class MessageBlock {
   static const statementType = 'statement';
   static const questionType = 'question';
   static const warningType = 'warning';
+
+  /// Calcul fait par l'API : ses nombres ne viennent jamais du modèle.
+  static const calculationType = 'calculation';
+
+  /// Calcul refusé par l'API, avec ses motifs tels quels.
+  static const calculationRefusalType = 'calculation_refusal';
 
   final String type;
   final int version;
@@ -54,13 +62,32 @@ class MessageBlock {
     return switch (type) {
       textType || questionType || warningType => true,
       statementType => kind != null,
+      calculationType => calculation != null,
+      calculationRefusalType => calculationRefusal != null,
       _ => false,
     };
   }
 
+  /// Le calcul d'un bloc de calcul que cette version sait afficher.
+  Calculation? get calculation => type == calculationType && version == 1
+      ? Calculation.tryParse(data['calculation'])
+      : null;
+
+  /// Le refus d'un bloc de calcul refusé que cette version sait afficher.
+  CalculationRefusal? get calculationRefusal =>
+      type == calculationRefusalType && version == 1
+      ? CalculationRefusal.tryParse(data)
+      : null;
+
+  /// Quelques mots de l'assistant au-dessus d'un bloc de calcul.
+  String? get caption => data['text'] as String?;
+
   /// Texte à afficher : celui du bloc s'il est connu, sinon le texte de repli.
+  /// Un bloc de calcul se lit en entier dans son texte de repli.
   String get displayText =>
-      known ? (data['text'] as String? ?? fallbackText) : fallbackText;
+      known && type != calculationType && type != calculationRefusalType
+      ? (data['text'] as String? ?? fallbackText)
+      : fallbackText;
 }
 
 /// Nature d'un énoncé de l'assistant : ce qui distingue un fait d'une hypothèse

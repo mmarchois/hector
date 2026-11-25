@@ -409,4 +409,31 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get sourceWithdrawn => 'Fassung inzwischen zurückgezogen';
+
+  @override
+  String get calculationInputs => 'Angaben';
+
+  @override
+  String get calculationSteps => 'Schritte';
+
+  @override
+  String get calculationAssumptions => 'Annahmen';
+
+  @override
+  String calculationExact(String value) {
+    return 'Genauer Wert: $value';
+  }
+
+  @override
+  String calculationSource(String source) {
+    return 'Quelle: $source';
+  }
+
+  @override
+  String calculationVersion(String title, String version) {
+    return '$title · Version $version';
+  }
+
+  @override
+  String get calculationRefusedTitle => 'Berechnung nicht durchgeführt';
 }

@@ -162,6 +162,114 @@ final secondExchange = [
   ]),
 ];
 
+/// Un calcul demandé dans la conversation, puis un calcul refusé (lot L14).
+final calculationExchange = [
+  message('m5', 'user', [
+    block('text', 'Quel courant pour un moteur de 3 kW en 230 V, cos φ 0,9 ?'),
+  ]),
+  message('m6', 'assistant', [
+    {
+      'type': 'calculation',
+      'version': 1,
+      'text': 'Courant absorbé par le moteur.',
+      'calculation': {
+        'uuid': '01a213b2-b1ab-7791-a4a3-14f205b52ef0',
+        'calculator': {
+          'key': 'single_phase_current',
+          'version': 1,
+          'title': 'Courant absorbé en monophasé',
+        },
+        'formula': 'I = P / (U × cos φ)',
+        'source':
+            'Loi physique : puissance active en régime sinusoïdal monophasé.',
+        'assumptions': [
+          'Régime sinusoïdal établi ; tension et courant en valeurs efficaces.',
+          'Le facteur de puissance est celui que vous indiquez : aucune valeur n\'est supposée.',
+          'La puissance est la puissance active absorbée : ni rendement, ni coefficient d\'utilisation ou de simultanéité ne sont appliqués.',
+        ],
+        'inputs': [
+          {
+            'key': 'power',
+            'label': 'Puissance active',
+            'symbol': 'P',
+            'value': 3,
+            'unit': 'kW',
+          },
+          {
+            'key': 'voltage',
+            'label': 'Tension',
+            'symbol': 'U',
+            'value': 230,
+            'unit': 'V',
+          },
+          {
+            'key': 'powerFactor',
+            'label': 'Facteur de puissance',
+            'symbol': 'cos φ',
+            'value': 0.9,
+            'unit': '',
+          },
+        ],
+        'steps': [
+          {
+            'label': 'Puissance apparente',
+            'expression': 'S = P / cos φ',
+            'value': 3333,
+            'unit': 'VA',
+          },
+          {
+            'label': 'Courant absorbé',
+            'expression': 'I = S / U',
+            'value': 14.49,
+            'unit': 'A',
+          },
+        ],
+        'result': {
+          'key': 'current',
+          'label': 'Courant absorbé',
+          'symbol': 'I',
+          'value': 14.5,
+          'unit': 'A',
+          'exact': 14.492753623188406,
+          'roundingRule':
+              'Arrondi par excès, à quatre chiffres significatifs ; la partie entière n\'est jamais arrondie. Un courant à prévoir ne se sous-estime pas.',
+        },
+        'createdAt': '2026-11-25T10:00:00+00:00',
+      },
+      'fallbackText': 'Résultat : I = 14,5 A',
+    },
+    block(
+      'statement',
+      'Faites confirmer le choix de la protection par un électricien : il ne se déduit pas de ce seul courant.',
+      kind: 'recommendation',
+    ),
+  ]),
+];
+
+final refusalExchange = [
+  message('m7', 'user', [
+    block('text', 'Et pour un moteur de 5 kW en 230 V ?'),
+  ]),
+  message('m8', 'assistant', [
+    block(
+      'statement',
+      'Il me manque le facteur de puissance de ce moteur pour faire le calcul.',
+      kind: 'missing_information',
+    ),
+    {
+      'type': 'calculation_refusal',
+      'version': 1,
+      'calculator': {
+        'key': 'single_phase_current',
+        'title': 'Courant absorbé en monophasé',
+      },
+      'reasons': ['Facteur de puissance (cos φ) : valeur manquante.'],
+      'fallbackText': 'Calcul non effectué',
+    },
+    block('question', 'Quel facteur de puissance indique sa plaque ?'),
+  ]),
+];
+
 void main() {
   const tokens = AuthTokens(accessToken: 'a', refreshToken: 'r');
 
@@ -268,6 +376,38 @@ void main() {
       );
       await tester.pumpAndSettle();
       await shot(tester, '04-conversation$suffix');
+    });
+
+    testWidgets('calcul$suffix', (tester) async {
+      phone(tester);
+      final c = buildContainer(
+        InMemoryTokenStorage()..tokens = tokens,
+        api(messages: calculationExchange),
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        app(c, const ChatScreen(conversationUuid: 'c1'), dark: dark),
+      );
+      await tester.pumpAndSettle();
+      await shot(tester, '04b-calcul$suffix');
+      // La carte dépasse l'écran : le haut (résultat, données) se lit en remontant
+      await tester.drag(find.byType(Scrollable).first, const Offset(0, 420));
+      await tester.pumpAndSettle();
+      await shot(tester, '04b-calcul-haut$suffix');
+    });
+
+    testWidgets('calcul refusé$suffix', (tester) async {
+      phone(tester);
+      final c = buildContainer(
+        InMemoryTokenStorage()..tokens = tokens,
+        api(messages: refusalExchange),
+      );
+      addTearDown(c.dispose);
+      await tester.pumpWidget(
+        app(c, const ChatScreen(conversationUuid: 'c1'), dark: dark),
+      );
+      await tester.pumpAndSettle();
+      await shot(tester, '04c-calcul-refuse$suffix');
     });
 
     testWidgets('alerte$suffix', (tester) async {

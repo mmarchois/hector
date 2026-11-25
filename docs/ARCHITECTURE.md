@@ -156,6 +156,14 @@ Le socle ne sait rien de l'électricité. Un contexte métier se rend utile dans
 | Blocs | Types de blocs que la capacité sait produire | Étape de vérification, tableau des hypothèses, conclusion |
 | Conditions | Quand la capacité est offerte | Selon la qualification, selon l'activité en cours de la conversation |
 
+Ce qu'un outil produit pendant un tour entre dans le registre du tour, et rien d'autre ne peut être montré comme une preuve :
+
+- une **source lue** (un passage) reçoit une référence S1, S2… que le modèle cite ; le serveur compose la source affichée (lot L10) ;
+- une **pièce** (un calcul exécuté) reçoit une référence C1, C2… ; le modèle la cite pour dire où la montrer, et le serveur met à cet endroit le bloc qu'il a composé lui-même. Une pièce que la réponse ne cite pas est montrée d'office (lot L14) ;
+- un **avis** (un calcul refusé) n'a pas de référence : le serveur le montre d'office, tel quel.
+
+Le modèle n'écrit que des énoncés, des questions et des mises en garde. Tout autre bloc est composé par le serveur, et le contrôle des réponses rejette un brouillon qui en contiendrait un.
+
 Les capacités sont des services étiquetés, découverts par le conteneur de Symfony. Ajouter un domaine fonctionnel revient à :
 
 1. créer son contexte (domaine, cas d'usage, persistance) et ses tests, sans toucher au socle ;
@@ -229,6 +237,8 @@ Le registre normatif (Réglementation) n'est pas un magasin de contenu : il dit 
 | `GET /api/v1/passages/{uuid}` | Consulter une source citée, selon sa licence | L10 |
 | `GET /api/v1/calculators`, `POST /api/v1/calculations`, `GET /api/v1/calculations/{uuid}` | Lister les calculateurs, calculer sans conversation, relire un calcul tel qu'il a été fait | L13 |
 | `GET /api/v1/diagnostics/{uuid}` | Lire l'état d'un diagnostic | L16 |
+
+Blocs composés par le serveur, à côté des blocs écrits par le modèle : `calculation` (un calcul exécuté, dans la forme de `GET /api/v1/calculations/{uuid}`, avec la légende du modèle dans `text`) et `calculation_refusal` (calculateur demandé et motifs du refus). Leur texte de repli contient tout ce qu'ils montrent.
 
 Forme d'un message de l'assistant :
 

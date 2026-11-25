@@ -819,6 +819,48 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Version retirée depuis'**
   String get sourceWithdrawn;
+
+  /// No description provided for @calculationInputs.
+  ///
+  /// In fr, this message translates to:
+  /// **'Données'**
+  String get calculationInputs;
+
+  /// No description provided for @calculationSteps.
+  ///
+  /// In fr, this message translates to:
+  /// **'Étapes'**
+  String get calculationSteps;
+
+  /// No description provided for @calculationAssumptions.
+  ///
+  /// In fr, this message translates to:
+  /// **'Hypothèses'**
+  String get calculationAssumptions;
+
+  /// No description provided for @calculationExact.
+  ///
+  /// In fr, this message translates to:
+  /// **'Valeur exacte : {value}'**
+  String calculationExact(String value);
+
+  /// No description provided for @calculationSource.
+  ///
+  /// In fr, this message translates to:
+  /// **'Source : {source}'**
+  String calculationSource(String source);
+
+  /// No description provided for @calculationVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'{title} · version {version}'**
+  String calculationVersion(String title, String version);
+
+  /// No description provided for @calculationRefusedTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Calcul non effectué'**
+  String get calculationRefusedTitle;
 }
 
 class _AppLocalizationsDelegate

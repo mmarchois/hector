@@ -119,5 +119,12 @@
   "sourcePage": "Page {page}",
   "sourceArticle": "Article {article}",
   "sourceNoExcerpt": "The excerpt from this source cannot be displayed. Refer to the document.",
-  "sourceWithdrawn": "Version withdrawn since"
+  "sourceWithdrawn": "Version withdrawn since",
+  "calculationInputs": "Given values",
+  "calculationSteps": "Steps",
+  "calculationAssumptions": "Assumptions",
+  "calculationExact": "Exact value: {value}",
+  "calculationSource": "Source: {source}",
+  "calculationVersion": "{title} · version {version}",
+  "calculationRefusedTitle": "Calculation not carried out"
 }

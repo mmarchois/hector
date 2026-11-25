@@ -119,5 +119,12 @@
   "sourcePage": "Seite {page}",
   "sourceArticle": "Artikel {article}",
   "sourceNoExcerpt": "Der Auszug aus dieser Quelle kann nicht angezeigt werden. Schlagen Sie im Dokument nach.",
-  "sourceWithdrawn": "Fassung inzwischen zurückgezogen"
+  "sourceWithdrawn": "Fassung inzwischen zurückgezogen",
+  "calculationInputs": "Angaben",
+  "calculationSteps": "Schritte",
+  "calculationAssumptions": "Annahmen",
+  "calculationExact": "Genauer Wert: {value}",
+  "calculationSource": "Quelle: {source}",
+  "calculationVersion": "{title} · Version {version}",
+  "calculationRefusedTitle": "Berechnung nicht durchgeführt"
 }

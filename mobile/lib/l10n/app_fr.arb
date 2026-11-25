@@ -171,5 +171,36 @@
     }
   },
   "sourceNoExcerpt": "L'extrait de cette source ne peut pas être affiché. Reportez-vous au document.",
-  "sourceWithdrawn": "Version retirée depuis"
+  "sourceWithdrawn": "Version retirée depuis",
+  "calculationInputs": "Données",
+  "calculationSteps": "Étapes",
+  "calculationAssumptions": "Hypothèses",
+  "calculationExact": "Valeur exacte : {value}",
+  "@calculationExact": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "calculationSource": "Source : {source}",
+  "@calculationSource": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "calculationVersion": "{title} · version {version}",
+  "@calculationVersion": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "calculationRefusedTitle": "Calcul non effectué"
 }

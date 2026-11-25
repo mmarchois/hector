@@ -226,6 +226,33 @@ class CalculationOutcome {
   final String roundingRule;
 }
 
+/// Un calcul que l'API a refusé de faire, avec ses motifs tels qu'elle les
+/// donne : valeur manquante, sans unité, hors du domaine couvert…
+class CalculationRefusal {
+  const CalculationRefusal({required this.title, required this.reasons});
+
+  /// Le refus d'un bloc de conversation, ou null s'il n'a pas la forme
+  /// attendue.
+  static CalculationRefusal? tryParse(Map<String, dynamic> json) {
+    final reasons = _texts(json['reasons']);
+    if (reasons.isEmpty) {
+      return null;
+    }
+    final calculator = json['calculator'];
+
+    return CalculationRefusal(
+      title: calculator is Map<String, dynamic>
+          ? calculator['title'] as String? ?? ''
+          : '',
+      reasons: reasons,
+    );
+  }
+
+  /// Nom du calcul demandé.
+  final String title;
+  final List<String> reasons;
+}
+
 /// Un calcul fait et enregistré par l'API, tel qu'il a été fait.
 class Calculation {
   const Calculation({
@@ -241,6 +268,20 @@ class Calculation {
     required this.result,
     required this.createdAt,
   });
+
+  /// Le calcul d'un bloc de conversation, ou null s'il n'a pas la forme
+  /// attendue : le bloc s'affiche alors par son texte de repli.
+  static Calculation? tryParse(Object? json) {
+    if (json is! Map<String, dynamic> ||
+        json['uuid'] is! String ||
+        json['calculator'] is! Map<String, dynamic> ||
+        json['result'] is! Map<String, dynamic> ||
+        DateTime.tryParse(json['createdAt'] as String? ?? '') == null) {
+      return null;
+    }
+
+    return Calculation.fromJson(json);
+  }
 
   factory Calculation.fromJson(Map<String, dynamic> json) {
     final calculator = json['calculator'] as Map<String, dynamic>? ?? const {};

@@ -120,7 +120,7 @@ Règles :
 - **CV1.** Une conversation appartient à un seul utilisateur, qui est le seul à y accéder.
 - **CV2.** Un message enregistré ne change plus.
 - **CV3.** Un tour contient exactement un message de l'utilisateur et au plus un message de l'assistant.
-- **CV4.** Un énoncé « fait sourcé » porte au moins une citation. Un « fait déclaré » renvoie à un message de l'utilisateur ou à une observation. Un « résultat de calcul » renvoie à une exécution de calcul. Un « avis rapporté » nomme sa source.
+- **CV4.** Un énoncé « fait sourcé » porte au moins une citation. Un « fait déclaré » renvoie à un message de l'utilisateur ou à une observation. Un « résultat de calcul » renvoie à une exécution de calcul et n'en écrit aucun chiffre : les nombres sont montrés par le bloc que le serveur compose à partir de l'exécution. Un « avis rapporté » nomme sa source.
 - **CV5.** Tout bloc porte un texte de repli lisible, pour les versions de l'application qui ne connaissent pas son type.
 - **CV6.** Tout message de l'assistant est relié à la trace de son tour.
 - **CV7.** Le socle ne connaît aucune notion électrique. L'activité en cours d'une conversation est un simple couple (capacité, identifiant).

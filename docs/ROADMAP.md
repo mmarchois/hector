@@ -362,6 +362,21 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Unitaires de l'outil. Intégration avec le faux modèle : appel réussi, entrée manquante, refus. Cas d'évaluation « calcul ».
 
+**Réalisé (25 novembre 2026).** Précisions et écarts :
+- Capacité « calcul » : un seul outil, `calculer`, toujours offert, invités compris. Le modèle choisit un calculateur et transmet les valeurs avec leur unité ; la liste des calculateurs et de leurs entrées est tirée du catalogue, donc toujours à jour.
+- Le modèle ne touche pas aux nombres. Le serveur fait le calcul et l'enregistre au nom de l'utilisateur (la même commande que la route de calcul), puis compose lui-même le bloc `calculation` : entrées telles que données, hypothèses, étapes, résultat arrondi et valeur exacte, formule, source, version du calculateur. Le bloc renvoie à l'exécution, relisible par `GET /api/v1/calculations/{uuid}`.
+- Un énoncé « résultat de calcul » cite le calcul exécuté pendant le tour (C1, C2…), lui seul, et n'écrit aucun chiffre : le contrôle des réponses rejette le reste. Il sert de légende et laisse sa place au bloc du serveur. Le modèle ne peut pas écrire lui-même un bloc de calcul.
+- Un calcul exécuté que la réponse ne présente pas est montré d'office, avant la question posée à l'utilisateur : celui-ci voit toujours les valeurs qui ont servi.
+- Refus : le calculateur refuse en disant pourquoi, rien n'est enregistré, et le serveur compose un bloc `calculation_refusal` avec ses motifs tels quels, dans la langue de l'application. Il est montré d'office, quoi qu'écrive le modèle, sauf si le même calcul aboutit ensuite dans le tour.
+- Socle : le registre du tour (`Evidence`) porte, à côté des sources lues, les pièces (un calcul, citable) et les avis (un refus) que le serveur compose. Une capacité reçoit de son interlocuteur le compte au nom duquel enregistrer et la langue dans laquelle composer ; rien de cela ne part chez le fournisseur du modèle.
+- Application mobile : carte de calcul et carte de refus. Une version qui ne connaît pas ces blocs affiche leur texte de repli, qui contient le calcul en entier.
+- Évaluation : famille « calcul » (neuf cas, non relus par un expert), avec un contrôle sans modèle sur le calcul montré : le bon calculateur et la bonne valeur, ou aucun résultat quand une valeur manque ou que le calcul n'existe pas. Le contrôle de la réponse finale ne porte plus que sur les blocs écrits par le modèle, avec les sources citées pendant le tour.
+- Écart : « s'il manque une entrée, l'assistant la demande » et « il ne transmet que des valeurs données par l'utilisateur » reposent sur les consignes. Le calculateur garantit qu'aucune valeur absente n'est supposée par le serveur, mais rien n'empêche le modèle de transmettre une valeur qu'il a supposée lui-même : le bloc montre alors cette valeur parmi les données, et seule l'évaluation mesure ce comportement.
+- Écart : un chiffre recopié par le modèle dans un énoncé d'une autre nature (explication, recommandation) n'est pas contrôlé. Le résultat qui fait foi est celui du bloc.
+- Écart : les consignes ont changé (outil de calcul, nature « résultat de calcul »). L'évaluation n'a pas été relancée et aucun essai n'a été fait avec le vrai modèle : les deux sont payants et attendent un accord. Tant qu'ils ne sont pas faits, le comportement du modèle face à l'outil n'est vérifié qu'avec le faux modèle.
+- Écart : dans une réponse dégradée (deux brouillons rejetés), un calcul exécuté reste enregistré mais n'est pas montré.
+- Écart : la police embarquée de l'application n'a pas la lettre φ ; sur un téléphone, la police du système la fournit. À vérifier sur un appareil : les captures de `make mobile_preview` ne peuvent pas le montrer.
+
 ---
 
 ## Phase 4 — Diagnostic

@@ -6,6 +6,7 @@ import '../../l10n/app_localizations.dart';
 import '../domain/conversation.dart';
 import '../state/chat_controller.dart';
 import '../theme.dart';
+import 'widgets/calculation.dart';
 import 'widgets/kit.dart';
 import 'widgets/sources.dart';
 
@@ -323,6 +324,14 @@ class _BlockView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final body = theme.textTheme.bodyLarge;
     final strong = theme.textTheme.titleMedium?.copyWith(height: 1.45);
+
+    // Un calcul, ou son refus : composés par l'API, affichés tels quels
+    if (block.calculation case final calculation?) {
+      return CalculationCard(calculation: calculation, caption: block.caption);
+    }
+    if (block.calculationRefusal case final refusal?) {
+      return CalculationRefusalCard(refusal: refusal);
+    }
 
     // Type ou nature inconnus de cette version : le texte de repli (CV5)
     if (!block.known || block.type == MessageBlock.textType) {

@@ -401,4 +401,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sourceWithdrawn => 'Version withdrawn since';
+
+  @override
+  String get calculationInputs => 'Given values';
+
+  @override
+  String get calculationSteps => 'Steps';
+
+  @override
+  String get calculationAssumptions => 'Assumptions';
+
+  @override
+  String calculationExact(String value) {
+    return 'Exact value: $value';
+  }
+
+  @override
+  String calculationSource(String source) {
+    return 'Source: $source';
+  }
+
+  @override
+  String calculationVersion(String title, String version) {
+    return '$title · version $version';
+  }
+
+  @override
+  String get calculationRefusedTitle => 'Calculation not carried out';
 }
