@@ -287,7 +287,8 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 - KN5 : les sources dont la licence interdit la transmission à un sous-traitant ne sont pas cherchées pour le modèle. Elles n'apparaissent donc dans aucune réponse pour l'instant.
 - Sans aucun document publié, l'outil n'est pas offert et les consignes disent au modèle qu'il n'a pas de base : c'est l'état de la base de développement aujourd'hui.
 - `GET /api/v1/passages/{uuid}` : consultation d'un passage cité, y compris d'une version retirée depuis (KN4). Mobile : renvois numérotés sous chaque énoncé sourcé, liste des sources sous la réponse, détail au toucher.
-- Écart : la boucle d'outils n'a pas été exercée avec le vrai modèle (elle demande un appel payant). Le contrat avec l'API est testé sur des réponses construites d'après sa documentation, pas enregistrées.
+- Vérifié avec le vrai modèle (test vivant `DocumentationSearchLiveTest`, 25 novembre 2026, claude-opus-5-5) : la recherche est appelée, les passages sont lus, trois faits sourcés citent chacun le bon passage, le brouillon est accepté du premier coup, en 10 secondes. Lors d'un premier essai, sur une fiche qui se disait elle-même fictive et sans valeur technique, le modèle a refusé de s'appuyer dessus et l'a dit à l'utilisateur.
+- Écart : le contrat de l'adaptateur reste testé sur des réponses construites d'après la documentation de l'API, pas enregistrées.
 - Écart : « une question hors corpus reçoit une réponse qui le dit » repose sur les consignes et sur le message de l'outil, pas sur un contrôle : à mesurer dans l'évaluation.
 - Écart : la part des sources attendues retrouvées est calculée par l'évaluation (`expectedSources`), mais aucune référence n'est notée : il n'y a ni corpus réel ni cas qui en attendent (questions P3 et P4). La référence du lot L12 reste à établir.
 
