@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <!-- Demandeur par son uuid, sans association : Calculation ne connaît pas User -->
+  <entity name="App\Domain\Calculation\CalculationRun" table="calculation_run">
+    <indexes>
+        <index columns="owner_uuid,created_at" name="idx_calculation_run_owner_created_at"/>
+    </indexes>
+    <id name="uuid" type="guid" column="uuid"/>
+    <field name="ownerUuid" type="guid" column="owner_uuid" nullable="false"/>
+    <field name="calculatorKey" type="string" column="calculator_key" length="64" nullable="false"/>
+    <field name="calculatorVersion" type="integer" column="calculator_version" nullable="false"/>
+    <!-- Définition d'alors, entrées, étapes et résultat : le calcul se relit tel qu'il a été fait (CA5) -->
+    <field name="trace" type="json" column="trace" nullable="false"/>
+    <field name="createdAt" type="datetimetz_immutable" column="created_at" nullable="false"/>
+  </entity>
+</doctrine-mapping>

@@ -20,6 +20,13 @@ framework:
             limit: 10
             interval: '1 minute'
 
+        # Calculs : limite par utilisateur. Un calcul ne coûte rien en jetons, mais chacun
+        # laisse une exécution enregistrée
+        calculation:
+            policy: 'sliding_window'
+            limit: 60
+            interval: '1 minute'
+
 when@test:
     framework:
         cache:
@@ -39,7 +46,15 @@ when@test:
                 limit: 3
                 interval: '1 minute'
                 storage_service: 'test.rate_limiter.guest_creation_storage'
+            # Même stockage en mémoire pour les calculs, à la limite réelle
+            calculation:
+                policy: 'sliding_window'
+                limit: 60
+                interval: '1 minute'
+                storage_service: 'test.rate_limiter.calculation_storage'
 
     services:
         test.rate_limiter.guest_creation_storage:
+            class: Symfony\Component\RateLimiter\Storage\InMemoryStorage
+        test.rate_limiter.calculation_storage:
             class: Symfony\Component\RateLimiter\Storage\InMemoryStorage

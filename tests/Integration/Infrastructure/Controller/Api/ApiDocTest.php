@@ -30,6 +30,13 @@ final class ApiDocTest extends WebTestCase
         self::assertArrayHasKey('TurnResponse', $doc['components']['schemas']);
         self::assertArrayHasKey('MessageResponse', $doc['components']['schemas']);
         self::assertSame(['get', 'put', 'delete'], array_keys($doc['paths']['/api/v1/auth/me']));
+        // Calculs (lot L13)
+        self::assertSame(['get'], array_keys($doc['paths']['/api/v1/calculators']));
+        self::assertSame(['post'], array_keys($doc['paths']['/api/v1/calculations']));
+        self::assertSame(['get'], array_keys($doc['paths']['/api/v1/calculations/{uuid}']));
+        self::assertArrayHasKey('RunCalculationRequest', $doc['components']['schemas']);
+        self::assertArrayHasKey('CalculatorResponse', $doc['components']['schemas']);
+        self::assertArrayHasKey('CalculationResponse', $doc['components']['schemas']);
         // Routes d'auth documentées statiquement (pas de contrôleur)
         self::assertArrayHasKey('/api/v1/auth/login', $doc['paths']);
         self::assertArrayHasKey('/api/v1/auth/token/refresh', $doc['paths']);

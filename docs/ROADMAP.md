@@ -335,6 +335,21 @@ Le MVP correspond aux phases 0 à 5. Après le lot L2, quatre fils peuvent avanc
 
 **Tests.** Suite critique : cas de référence dans des fichiers de données indépendants du code ; propriétés (monotonie, cohérence des unités, aller-retour des conversions) ; tests de mutation. Intégration des routes.
 
+**Réalisé (25 novembre 2026).** Précisions et écarts :
+- Contexte `Calculation`, sans aucun lien avec la conversation ni avec le modèle de langage (règles d'architecture de `make check`). Une grandeur est une valeur et une unité (`Quantity`, `Unit`) ; chaque unité a sa dimension et son rapport à l'unité de base, ce qui remplace une classe par grandeur. Les bornes admises sont portées par l'entrée du calculateur.
+- Sept calculateurs en version 1, tous de physique pure : loi d'Ohm dans ses trois écritures, puissance active en monophasé et en triphasé équilibré, courant absorbé en monophasé et en triphasé. Un calculateur se construit sans rien recevoir : il ne peut lire ni base, ni horloge, ni modèle (CA1, vérifié par un test).
+- Le moteur contrôle toutes les entrées avant de calculer et rend tous les motifs de refus d'un coup, un par entrée : valeur manquante, sans unité, d'unité incohérente, hors bornes, entrée inconnue, résultat hors du domaine couvert. Aucune valeur n'est supposée ; un facteur de puissance absent est un refus, jamais 1 ni 0,8.
+- Bornes : 1 000 V, 10 000 A, 1 000 MΩ, 10 MW. Ce sont des garde-fous contre une faute de frappe, posés au lancement du lot ; ils ne disent pas qu'une valeur convient à une installation. À faire relire par l'expert.
+- Arrondi (CA6), posé au lancement du lot et à faire relire : quatre chiffres significatifs, partie entière jamais arrondie ; par excès pour les courants absorbés, qui servent à dimensionner, au plus proche ailleurs. La valeur exacte accompagne toujours la valeur arrondie.
+- `CalculationRun` garde une copie complète du calcul (définition d'alors, entrées telles que données, étapes, résultat) : il se relit tel qu'il a été fait, même si le calculateur change de version (CA5). Un calcul refusé n'enregistre rien. Les calculs suivent la fusion d'un invité dans un compte et s'effacent avec le compte.
+- Routes : `GET /api/v1/calculators`, `POST /api/v1/calculations`, `GET /api/v1/calculations/{uuid}`, limitées à 60 calculs par minute et par compte. Textes en français, anglais et allemand, nombres écrits selon la langue. Application mobile : routes répercutées dans `data/`, sans écran pour l'instant (l'affichage vient avec le lot L14).
+- Tests : cas de référence dans `tests/Critical/Calculation/reference-cases.json` (22 calculs acceptés, 14 refusés), règles CA1 à CA7 une par une, arrondi, conversions, propriétés sur tirages reproductibles (sens de variation, calcul et calcul inverse, indifférence à l'unité).
+- Écart : la chute de tension n'est pas livrée. Son calcul demande la résistivité du conducteur à sa température de service et sa réactance, que la norme fixe : les écrire sans le texte ni l'expert serait inventer une référence. Elle attend le corpus (P3), l'expert (P4) et le registre (L11).
+- Écart : le « courant d'emploi » livré est le courant absorbé par un récepteur. Aucun rendement ni coefficient d'utilisation ou de simultanéité n'est appliqué, et l'hypothèse le dit.
+- Écart : aucun cas de référence ne vient d'un expert. Les valeurs attendues ont été posées à la main puis recoupées par un calcul décimal fait hors de PHP ; le fichier garde `review` vide.
+- Écart : les tests de mutation n'ont pas été lancés. Le projet n'a ni outil de mutation ni extension de couverture ; ajouter Infection demande d'autoriser un plugin Composer, décision laissée au porteur du projet. Le seuil de 90 % reste donc à mesurer.
+- Écart : `CalculationRun` ne porte pas d'avertissements, aucun calculateur n'en émettant encore.
+
 ### L14 — Calculs dans la conversation
 
 **Objectif.** Calculer depuis la discussion, sans que le modèle touche aux nombres.

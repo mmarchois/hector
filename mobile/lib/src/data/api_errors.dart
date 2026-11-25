@@ -85,3 +85,56 @@ class TooManyMessagesException extends MessageLimitException {
 class ServiceSaturatedException extends MessageLimitException {
   ServiceSaturatedException(super.message);
 }
+
+/// Calcul refusé par l'API (422). Le calculateur dit pourquoi : il ne suppose
+/// jamais une valeur absente et n'extrapole pas hors de son domaine.
+class CalculationRefusedException implements Exception {
+  CalculationRefusedException({
+    this.inputErrors = const {},
+    this.calculatorError,
+    this.resultError,
+  });
+
+  /// Range les violations de l'API : `inputs.<clé>`, `calculator` ou `inputs`.
+  factory CalculationRefusedException.fromFieldErrors(
+    Map<String, String> fieldErrors,
+  ) {
+    const prefix = 'inputs.';
+
+    return CalculationRefusedException(
+      inputErrors: {
+        for (final error in fieldErrors.entries)
+          if (error.key.startsWith(prefix))
+            error.key.substring(prefix.length): error.value,
+      },
+      calculatorError: fieldErrors['calculator'],
+      resultError: fieldErrors['inputs'],
+    );
+  }
+
+  /// Clé d'une entrée → motif (valeur manquante, sans unité, hors bornes…).
+  final Map<String, String> inputErrors;
+
+  /// Calculateur inconnu ou absent.
+  final String? calculatorError;
+
+  /// Résultat hors du domaine couvert, ou entrées absentes de la requête.
+  final String? resultError;
+
+  /// Tous les motifs, à afficher tels quels.
+  List<String> get reasons => [
+    ?calculatorError,
+    ...inputErrors.values,
+    ?resultError,
+  ];
+}
+
+/// Calcul inconnu, ou d'un autre utilisateur (404).
+class CalculationNotFoundException implements Exception {}
+
+/// Trop de calculs lancés à la suite (429), avec le message de l'API.
+class TooManyCalculationsException implements Exception {
+  TooManyCalculationsException(this.message);
+
+  final String message;
+}

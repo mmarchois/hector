@@ -17,3 +17,5 @@
 "Saisissez votre SIRET.": "Enter your SIRET number."
 "Session d'invité manquante.": "Guest session is missing."
 "Votre message ne doit pas dépasser {{ limit }} caractères.": "Your message must not exceed {{ limit }} characters."
+"Choisissez un calcul.": "Choose a calculation."
+"Indiquez les valeurs du calcul.": "Give the values of the calculation."

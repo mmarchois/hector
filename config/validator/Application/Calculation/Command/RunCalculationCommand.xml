@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<constraint-mapping xmlns="http://symfony.com/schema/dic/constraint-mapping"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://symfony.com/schema/dic/constraint-mapping https://symfony.com/schema/dic/constraint-mapping/constraint-mapping-1.0.xsd">
+    <!-- Les valeurs et leurs unités sont contrôlées par le calculateur, qui refuse en disant pourquoi -->
+    <class name="App\Application\Calculation\Command\RunCalculationCommand">
+        <property name="calculator">
+            <constraint name="NotBlank">
+                <option name="normalizer">trim</option>
+                <option name="message">Choisissez un calcul.</option>
+            </constraint>
+        </property>
+        <property name="inputs">
+            <constraint name="NotNull">
+                <option name="message">Indiquez les valeurs du calcul.</option>
+            </constraint>
+        </property>
+    </class>
+</constraint-mapping>

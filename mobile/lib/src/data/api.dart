@@ -9,6 +9,7 @@ import '../state/auth_controller.dart';
 import 'auth/auth_interceptor.dart';
 import 'auth/auth_repository.dart';
 import 'auth/token_storage.dart';
+import 'calculation/calculation_repository.dart';
 import 'conversation/conversation_repository.dart';
 import 'knowledge/knowledge_repository.dart';
 import 'profile/profile_repository.dart';
@@ -77,6 +78,10 @@ final conversationRepositoryProvider = Provider<ConversationRepository>(
 
 final knowledgeRepositoryProvider = Provider<KnowledgeRepository>(
   (ref) => KnowledgeRepository(ref.watch(apiDioProvider)),
+);
+
+final calculationRepositoryProvider = Provider<CalculationRepository>(
+  (ref) => CalculationRepository(ref.watch(apiDioProvider)),
 );
 
 /// État actuel d'un passage cité, lu à l'ouverture du détail d'une source. Sans

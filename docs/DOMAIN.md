@@ -170,9 +170,9 @@ Exemple qui motive ce contexte : la NF C 15-100 a été republiée en 2024 sous 
 
 | Objet | Type | Contenu |
 |---|---|---|
-| `Quantity` et ses variantes (`Voltage`, `Current`, `Power`, `Length`, `CrossSection`, `PowerFactor`…) | Objets-valeurs | Valeur, unité, bornes admises |
-| `CalculatorDefinition` | Objet du domaine | Clé, version, entrées et sorties typées, hypothèses, domaine de validité, source de la formule et des constantes |
-| `CalculationRun` | Agrégat | Calculateur et version, entrées, étapes intermédiaires, résultat, avertissements, demandeur, date |
+| `Quantity`, `Unit`, `Dimension` | Objets-valeurs | Une valeur et son unité ; chaque unité a sa dimension (tension, courant, résistance, puissance, rapport sans unité) et son rapport à l'unité de base |
+| `CalculatorDefinition` | Objet du domaine | Clé, version, entrées typées avec leurs bornes admises, sortie avec sa règle d'arrondi, hypothèses, source de la formule et des constantes |
+| `CalculationRun` | Agrégat | Calculateur et version, copie de sa définition d'alors, entrées telles que données, étapes intermédiaires, résultat arrondi et valeur exacte, demandeur, date ; des avertissements quand un calculateur en émettra |
 
 Règles :
 
@@ -184,7 +184,7 @@ Règles :
 - **CA6.** La règle d'arrondi est explicite et, quand la sécurité est en jeu, orientée du côté sûr.
 - **CA7.** Chaque constante et chaque formule a une source : loi physique ou référence du registre.
 
-Périmètre initial : calculs qui ne reposent que sur des lois physiques (loi d'Ohm, puissance en monophasé et en triphasé, courant d'emploi, chute de tension). Les calculs qui reposent sur des tableaux de normes attendent la réponse à la question P3.
+Périmètre initial : calculs qui ne reposent que sur des lois physiques (loi d'Ohm, puissance en monophasé et en triphasé, courant absorbé). Les calculs qui reposent sur des valeurs ou des tableaux de normes attendent la réponse à la question P3 ; la chute de tension en fait partie, par la résistivité et la réactance qu'elle demande (voir ROADMAP, lot L13).
 
 ### 4.5 Diagnostic
 

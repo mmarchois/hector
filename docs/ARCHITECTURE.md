@@ -227,7 +227,7 @@ Le registre normatif (Réglementation) n'est pas un magasin de contenu : il dit 
 | `POST /api/v1/auth/merge-guest` | Rattacher au compte connecté les données d'un invité (P11) | L4 |
 | `POST /api/v1/messages/{uuid}/feedback` | Signaler ou noter une réponse | L18, L19 |
 | `GET /api/v1/passages/{uuid}` | Consulter une source citée, selon sa licence | L10 |
-| `GET /api/v1/calculators`, `POST /api/v1/calculations` | Lister les calculateurs, calculer sans conversation | L13 |
+| `GET /api/v1/calculators`, `POST /api/v1/calculations`, `GET /api/v1/calculations/{uuid}` | Lister les calculateurs, calculer sans conversation, relire un calcul tel qu'il a été fait | L13 |
 | `GET /api/v1/diagnostics/{uuid}` | Lire l'état d'un diagnostic | L16 |
 
 Forme d'un message de l'assistant :
