@@ -37,7 +37,7 @@ final readonly class TurnRunner
         /** @var Turn $finished */
         $finished = $this->commandBus->handle($outcome->failure !== null
             ? new FailTurnCommand($turn->getUuid(), $outcome->failure, $outcome->trace)
-            : new AnswerTurnCommand($turn->getUuid(), $outcome->blocks, $outcome->degraded, $outcome->trace));
+            : new AnswerTurnCommand($turn->getUuid(), $outcome->blocks, $outcome->degraded, $outcome->trace, $outcome->citations));
 
         return $finished;
     }

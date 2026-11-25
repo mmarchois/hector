@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\Infrastructure\Evaluation;
 
+use App\Application\Conversation\Capability\CapabilityInterface;
+use App\Application\Conversation\Capability\Evidence;
+use App\Application\Conversation\Capability\ToolInterface;
+use App\Application\Conversation\Capability\ToolResult;
 use App\Application\Conversation\Port\ChatMessage;
 use App\Application\Conversation\Port\ChatModelUnavailableException;
 use App\Application\Conversation\Port\ChatRole;
@@ -14,6 +18,7 @@ use App\Application\Conversation\Port\Prompt;
 use App\Application\Conversation\Port\PromptCatalogInterface;
 use App\Application\Conversation\Service\AnswerEngine;
 use App\Application\Conversation\Service\TurnContextBuilder;
+use App\Domain\Conversation\Citation;
 use App\Domain\Conversation\Repository\MessageRepositoryInterface;
 use App\Infrastructure\Evaluation\CaseResult;
 use App\Infrastructure\Evaluation\EvaluationCase;
@@ -134,6 +139,43 @@ final class EvaluatorTest extends TestCase
         self::assertTrue($result->passed());
     }
 
+    public function testTheExpectedSourcesAreLookedForInWhatTheSearchGaveToRead(): void
+    {
+        $this->model->willCallTool('chercher', ['question' => 'bouton de test'])->willReply(FakeChatModel::statement('Réponse.'));
+        $this->judge->willReply($this->verdicts(['I1' => false]));
+        $tool = new class implements ToolInterface {
+            public function name(): string
+            {
+                return 'chercher';
+            }
+
+            public function description(): string
+            {
+                return 'Cherche.';
+            }
+
+            public function inputSchema(): array
+            {
+                return ['type' => 'object'];
+            }
+
+            public function call(array $input, Evidence $evidence): ToolResult
+            {
+                return new ToolResult('[' . $evidence->register(new Citation('p1', 'regulatory', 'Fiche différentiel', 'Hector', 'v1', null, null, null, null, null, null, null)) . '] Passage.');
+            }
+        };
+        $capability = $this->createStub(CapabilityInterface::class);
+        $capability->method('tools')->willReturn([$tool]);
+        $capability->method('instructions')->willReturn(null);
+
+        $result = $this->evaluator([$capability])->evaluate($this->case(forbidden: ['Invente'], sources: ['fiche différentiel', 'Guide absent']));
+
+        // Une mesure, pas un critère : le cas reste réussi même si une source manque
+        self::assertTrue($result->passed());
+        self::assertSame(0.5, $result->retrieval());
+        self::assertSame([true, false], array_column(array_values(array_filter($result->checks, static fn (array $check): bool => $check['kind'] === CaseResult::RETRIEVAL)), 'ok'));
+    }
+
     public function testAProviderFailureFailsTheCaseWithoutJudging(): void
     {
         $this->model->willThrow(new ChatModelUnavailableException('anthropic:overloaded_error Overloaded'));
@@ -150,8 +192,9 @@ final class EvaluatorTest extends TestCase
      * @param list<string> $expected
      * @param list<string> $forbidden
      * @param list<string> $patterns
+     * @param list<string> $sources
      */
-    private function case(array $expected = [], array $forbidden = [], array $patterns = []): EvaluationCase
+    private function case(array $expected = [], array $forbidden = [], array $patterns = [], array $sources = []): EvaluationCase
     {
         return new EvaluationCase(
             id: 'cas-1',
@@ -163,7 +206,7 @@ final class EvaluatorTest extends TestCase
             expected: $expected,
             forbidden: $forbidden,
             forbiddenPatterns: $patterns,
-            expectedSources: [],
+            expectedSources: $sources,
             reviewedBy: null,
             reviewedAt: null,
         );
@@ -179,7 +222,8 @@ final class EvaluatorTest extends TestCase
         )], \JSON_THROW_ON_ERROR);
     }
 
-    private function evaluator(): Evaluator
+    /** @param list<CapabilityInterface> $capabilities */
+    private function evaluator(array $capabilities = []): Evaluator
     {
         $prompts = $this->createStub(PromptCatalogInterface::class);
         $prompts->method('get')->willReturnCallback(static fn (string $name): Prompt => new Prompt($name, 'v', match ($name) {
@@ -191,7 +235,7 @@ final class EvaluatorTest extends TestCase
         }));
 
         return new Evaluator(
-            new TurnContextBuilder($prompts, $this->createStub(ParticipantInterface::class), $this->createStub(MessageRepositoryInterface::class)),
+            new TurnContextBuilder($prompts, $this->createStub(ParticipantInterface::class), $this->createStub(MessageRepositoryInterface::class), $capabilities),
             new AnswerEngine($this->model, new FrenchAnswerTexts()),
             new Judge($this->judge, $prompts),
         );

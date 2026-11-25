@@ -34,7 +34,7 @@ final readonly class EvaluationReport
     }
 
     /**
-     * @return array<string, array{label: string, binary: bool, cases: int, passed: int, failed: int, unjudged: int, degraded: int, errors: int, unreviewed: int, coverage: float|null}>
+     * @return array<string, array{label: string, binary: bool, cases: int, passed: int, failed: int, unjudged: int, degraded: int, errors: int, unreviewed: int, coverage: float|null, retrieval: float|null}>
      */
     public function families(): array
     {
@@ -45,6 +45,7 @@ final readonly class EvaluationReport
                 continue;
             }
             $coverages = array_filter(array_map(static fn (CaseResult $result): ?float => $result->coverage(), $results), static fn (?float $coverage): bool => $coverage !== null);
+            $retrievals = array_filter(array_map(static fn (CaseResult $result): ?float => $result->retrieval(), $results), static fn (?float $retrieval): bool => $retrieval !== null);
 
             $summary[$family->value] = [
                 'label' => $family->label(),
@@ -57,6 +58,7 @@ final readonly class EvaluationReport
                 'errors' => \count(array_filter($results, static fn (CaseResult $result): bool => $result->status === CaseResult::FAILED)),
                 'unreviewed' => \count(array_filter($results, static fn (CaseResult $result): bool => !$result->reviewed)),
                 'coverage' => $coverages === [] ? null : array_sum($coverages) / \count($coverages),
+                'retrieval' => $retrievals === [] ? null : array_sum($retrievals) / \count($retrievals),
             ];
         }
 

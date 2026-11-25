@@ -6,6 +6,7 @@ namespace App\Infrastructure\Adapter\Llm\Anthropic;
 
 use Anthropic\Beta\Messages\BetaMessage;
 use Anthropic\Beta\Messages\BetaTextBlock;
+use Anthropic\Beta\Messages\BetaToolUseBlock;
 use Anthropic\Client;
 use Anthropic\Core\Exceptions\APIConnectionException;
 use Anthropic\Core\Exceptions\APIException;
@@ -20,6 +21,9 @@ use App\Application\Conversation\Port\ChatModelUnavailableException;
 use App\Application\Conversation\Port\ChatRequest;
 use App\Application\Conversation\Port\ChatResponse;
 use App\Application\Conversation\Port\ChatStopReason;
+use App\Application\Conversation\Port\ChatTool;
+use App\Application\Conversation\Port\ChatToolCall;
+use App\Application\Conversation\Port\ChatToolResult;
 use App\Application\Conversation\Port\ChatUsage;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpClient\Psr18Client;
@@ -59,7 +63,7 @@ final class AnthropicChatModel implements ChatModelInterface
             $message = $this->client()->beta->messages->create(
                 maxTokens: $this->maxTokens,
                 messages: array_map(
-                    static fn (ChatMessage $message): array => ['role' => $message->role->value, 'content' => $message->text],
+                    static fn (ChatMessage $message): array => ['role' => $message->role->value, 'content' => self::contentOf($message)],
                     $request->messages,
                 ),
                 model: $this->model,
@@ -70,6 +74,10 @@ final class AnthropicChatModel implements ChatModelInterface
                     ? ['effort' => $this->effort]
                     : ['effort' => $this->effort, 'format' => ['type' => 'json_schema', 'schema' => $request->outputSchema]],
                 system: $request->system,
+                tools: $request->tools === [] ? null : array_map(
+                    static fn (ChatTool $tool): array => ['name' => $tool->name, 'description' => $tool->description, 'inputSchema' => $tool->inputSchema],
+                    $request->tools,
+                ),
                 betas: [self::FALLBACK_BETA],
             );
         } catch (RateLimitException|InternalServerException $e) {
@@ -88,13 +96,36 @@ final class AnthropicChatModel implements ChatModelInterface
         return $this->toResponse($message);
     }
 
+    /**
+     * Contenu d'un message pour le fournisseur. Un message de l'assistant produit plus tôt
+     * dans le même tour lui est renvoyé tel qu'il l'a rendu : son raisonnement en fait
+     * partie, et le fournisseur l'exige pour poursuivre après un appel d'outil.
+     */
+    private static function contentOf(ChatMessage $message): mixed
+    {
+        if ($message->providerContent !== null) {
+            return $message->providerContent;
+        }
+        if ($message->toolResults !== []) {
+            return array_map(
+                static fn (ChatToolResult $result): array => ['type' => 'tool_result', 'toolUseID' => $result->toolCallId, 'content' => $result->content, 'isError' => $result->isError],
+                $message->toolResults,
+            );
+        }
+
+        return $message->text;
+    }
+
     private function toResponse(BetaMessage $message): ChatResponse
     {
         $texts = [];
+        $toolCalls = [];
         foreach ($message->content as $block) {
             // Les blocs de raisonnement (vides par défaut) et autres types sont ignorés
             if ($block instanceof BetaTextBlock) {
                 $texts[] = $block->text;
+            } elseif ($block instanceof BetaToolUseBlock) {
+                $toolCalls[] = new ChatToolCall($block->id, $block->name, $block->input);
             }
         }
 
@@ -102,6 +133,7 @@ final class AnthropicChatModel implements ChatModelInterface
             text: implode("\n\n", $texts),
             stopReason: match ($message->stopReason) {
                 'end_turn', 'stop_sequence' => ChatStopReason::EndTurn,
+                'tool_use' => ChatStopReason::ToolUse,
                 'max_tokens', 'model_context_window_exceeded' => ChatStopReason::MaxTokens,
                 'refusal' => ChatStopReason::Refusal,
                 default => ChatStopReason::Other,
@@ -113,6 +145,8 @@ final class AnthropicChatModel implements ChatModelInterface
                 cacheReadInputTokens: $message->usage->cacheReadInputTokens ?? 0,
                 cacheCreationInputTokens: $message->usage->cacheCreationInputTokens ?? 0,
             ),
+            toolCalls: $toolCalls,
+            providerContent: $message->content,
         );
     }
 

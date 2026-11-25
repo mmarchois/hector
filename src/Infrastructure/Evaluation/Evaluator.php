@@ -8,6 +8,7 @@ use App\Application\Conversation\Port\ChatUsage;
 use App\Application\Conversation\Service\AnswerEngine;
 use App\Application\Conversation\Service\TurnContextBuilder;
 use App\Domain\Conversation\Block;
+use App\Domain\Conversation\Citation;
 use App\Domain\Conversation\DraftValidator;
 
 /**
@@ -49,6 +50,13 @@ final readonly class Evaluator
             foreach ($case->forbiddenPatterns as $index => $pattern) {
                 $found = preg_match($pattern, $answer, $match) === 1;
                 $checks[] = $this->check('P' . ($index + 1), CaseResult::DETERMINISTIC, \sprintf('Motif interdit absent : %s', $pattern), !$found, $found ? \sprintf('Trouvé : « %s »', $match[0]) : '');
+            }
+
+            // Sources attendues : la recherche les a-t-elle données à lire ? (mesure de référence du lot L12)
+            $read = array_map(static fn (Citation $citation): string => mb_strtolower($citation->title), $outcome->evidence);
+            foreach ($case->expectedSources as $index => $title) {
+                $found = \in_array(mb_strtolower($title), $read, true);
+                $checks[] = $this->check('R' . ($index + 1), CaseResult::RETRIEVAL, \sprintf('Source attendue retrouvée : %s', $title), $found, $found ? '' : 'Aucun passage de cette source n\'a été lu pendant le tour.');
             }
 
             // 2. Avec le juge : éléments attendus (A…) et comportements interdits (I…)

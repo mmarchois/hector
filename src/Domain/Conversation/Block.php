@@ -80,6 +80,17 @@ final readonly class Block
     }
 
     /**
+     * Même bloc, avec d'autres citations : le brouillon cite par référence de tour (S1, S2…),
+     * le message enregistré par identifiant durable.
+     *
+     * @param list<string> $citations
+     */
+    public function withCitations(array $citations): self
+    {
+        return new self($this->type, $this->version, [...$this->content, 'citations' => $citations], $this->fallbackText);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public function toArray(): array

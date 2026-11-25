@@ -14,8 +14,12 @@ class Message
     /** @var list<array<string, mixed>> blocs sérialisés (colonne JSON) */
     private array $blocks;
 
+    /** @var list<array<string, mixed>> sources citées, sérialisées (colonne JSON) */
+    private array $citations;
+
     /**
-     * @param list<Block> $blocks
+     * @param list<Block>    $blocks
+     * @param list<Citation> $citations sources citées par les blocs, composées par le serveur (D7)
      */
     public function __construct(
         private string $uuid,
@@ -23,11 +27,13 @@ class Message
         private MessageRole $role,
         array $blocks,
         private \DateTimeImmutable $createdAt,
+        array $citations = [],
     ) {
         if ($blocks === []) {
             throw new \InvalidArgumentException('Un message contient au moins un bloc.');
         }
         $this->blocks = array_map(static fn (Block $block): array => $block->toArray(), $blocks);
+        $this->citations = array_map(static fn (Citation $citation): array => $citation->toArray(), $citations);
     }
 
     public function getUuid(): string
@@ -49,6 +55,12 @@ class Message
     public function getBlocks(): array
     {
         return array_map(Block::fromArray(...), $this->blocks);
+    }
+
+    /** @return list<Citation> */
+    public function getCitations(): array
+    {
+        return array_map(Citation::fromArray(...), $this->citations);
     }
 
     public function getCreatedAt(): \DateTimeImmutable

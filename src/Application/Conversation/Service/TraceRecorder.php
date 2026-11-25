@@ -23,6 +23,9 @@ final class TraceRecorder
     /** @var list<array{attempt: int, reasons: list<string>}> */
     private array $rejections = [];
 
+    /** @var list<array{name: string, input: array<string, mixed>, read: list<string>, error: bool}> */
+    private array $tools = [];
+
     private readonly int $startedAt;
 
     public function __construct(
@@ -47,6 +50,15 @@ final class TraceRecorder
         $this->rejections[] = ['attempt' => $attempt, 'reasons' => $reasons];
     }
 
+    /**
+     * @param array<string, mixed> $input
+     * @param list<string>         $read  identifiants de ce que l'outil a donné à lire
+     */
+    public function tool(string $name, array $input, array $read, bool $error): void
+    {
+        $this->tools[] = ['name' => $name, 'input' => $input, 'read' => $read, 'error' => $error];
+    }
+
     public function trace(?string $error = null): TurnTrace
     {
         return new TurnTrace(
@@ -60,6 +72,7 @@ final class TraceRecorder
             durationMs: intdiv(hrtime(true) - $this->startedAt, 1_000_000),
             error: $error,
             rejections: $this->rejections === [] ? null : $this->rejections,
+            tools: $this->tools === [] ? null : $this->tools,
         );
     }
 }

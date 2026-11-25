@@ -17,6 +17,8 @@ final readonly class CaseResult
     public const string DETERMINISTIC = 'deterministic';
     public const string EXPECTED = 'expected';
     public const string FORBIDDEN = 'forbidden';
+    /** Source attendue retrouvée par la recherche : une mesure, pas un critère de réussite */
+    public const string RETRIEVAL = 'retrieval';
 
     /**
      * @param list<array{id: string, kind: string, label: string, ok: bool|null, reason: string}> $checks
@@ -57,7 +59,7 @@ final readonly class CaseResult
 
         $unjudged = false;
         foreach ($this->checks as $check) {
-            if ($check['kind'] === self::EXPECTED) {
+            if ($check['kind'] === self::EXPECTED || $check['kind'] === self::RETRIEVAL) {
                 continue;
             }
             if ($check['ok'] === false) {
@@ -85,10 +87,21 @@ final readonly class CaseResult
         return \count(array_filter($expected, static fn (array $check): bool => $check['ok'] === true)) / \count($expected);
     }
 
+    /** Part des sources attendues que la recherche a données à lire ; null si le cas n'en attend aucune. */
+    public function retrieval(): ?float
+    {
+        $checks = array_values(array_filter($this->checks, static fn (array $check): bool => $check['kind'] === self::RETRIEVAL));
+        if ($checks === [] || $this->status === self::FAILED) {
+            return null;
+        }
+
+        return \count(array_filter($checks, static fn (array $check): bool => $check['ok'] === true)) / \count($checks);
+    }
+
     /** @return array<string, mixed> */
     public function toArray(): array
     {
-        return [...get_object_vars($this), 'passed' => $this->passed(), 'coverage' => $this->coverage()];
+        return [...get_object_vars($this), 'passed' => $this->passed(), 'coverage' => $this->coverage(), 'retrieval' => $this->retrieval()];
     }
 
     /** @param array<string, mixed> $data */

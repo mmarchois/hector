@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Conversation\Service;
 
+use App\Application\Conversation\Capability\CapabilityInterface;
 use App\Application\Conversation\Port\ChatMessage;
 use App\Application\Conversation\Port\ChatRequest;
 use App\Application\Conversation\Port\ChatRole;
@@ -34,10 +35,14 @@ final readonly class TurnContextBuilder
      */
     public const int HISTORY_MAX_CHARACTERS = 40_000;
 
+    /**
+     * @param iterable<CapabilityInterface> $capabilities ce que les contextes métier apportent au tour
+     */
     public function __construct(
         private PromptCatalogInterface $prompts,
         private ParticipantInterface $participants,
         private MessageRepositoryInterface $messageRepository,
+        private iterable $capabilities = [],
     ) {
     }
 
@@ -70,7 +75,19 @@ final readonly class TurnContextBuilder
             $system = str_replace('{{language}}', trim($this->prompts->get('language-' . $locale)->text), $system);
         }
 
-        return new PreparedTurn(new ChatRequest($system, $this->trim($messages)), substr(hash('sha256', $system), 0, 12), $locale);
+        // Les capacités : leurs consignes entrent dans celles du tour, leurs outils sont offerts au modèle
+        $tools = [];
+        $instructions = [];
+        foreach ($this->capabilities as $capability) {
+            array_push($tools, ...$capability->tools($participant));
+            $text = trim($capability->instructions($participant) ?? '');
+            if ($text !== '') {
+                $instructions[] = $text;
+            }
+        }
+        $system = str_replace('{{capabilities}}', implode("\n\n", $instructions), $system);
+
+        return new PreparedTurn(new ChatRequest($system, $this->trim($messages)), substr(hash('sha256', $system), 0, 12), $locale, $tools);
     }
 
     /**

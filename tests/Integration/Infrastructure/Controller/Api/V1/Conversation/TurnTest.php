@@ -10,12 +10,15 @@ use App\Application\Conversation\Service\AnswerEngine;
 use App\Infrastructure\Persistence\Doctrine\Fixtures\UserFixture;
 use App\Tests\Integration\Infrastructure\Controller\Api\AbstractApiTestCase;
 use App\Tests\Support\FakeChatModel;
+use App\Tests\Support\KnowledgeFixtures;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /** Lot L5 : un tour réel, avec le faux modèle (make test n'appelle jamais le fournisseur). */
 final class TurnTest extends AbstractApiTestCase
 {
+    use KnowledgeFixtures;
+
     private KernelBrowser $client;
     private FakeChatModel $model;
 
@@ -125,6 +128,79 @@ final class TurnTest extends AbstractApiTestCase
         self::assertSame(AnswerEngine::DEGRADED_REPLY, $turn['assistantMessage']['blocks'][0]['text']);
         self::assertCount(2, $this->model->requests);
         self::assertSame([1, 2], array_column($this->rejections($turn['uuid']), 'attempt'));
+    }
+
+    public function testHectorSearchesTheDocumentationAndCitesWhatItRead(): void
+    {
+        $this->document('fiche-exemple.md', ['title' => 'Fiche différentiel', 'excerptMax' => 30]);
+        $token = $this->login($this->client)['token'];
+        $uuid = $this->newConversation($token);
+        $this->model
+            ->willCallTool('rechercher_documentation', ['question' => 'bouton de test du différentiel'])
+            ->willReply(FakeChatModel::draft([
+                ['statement', 'sourced_fact', 'Le bouton de test vérifie le mécanisme de déclenchement.', ['S1']],
+                ['statement', 'recommendation', 'Essayez-le régulièrement.'],
+            ]));
+
+        $turn = $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $token, ['text' => 'À quoi sert le bouton de test ?']);
+
+        self::assertSame('completed', $turn['status']);
+        // L'outil est offert et expliqué au modèle, qui lit ensuite les passages trouvés
+        self::assertSame('rechercher_documentation', $this->model->requests[0]->tools[0]->name);
+        self::assertStringContainsString('`rechercher_documentation`', $this->model->requests[0]->system);
+        $read = $this->model->requests[1]->messages[2]->toolResults[0]->content;
+        self::assertStringContainsString('[S1] Fiche différentiel — Hector, version « v1 », publiée le 2026-11-01', $read);
+        self::assertStringContainsString('bouton de test', $read);
+
+        // La source est composée par le serveur ; l'extrait suit la licence (30 caractères au plus)
+        $citations = $turn['assistantMessage']['citations'];
+        self::assertCount(1, $citations);
+        self::assertSame(['regulatory', 'Fiche différentiel', 'Hector', 'v1', '2026-11-01', '2026-12-01'], [$citations[0]['corpus'], $citations[0]['title'], $citations[0]['publisher'], $citations[0]['version'], $citations[0]['publishedOn'], $citations[0]['effectiveFrom']]);
+        self::assertLessThanOrEqual(31, mb_strlen($citations[0]['excerpt']));
+        self::assertStringStartsWith('Fiche d\'exemple : dispositif différentiel', $citations[0]['section']);
+        // Le bloc renvoie à sa source par l'identifiant du passage, que l'on peut consulter
+        self::assertSame([$citations[0]['id']], $turn['assistantMessage']['blocks'][0]['citations']);
+        self::assertSame([], $turn['assistantMessage']['blocks'][1]['citations']);
+        $this->apiRequest($this->client, 'GET', '/api/v1/passages/' . $citations[0]['id'], $token);
+        self::assertResponseStatusCodeSame(200);
+        // Relue plus tard, la conversation montre les mêmes sources
+        $messages = $this->apiRequest($this->client, 'GET', "/api/v1/conversations/$uuid/messages", $token);
+        self::assertSame($citations, $messages['items'][1]['citations']);
+
+        // La trace dit quel outil a été appelé, avec quoi, et ce qu'il a donné à lire
+        $tools = json_decode((string) $this->connection()->fetchOne('SELECT trace_tools FROM conversation_turn WHERE uuid = ?', [$turn['uuid']]), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertSame('rechercher_documentation', $tools[0]['name']);
+        self::assertSame(['question' => 'bouton de test du différentiel'], $tools[0]['input']);
+        self::assertContains($citations[0]['id'], $tools[0]['read']);
+    }
+
+    public function testACitationOfSomethingTheSearchDidNotReturnNeverReachesTheUser(): void
+    {
+        $this->document('fiche-exemple.md');
+        $token = $this->login($this->client)['token'];
+        $uuid = $this->newConversation($token);
+        // Le modèle cite sans avoir cherché : rien n'a été lu pendant ce tour
+        $invented = FakeChatModel::draft([['statement', 'sourced_fact', 'Une règle que je crois connaître.', ['S1']]]);
+        $this->model->willReply($invented)->willReply($invented);
+
+        $turn = $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $token, ['text' => 'Que dit la norme ?']);
+
+        self::assertSame('degraded', $turn['status']);
+        self::assertSame([], $turn['assistantMessage']['citations']);
+        self::assertStringContainsString('cite S1', $this->rejections($turn['uuid'])[0]['reasons'][0]);
+    }
+
+    public function testWithoutAnyPublishedDocumentTheModelIsToldItHasNoDocumentation(): void
+    {
+        $this->document('fiche-exemple.md', ['publish' => false]);
+        $token = $this->login($this->client)['token'];
+        $uuid = $this->newConversation($token);
+
+        $this->apiRequest($this->client, 'POST', "/api/v1/conversations/$uuid/messages", $token, ['text' => 'Bonjour']);
+
+        self::assertSame([], $this->model->requests[0]->tools);
+        self::assertStringContainsString('Tu n\'as pas encore accès à une base documentaire', $this->model->requests[0]->system);
+        self::assertStringNotContainsString('{{', $this->model->requests[0]->system);
     }
 
     public function testTheModelReceivesTheHistoryAndNoIdentity(): void

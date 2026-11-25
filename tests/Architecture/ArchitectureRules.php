@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Architecture;
 
+use App\Application\Conversation\Port\Participant;
+use App\Application\Conversation\Port\Prompt;
+use App\Application\Conversation\Port\PromptCatalogInterface;
+use App\Domain\Conversation\Citation;
 use PHPat\Selector\Selector;
 use PHPat\Selector\SelectorInterface;
 use PHPat\Test\Attributes\TestRule;
@@ -35,6 +39,17 @@ final class ArchitectureRules
         'Catalog' => ['Knowledge'],
         'ProductRecommendation' => ['Catalog', 'Calculation'],
         'Experience' => ['Diagnosis', 'Safety', 'Regulation'],
+    ];
+
+    /**
+     * Ce qu'une capacité connaît du socle, en plus de App\Application\Conversation\Capability :
+     * à qui elle parle, où lire ses consignes, et la source qu'elle donne à citer.
+     */
+    private const array CAPABILITY_CONTRACT = [
+        Participant::class,
+        PromptCatalogInterface::class,
+        Prompt::class,
+        Citation::class,
     ];
 
     /** Socle : il n'utilise aucun contexte, et les contextes ne s'y branchent que par ses capacités. */
@@ -93,7 +108,7 @@ final class ArchitectureRules
     }
 
     /**
-     * Les contextes métier ne connaissent du socle que son interface de capacité, et seulement
+     * Les contextes métier ne connaissent du socle que son contrat de capacité, et seulement
      * depuis leur propre dossier Capability (docs/ARCHITECTURE.md, § 6).
      *
      * @return iterable<string, Rule>
@@ -118,8 +133,8 @@ final class ArchitectureRules
                 ->classes($capability)
                 ->shouldNotDependOn()
                 ->classes(...$conversation)
-                ->excluding($capabilityPort)
-                ->because('Une capacité ne connaît du socle que son interface de capacité.');
+                ->excluding($capabilityPort, ...array_map(Selector::classname(...), self::CAPABILITY_CONTRACT))
+                ->because('Une capacité ne connaît du socle que son contrat de capacité.');
         }
     }
 

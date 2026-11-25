@@ -12,6 +12,9 @@ use App\Application\Conversation\Port\ChatModelUnavailableException;
 use App\Application\Conversation\Port\ChatRequest;
 use App\Application\Conversation\Port\ChatRole;
 use App\Application\Conversation\Port\ChatStopReason;
+use App\Application\Conversation\Port\ChatTool;
+use App\Application\Conversation\Port\ChatToolCall;
+use App\Application\Conversation\Port\ChatToolResult;
 use App\Infrastructure\Adapter\Llm\Anthropic\AnthropicChatModel;
 use App\Tests\Support\RecordedHttpClient;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -75,6 +78,51 @@ final class AnthropicChatModelTest extends TestCase
 
         $body = json_decode((string) $http->requests[0]->getBody(), true, flags: \JSON_THROW_ON_ERROR);
         self::assertSame(['effort' => 'medium', 'format' => ['type' => 'json_schema', 'schema' => $schema]], $body['output_config']);
+    }
+
+    public function testToolsAreOfferedAndAToolCallIsTranslated(): void
+    {
+        $http = RecordedHttpClient::replying(200, self::RESPONSES . '/tool_use.json');
+        $schema = ['type' => 'object', 'properties' => ['question' => ['type' => 'string']], 'required' => ['question']];
+
+        $response = $this->model($http)->complete(new ChatRequest(
+            'Consignes',
+            [new ChatMessage(ChatRole::User, 'À quoi sert le bouton de test ?')],
+            tools: [new ChatTool('rechercher_documentation', 'Cherche des passages.', $schema)],
+        ));
+
+        self::assertSame(ChatStopReason::ToolUse, $response->stopReason);
+        self::assertEquals([new ChatToolCall('toolu_01Exemple', 'rechercher_documentation', ['question' => 'bouton de test du différentiel'])], $response->toolCalls);
+        self::assertSame('', $response->text);
+        self::assertNotNull($response->providerContent);
+
+        $body = json_decode((string) $http->requests[0]->getBody(), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertSame([['name' => 'rechercher_documentation', 'description' => 'Cherche des passages.', 'input_schema' => $schema]], $body['tools']);
+        // Aucun choix d'outil forcé : certains modèles le refusent (docs/ARCHITECTURE.md, § 7)
+        self::assertArrayNotHasKey('tool_choice', $body);
+    }
+
+    public function testAToolResultGoesBackWithTheAssistantTurnUntouched(): void
+    {
+        $first = RecordedHttpClient::replying(200, self::RESPONSES . '/tool_use.json');
+        $called = $this->model($first)->complete($this->request());
+        $http = RecordedHttpClient::replying(200, self::RESPONSES . '/end_turn.json');
+
+        $this->model($http)->complete(new ChatRequest('Consignes', [
+            new ChatMessage(ChatRole::User, 'À quoi sert le bouton de test ?'),
+            new ChatMessage(ChatRole::Assistant, $called->text, toolCalls: $called->toolCalls, providerContent: $called->providerContent),
+            new ChatMessage(ChatRole::User, '', toolResults: [new ChatToolResult('toolu_01Exemple', '[S1] Le bouton de test…'), new ChatToolResult('toolu_02', 'Outil inconnu.', true)]),
+        ]));
+
+        $messages = json_decode((string) $http->requests[0]->getBody(), true, flags: \JSON_THROW_ON_ERROR)['messages'];
+        // Le message de l'assistant repart tel que le fournisseur l'a rendu, raisonnement compris
+        self::assertSame('assistant', $messages[1]['role']);
+        self::assertSame(['thinking', 'tool_use'], array_column($messages[1]['content'], 'type'));
+        self::assertSame('sig-outil', $messages[1]['content'][0]['signature']);
+        self::assertSame('toolu_01Exemple', $messages[1]['content'][1]['id']);
+        self::assertSame('user', $messages[2]['role']);
+        self::assertSame(['type' => 'tool_result', 'tool_use_id' => 'toolu_01Exemple', 'content' => '[S1] Le bouton de test…', 'is_error' => false], $messages[2]['content'][0]);
+        self::assertTrue($messages[2]['content'][1]['is_error']);
     }
 
     public function testARefusalIsReported(): void

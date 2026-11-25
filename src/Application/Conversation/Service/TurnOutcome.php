@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\Conversation\Service;
 
 use App\Domain\Conversation\Block;
+use App\Domain\Conversation\Citation;
 use App\Domain\Conversation\TurnFailure;
 use App\Domain\Conversation\TurnTrace;
 
@@ -12,7 +13,9 @@ use App\Domain\Conversation\TurnTrace;
 final readonly class TurnOutcome
 {
     /**
-     * @param list<Block> $blocks réponse à montrer ; vide si le tour a échoué
+     * @param list<Block>    $blocks    réponse à montrer ; vide si le tour a échoué
+     * @param list<Citation> $citations sources citées par la réponse, dans l'ordre de leur première citation
+     * @param list<Citation> $evidence  tout ce que les outils ont donné à lire pendant le tour
      */
     public function __construct(
         public array $blocks,
@@ -20,6 +23,8 @@ final readonly class TurnOutcome
         public bool $degraded,
         public ?TurnFailure $failure,
         public TurnTrace $trace,
+        public array $citations = [],
+        public array $evidence = [],
     ) {
     }
 

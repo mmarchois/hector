@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Persistence\Doctrine\Repository\Knowledge;
 
+use App\Domain\Knowledge\DocumentStatus;
 use App\Domain\Knowledge\DocumentVersion;
 use App\Domain\Knowledge\Repository\DocumentVersionRepositoryInterface;
 use App\Domain\Knowledge\Source;
@@ -30,6 +31,11 @@ final class DocumentVersionRepository extends ServiceEntityRepository implements
     public function findOneByUuid(string $uuid): ?DocumentVersion
     {
         return $this->find($uuid);
+    }
+
+    public function countPublished(): int
+    {
+        return $this->count(['status' => DocumentStatus::Published]);
     }
 
     public function findOneBySourceAndLabel(Source $source, string $label): ?DocumentVersion

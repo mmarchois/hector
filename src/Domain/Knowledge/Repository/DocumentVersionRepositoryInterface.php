@@ -13,6 +13,9 @@ interface DocumentVersionRepositoryInterface
 
     public function findOneByUuid(string $uuid): ?DocumentVersion;
 
+    /** Nombre de versions publiées, tous corpus confondus. */
+    public function countPublished(): int;
+
     public function findOneBySourceAndLabel(Source $source, string $label): ?DocumentVersion;
 
     /** @return list<DocumentVersion> de la plus récente à la plus ancienne */

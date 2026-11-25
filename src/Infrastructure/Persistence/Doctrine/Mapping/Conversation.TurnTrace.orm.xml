@@ -11,5 +11,6 @@
     <field name="durationMs" type="integer" column="duration_ms" nullable="true"/>
     <field name="error" type="string" length="255" nullable="true"/>
     <field name="rejections" type="json" nullable="true"/>
+    <field name="tools" type="json" nullable="true"/>
   </embeddable>
 </doctrine-mapping>

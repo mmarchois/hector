@@ -9,6 +9,7 @@ use App\Application\Conversation\Port\ChatModelInterface;
 use App\Application\Conversation\Port\ChatRequest;
 use App\Application\Conversation\Port\ChatResponse;
 use App\Application\Conversation\Port\ChatStopReason;
+use App\Application\Conversation\Port\ChatToolCall;
 use App\Application\Conversation\Port\ChatUsage;
 
 /**
@@ -52,6 +53,25 @@ final class FakeChatModel implements ChatModelInterface
     public function willReply(string $text, ChatStopReason $stopReason = ChatStopReason::EndTurn, ?ChatUsage $usage = null): self
     {
         $this->script[] = new ChatResponse($text, $stopReason, 'fake-model', $usage ?? new ChatUsage(100, 20));
+
+        return $this;
+    }
+
+    /**
+     * Le modèle demande un outil : la réponse suivante du script sera lue après son résultat.
+     *
+     * @param array<string, mixed> $input
+     */
+    public function willCallTool(string $name, array $input, ?ChatUsage $usage = null): self
+    {
+        $this->script[] = new ChatResponse(
+            '',
+            ChatStopReason::ToolUse,
+            'fake-model',
+            $usage ?? new ChatUsage(100, 20),
+            [new ChatToolCall('appel-' . (\count($this->script) + \count($this->requests) + 1), $name, $input)],
+            ['contenu brut du fournisseur'],
+        );
 
         return $this;
     }

@@ -8,6 +8,9 @@
     <id name="uuid" type="guid" column="uuid"/>
     <field name="role" type="string" column="role" length="16" enum-type="App\Domain\Conversation\MessageRole" nullable="false"/>
     <field name="blocks" type="json" column="blocks" nullable="false"/>
+    <field name="citations" type="json" column="citations" nullable="false">
+        <options><option name="default">[]</option></options>
+    </field>
     <field name="createdAt" type="datetimetz_immutable" column="created_at" nullable="false"/>
     <many-to-one field="conversation" target-entity="App\Domain\Conversation\Conversation">
         <join-column name="conversation_uuid" referenced-column-name="uuid" nullable="false" on-delete="CASCADE"/>

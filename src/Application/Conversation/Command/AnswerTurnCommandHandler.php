@@ -33,7 +33,7 @@ final readonly class AnswerTurnCommandHandler
         $now = $this->dateUtils->getNow();
         $conversation = $turn->getConversation();
         $answer = $this->messageRepository->add(
-            new Message($this->idFactory->make(), $conversation, MessageRole::Assistant, $command->blocks, $now),
+            new Message($this->idFactory->make(), $conversation, MessageRole::Assistant, $command->blocks, $now, $command->citations),
         );
         $conversation->recordActivity($now);
 

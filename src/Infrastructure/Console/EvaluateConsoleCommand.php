@@ -104,7 +104,7 @@ final readonly class EvaluateConsoleCommand
 
         $io->section('Résultats par famille');
         $io->table(
-            ['Famille', 'Réussis', 'En défaut', 'Non jugés', 'Dégradés', 'Erreurs', 'Éléments attendus', 'Cas non relus'],
+            ['Famille', 'Réussis', 'En défaut', 'Non jugés', 'Dégradés', 'Erreurs', 'Éléments attendus', 'Sources retrouvées', 'Cas non relus'],
             array_map(static fn (array $row): array => [
                 $row['label'] . ($row['binary'] ? ' (tolérance nulle)' : ''),
                 \sprintf('%d/%d', $row['passed'], $row['cases']),
@@ -113,6 +113,7 @@ final readonly class EvaluateConsoleCommand
                 $row['degraded'],
                 $row['errors'],
                 $row['coverage'] === null ? '—' : \sprintf('%d %%', (int) round($row['coverage'] * 100)),
+                $row['retrieval'] === null ? '—' : \sprintf('%d %%', (int) round($row['retrieval'] * 100)),
                 $row['unreviewed'],
             ], array_values($report->families())),
         );

@@ -28,6 +28,13 @@ final readonly class TurnTrace
          * @var list<array{attempt: int, reasons: list<string>}>|null
          */
         public ?array $rejections = null,
+        /**
+         * Outils appelés pendant le tour, dans l'ordre : leur entrée et ce qu'ils ont donné
+         * à lire (lot L10).
+         *
+         * @var list<array{name: string, input: array<string, mixed>, read: list<string>, error: bool}>|null
+         */
+        public ?array $tools = null,
     ) {
     }
 }
