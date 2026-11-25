@@ -23,14 +23,14 @@ make install   # première fois : conteneurs, dépendances, clés JWT, bases dev
 make start     # les fois suivantes
 ```
 
-L'API répond sur http://localhost:8000 :
+L'API répond sur http://localhost:8003 :
 
 | URL | Contenu |
 |-----|---------|
-| http://localhost:8000/api/doc | Interface Swagger |
-| http://localhost:8000/api/v1/doc | Spec OpenAPI (JSON) |
+| http://localhost:8003/api/doc | Interface Swagger |
+| http://localhost:8003/api/v1/doc | Spec OpenAPI (JSON) |
 
-Si les ports 8000 ou 5432 sont déjà pris, créer un `docker-compose.override.yml` (ignoré par git) :
+Si les ports 8003 ou 5432 sont déjà pris, créer un `docker-compose.override.yml` (ignoré par git) :
 
 ```yaml
 services:

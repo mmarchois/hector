@@ -8,8 +8,8 @@ L'API doit tourner (`make start` à la racine). Depuis la racine du dépôt :
 
 ```bash
 make mobile_install
-make mobile_run_dev                                   # API sur http://localhost:8000
-make mobile_run_dev API_URL=http://10.0.2.2:8000      # émulateur Android
+make mobile_run_dev                                   # API sur http://localhost:8003
+make mobile_run_dev API_URL=http://10.0.2.2:8003      # émulateur Android
 ```
 
 L'adresse de l'API est injectée à la compilation (`--dart-define=API_BASE_URL=…`, cf. `lib/src/config.dart`).

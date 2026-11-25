@@ -32,7 +32,7 @@ services:
   nginx:
     image: nginx:stable-alpine
     ports:
-      - '8000:80'
+      - '8003:80'
     volumes:
       - ./:/var/www/hector
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
