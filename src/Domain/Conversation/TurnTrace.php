@@ -21,6 +21,13 @@ final readonly class TurnTrace
         public ?int $durationMs = null,
         /** Détail technique d'un échec (classe d'erreur du fournisseur), jamais montré à l'utilisateur */
         public ?string $error = null,
+        /**
+         * Brouillons rejetés par le contrôle, avec leurs motifs (lot L7). Jetons et durée
+         * ci-dessus couvrent tous les appels du tour, reprise comprise.
+         *
+         * @var list<array{attempt: int, reasons: list<string>}>|null
+         */
+        public ?array $rejections = null,
     ) {
     }
 }

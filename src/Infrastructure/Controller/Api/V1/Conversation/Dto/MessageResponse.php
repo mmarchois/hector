@@ -20,7 +20,7 @@ final readonly class MessageResponse implements \JsonSerializable
         #[OA\Property(enum: ['user', 'assistant'])]
         public string $role,
         #[OA\Property(
-            description: 'Blocs typés et versionnés. Champs communs : type, version, fallbackText (texte à afficher si le type est inconnu de l\'application). Type `text` : champ `text`.',
+            description: 'Blocs typés et versionnés. Champs communs : type, version, fallbackText (texte à afficher si le type ou la nature est inconnu de l\'application). Type `text` : champ `text`. Type `statement` (énoncé de l\'assistant) : `kind` (sourced_fact, declared_fact, calculation_result, general_explanation, hypothesis, recommendation, missing_information, reported_opinion), `text`, `citations` (identifiants), `source` pour un avis rapporté. Types `question` et `warning` : champ `text`.',
             type: 'array',
             items: new OA\Items(
                 required: ['type', 'version', 'fallbackText'],

@@ -10,5 +10,6 @@
     <field name="cacheCreationInputTokens" type="integer" column="cache_creation_input_tokens" nullable="true"/>
     <field name="durationMs" type="integer" column="duration_ms" nullable="true"/>
     <field name="error" type="string" length="255" nullable="true"/>
+    <field name="rejections" type="json" nullable="true"/>
   </embeddable>
 </doctrine-mapping>

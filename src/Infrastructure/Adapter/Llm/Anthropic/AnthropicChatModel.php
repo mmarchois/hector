@@ -66,7 +66,9 @@ final class AnthropicChatModel implements ChatModelInterface
                 // Mise en cache automatique du préfixe (consignes et historique) d'un tour à l'autre
                 cacheControl: ['type' => 'ephemeral'],
                 fallbacks: 'default',
-                outputConfig: ['effort' => $this->effort],
+                outputConfig: $request->outputSchema === null
+                    ? ['effort' => $this->effort]
+                    : ['effort' => $this->effort, 'format' => ['type' => 'json_schema', 'schema' => $request->outputSchema]],
                 system: $request->system,
                 betas: [self::FALLBACK_BETA],
             );

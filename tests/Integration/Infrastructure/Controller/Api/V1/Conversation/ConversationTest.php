@@ -48,7 +48,7 @@ final class ConversationTest extends AbstractApiTestCase
             'fallbackText' => 'Un différentiel 30 mA déclenche de façon aléatoire.',
         ]], $turn['userMessage']['blocks']);
         self::assertSame('assistant', $turn['assistantMessage']['role']);
-        self::assertSame(FakeChatModel::DEFAULT_REPLY, $turn['assistantMessage']['blocks'][0]['fallbackText']);
+        self::assertSame(FakeChatModel::DEFAULT_REPLY, $turn['assistantMessage']['blocks'][0]['text']);
         self::assertSame([], $turn['assistantMessage']['citations']);
 
         // Le tour se relit, et le premier message titre la conversation
@@ -150,11 +150,11 @@ final class ConversationTest extends AbstractApiTestCase
         $client = static::createClient();
         $token = $this->login($client)['token'];
 
-        $this->apiRequest($client, 'GET', '/api/v1/conversations/0b507871-0000-4000-8000-000000000000/messages', $token);
+        $this->apiRequest($client, 'GET', '/api/v1/conversations/0b507871-0000-4000-8003-000000000000/messages', $token);
         self::assertResponseStatusCodeSame(404);
         $this->apiRequest($client, 'GET', '/api/v1/conversations/pas-un-uuid/messages', $token);
         self::assertResponseStatusCodeSame(404);
-        $this->apiRequest($client, 'GET', '/api/v1/turns/0b507871-0000-4000-8000-000000000000', $token);
+        $this->apiRequest($client, 'GET', '/api/v1/turns/0b507871-0000-4000-8003-000000000000', $token);
         self::assertResponseStatusCodeSame(404);
     }
 

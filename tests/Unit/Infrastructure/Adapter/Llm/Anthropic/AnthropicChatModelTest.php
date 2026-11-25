@@ -66,6 +66,17 @@ final class AnthropicChatModelTest extends TestCase
         self::assertArrayNotHasKey('tool_choice', $body);
     }
 
+    public function testAnOutputSchemaAsksForAStructuredAnswer(): void
+    {
+        $http = RecordedHttpClient::replying(200, self::RESPONSES . '/end_turn.json');
+        $schema = ['type' => 'object', 'properties' => ['blocks' => ['type' => 'array']], 'required' => ['blocks'], 'additionalProperties' => false];
+
+        $this->model($http)->complete(new ChatRequest('Consignes', [new ChatMessage(ChatRole::User, 'Bonjour')], $schema));
+
+        $body = json_decode((string) $http->requests[0]->getBody(), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertSame(['effort' => 'medium', 'format' => ['type' => 'json_schema', 'schema' => $schema]], $body['output_config']);
+    }
+
     public function testARefusalIsReported(): void
     {
         $response = $this->model(RecordedHttpClient::replying(200, self::RESPONSES . '/refusal.json'))->complete($this->request());

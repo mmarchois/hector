@@ -23,13 +23,14 @@ use App\Domain\Conversation\Conversation;
 use App\Domain\Conversation\Message;
 use App\Domain\Conversation\MessageRole;
 use App\Domain\Conversation\Repository\MessageRepositoryInterface;
+use App\Domain\Conversation\StatementKind;
 use App\Domain\Conversation\Turn;
 use App\Domain\Conversation\TurnFailure;
 use App\Domain\Conversation\TurnStatus;
 use App\Tests\Support\FakeChatModel;
 use PHPUnit\Framework\TestCase;
 
-/** Lot L5 : un tour réel, avec le faux modèle. */
+/** Lots L5 et L7 : un tour réel, son contrôle et sa reprise, avec le faux modèle. */
 final class TurnRunnerTest extends TestCase
 {
     private FakeChatModel $model;
@@ -44,15 +45,15 @@ final class TurnRunnerTest extends TestCase
 
     public function testTheModelAnswerIsRecordedWithItsTrace(): void
     {
-        $this->model->willReply('Vérifiez d\'abord si le déclenchement suit la mise en route d\'un appareil.');
+        $this->model->willReply(FakeChatModel::statement('Vérifiez d\'abord si le déclenchement suit la mise en route d\'un appareil.', 'recommendation'));
 
         $turn = $this->runner()->send('c1', 'owner', 'Mon différentiel saute');
 
         self::assertSame(TurnStatus::Completed, $turn->getStatus());
-        self::assertSame(
-            'Vérifiez d\'abord si le déclenchement suit la mise en route d\'un appareil.',
-            $turn->getAssistantMessage()?->getBlocks()[0]->fallbackText,
-        );
+        $block = $turn->getAssistantMessage()?->getBlocks()[0];
+        self::assertSame(StatementKind::Recommendation, $block?->kind());
+        self::assertSame('Vérifiez d\'abord si le déclenchement suit la mise en route d\'un appareil.', $block->textContent());
+        self::assertNull($turn->getTrace()->rejections);
         $trace = $turn->getTrace();
         self::assertSame('fake-model', $trace->model);
         self::assertSame('end_turn', $trace->stopReason);
@@ -83,6 +84,62 @@ final class TurnRunnerTest extends TestCase
 
         self::assertSame(TurnStatus::Degraded, $turn->getStatus());
         self::assertSame(TurnRunner::EMPTY_REPLY, $turn->getAssistantMessage()?->getBlocks()[0]->fallbackText);
+    }
+
+    public function testARejectedDraftIsRetriedWithItsReasons(): void
+    {
+        $this->model
+            ->willReply(FakeChatModel::statement('Selon l\'article 771.314, il faut un 30 mA.'))
+            ->willReply(FakeChatModel::statement('Un différentiel 30 mA protège les personnes.'));
+
+        $turn = $this->runner()->send('c1', 'owner', 'Quel différentiel ?');
+
+        self::assertSame(TurnStatus::Completed, $turn->getStatus());
+        self::assertSame('Un différentiel 30 mA protège les personnes.', $turn->getAssistantMessage()?->getBlocks()[0]->textContent());
+        self::assertCount(2, $this->model->requests);
+        $rejections = $turn->getTrace()->rejections;
+        self::assertNotNull($rejections);
+        self::assertStringContainsString('article 771.314', $rejections[0]['reasons'][0]);
+        self::assertSame(200, $turn->getTrace()->inputTokens);
+    }
+
+    public function testAnAnswerCutOffBeforeItsEndIsRetried(): void
+    {
+        $this->model
+            ->willReply('{"blocks": [{"type": "statem', ChatStopReason::MaxTokens)
+            ->willReply(FakeChatModel::statement('Réponse courte.'));
+
+        $turn = $this->runner()->send('c1', 'owner', 'Bonjour');
+
+        self::assertSame(TurnStatus::Completed, $turn->getStatus());
+        self::assertSame(['La réponse a été coupée avant la fin : fais plus court.'], $turn->getTrace()->rejections[0]['reasons'] ?? null);
+    }
+
+    public function testTwoRejectedDraftsGiveTheDegradedReply(): void
+    {
+        $this->model
+            ->willReply(FakeChatModel::statement('Fait établi.', 'sourced_fact'))
+            ->willReply(FakeChatModel::statement('Toujours établi.', 'sourced_fact'));
+
+        $turn = $this->runner()->send('c1', 'owner', 'Bonjour');
+
+        self::assertSame(TurnStatus::Degraded, $turn->getStatus());
+        self::assertEquals([Block::text(TurnRunner::DEGRADED_REPLY)], $turn->getAssistantMessage()?->getBlocks());
+        self::assertCount(2, $turn->getTrace()->rejections ?? []);
+        // Jamais de troisième appel
+        self::assertCount(TurnRunner::MAX_ATTEMPTS, $this->model->requests);
+    }
+
+    public function testAProviderFailureDuringTheRetryFailsTheTurn(): void
+    {
+        $this->model
+            ->willReply(FakeChatModel::statement('Fait établi.', 'sourced_fact'))
+            ->willThrow(new ChatModelUnavailableException('anthropic:overloaded_error Overloaded'));
+
+        $turn = $this->runner()->send('c1', 'owner', 'Bonjour');
+
+        self::assertSame(TurnStatus::Failed, $turn->getStatus());
+        self::assertCount(1, $turn->getTrace()->rejections ?? []);
     }
 
     public function testAnUnavailableProviderFailsTheTurnWithoutAnswer(): void
